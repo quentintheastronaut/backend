@@ -3,10 +3,15 @@ import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { DishModule } from './dish/dish.module';
-import { InjectDataSource, TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import entities from './enitity';
+import configuration from './config/configuration';
+import * as dotenv from 'dotenv';
 
+dotenv.config({
+  path: `.env`,
+});
 @Module({
   imports: [
     AuthModule,
@@ -14,13 +19,13 @@ import entities from './enitity';
     DishModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'us-cdbr-east-05.cleardb.net',
-      port: 3306,
-      username: 'b1debf5dc6925d',
-      password: '4e5f4ab8',
-      database: 'heroku_9d924f8e65061f6',
       entities: entities,
       synchronize: true,
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
+      host: process.env.DATABASE_HOST,
+      port: parseInt(process.env.DATABASE_PORT, 10) || 3306,
     }),
   ],
   providers: [AppService],

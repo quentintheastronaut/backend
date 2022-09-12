@@ -13,7 +13,8 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @Get('/profile')
-  getProfile(@Req() jwtUser: JwtUser) {
-    return this.userService.getProfile(jwtUser);
+  getProfile(@Req() req: { user: JwtUser }) {
+    const { user } = req;
+    return this.userService.getProfile(user);
   }
 }

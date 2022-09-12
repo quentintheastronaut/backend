@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import moment from 'moment';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 enum Sex {
   MALE = 'male',
@@ -34,21 +41,56 @@ export class User {
   sex: string;
 
   @Column({
-    type: 'date',
-    nullable: false,
+    default: 0,
   })
-  birthday: Date;
+  height: number;
+
+  @Column({
+    default: 0,
+  })
+  weight: number;
+
+  @Column({
+    default: '',
+  })
+  image_url: string;
+
+  @Column({
+    default: '',
+  })
+  health_goal: string;
+
+  @Column({
+    default: '',
+  })
+  group_id: string;
+
+  @Column({
+    default: 0,
+  })
+  desired_weight: number;
+
+  @Column({
+    default: '',
+  })
+  activity_intensity: string;
 
   @Column({
     nullable: false,
     default: '',
+    unique: true,
   })
   email: string;
 
   @Column({
-    name: 'email',
     nullable: false,
     default: '',
   })
   password: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

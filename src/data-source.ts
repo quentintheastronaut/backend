@@ -1,18 +1,23 @@
+import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import entities from './enitity';
 
-export const MySqlDataSource = new DataSource({
+dotenv.config({
+  path: `.env`,
+});
+
+export const AppDataSource = new DataSource({
   type: 'mysql',
-  host: 'us-cdbr-east-05.cleardb.net',
-  port: 3306,
-  username: 'b1debf5dc6925d',
-  password: '4e5f4ab8',
-  database: 'heroku_9d924f8e65061f6',
+  host: process.env.DATABASE_HOST.toString(),
+  port: parseInt(process.env.DATABASE_PORT, 10),
+  username: process.env.DATABASE_USERNAME.toString(),
+  password: process.env.DATABASE_PASSWORD.toString(),
+  database: process.env.DATABASE_NAME.toString(),
   entities: entities,
   synchronize: true,
 });
 
-MySqlDataSource.initialize()
+AppDataSource.initialize()
   .then(() => {
     console.log('Data Source has been initialized!');
   })

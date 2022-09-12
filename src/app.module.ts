@@ -1,3 +1,4 @@
+import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
@@ -6,7 +7,6 @@ import { DishModule } from './dish/dish.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import entities from './enitity';
-import configuration from './config/configuration';
 import * as dotenv from 'dotenv';
 
 dotenv.config({
@@ -29,6 +29,7 @@ dotenv.config({
     }),
   ],
   providers: [AppService],
+  controllers: [AppController],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}

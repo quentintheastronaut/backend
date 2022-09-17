@@ -24,13 +24,13 @@ export class User {
     nullable: false,
     default: '',
   })
-  first_name: string;
+  firstName: string;
 
   @Column({
     nullable: false,
     default: '',
   })
-  last_name: string;
+  lastName: string;
 
   @Column({
     nullable: false,
@@ -53,27 +53,27 @@ export class User {
   @Column({
     default: '',
   })
-  image_url: string;
+  imageUrl: string;
 
   @Column({
     default: '',
   })
-  health_goal: string;
+  healthGoal: string;
 
   @Column({
     default: '',
   })
-  group_id: string;
+  groupId: string;
 
   @Column({
     default: 0,
   })
-  desired_weight: number;
+  desiredWeight: number;
 
   @Column({
     default: '',
   })
-  activity_intensity: string;
+  activityIntensity: string;
 
   @Column({
     nullable: false,

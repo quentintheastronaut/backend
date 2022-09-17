@@ -1,9 +1,8 @@
+import { UpdateProfileDto } from './dto/request/updateProfile.dto';
 import { JwtGuard } from './../auth/guard/jwt.guard';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { UserService } from './user.service';
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('User')
@@ -17,5 +16,15 @@ export class UserController {
   getProfile(@Req() req: { user: JwtUser }) {
     const { user } = req;
     return this.userService.getProfile(user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('/profile')
+  updateProfile(
+    @Req() req: { user: JwtUser },
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    const { user } = req;
+    return this.userService.updateProfile(user, updateProfileDto);
   }
 }

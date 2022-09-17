@@ -30,10 +30,17 @@ export class AuthService {
         ])
         .execute();
 
+      const user = await AppDataSource.getRepository(User).findOne({
+        where: {
+          email,
+        },
+      });
+
+      delete user.password;
+
+      return this.signToken(parseInt(user.id, 10), email);
+
       // return saved user
-      return {
-        message: 'Successfully',
-      };
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY')
         throw new ForbiddenException('Credentials taken');

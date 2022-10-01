@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PageDto, PageOptionsDto } from 'src/dtos';
-import { Dish } from 'src/enitities/Dish';
+import { Dish } from 'src/entities/Dish';
 import { DishService } from './dish.service';
 import { ApiPaginatedResponse } from 'src/decorators/api-paginated-response.decorator';
 

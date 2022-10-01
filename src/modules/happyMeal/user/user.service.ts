@@ -1,5 +1,5 @@
 import { UpdateProfileDto } from './dto/request/updateProfile.dto';
-import { User } from '../../../enitities/User';
+import { User } from '../../../entities/User';
 import { AppDataSource } from '../../../data-source';
 import { JwtUser } from '../auth/dto/parsedToken.dto';
 import { BadRequestException, Injectable } from '@nestjs/common';

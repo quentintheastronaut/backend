@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
-import { Dish } from 'src/enitities/Dish';
+import { Dish } from 'src/entities/Dish';
 
 @Injectable({})
 export class DishService {

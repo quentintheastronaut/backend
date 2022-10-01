@@ -8,7 +8,7 @@ import { UserModule } from './modules/happyMeal/user/user.module';
 import { DishModule } from './modules/happyMeal/dish/dish.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import entities from './enitities';
+import entities from './entities';
 import * as dotenv from 'dotenv';
 
 dotenv.config({

@@ -1,4 +1,4 @@
-import { UserToGroup } from './../../../enitities/UserToGroup';
+import { UserToGroup } from '../../../entities/UserToGroup';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { AppDataSource } from './../../../data-source';
 import {
@@ -8,10 +8,10 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { Group } from 'src/enitities/Group';
+import { Group } from 'src/entities/Group';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/dtos';
 import { GroupDto } from './dto/request/group.dto';
-import { User } from 'src/enitities';
+import { User } from 'src/entities';
 import { GroupRole } from 'src/constants/groupRole';
 
 @Injectable({})

@@ -1,7 +1,7 @@
 import { PageDto } from 'src/dtos/page.dto';
 import * as dotenv from 'dotenv';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../../../enitities/User';
+import { User } from '../../../entities/User';
 import { AppDataSource } from '../../../data-source';
 import { AuthDto } from './dto/auth.dto';
 import { ForbiddenException, Injectable, HttpStatus } from '@nestjs/common';

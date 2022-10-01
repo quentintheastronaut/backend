@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PageDto, PageOptionsDto } from 'src/dtos';
-import { Group } from 'src/enitities/Group';
+import { Group } from 'src/entities/Group';
 import { GroupDto } from './dto/request/group.dto';
 import { ApiPaginatedResponse } from 'src/decorators';
 import { JwtGuard } from '../auth/guard';

@@ -1,12 +1,14 @@
+import { GroupModule } from './modules/happyMeal/group/group.module';
+import { ClassificationModule } from './modules/vgg19/classification/classification.module';
 import { AppController } from './app.controller';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/happyMeal/auth/auth.module';
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { DishModule } from './dish/dish.module';
+import { UserModule } from './modules/happyMeal/user/user.module';
+import { DishModule } from './modules/happyMeal/dish/dish.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import entities from './enitity';
+import entities from './enitities';
 import * as dotenv from 'dotenv';
 
 dotenv.config({
@@ -17,6 +19,8 @@ dotenv.config({
     AuthModule,
     UserModule,
     DishModule,
+    GroupModule,
+    ClassificationModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       entities: entities,

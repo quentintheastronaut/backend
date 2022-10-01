@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
-import entities from './enitity';
+import entities from './enitities';
 
 dotenv.config({
   path: `.env`,

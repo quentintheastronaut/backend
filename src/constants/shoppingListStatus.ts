@@ -1,4 +1,4 @@
 export enum ShoppingListStatus {
-  OPENING = 'opening',
+  PENDING = 'pending',
   CLOSED = 'closed',
 }

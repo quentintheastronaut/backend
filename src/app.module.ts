@@ -1,3 +1,5 @@
+import { ShoppingListModule } from './modules/happyMeal/shoppingList/shoppingList.module';
+import { IngredientModule } from './modules/happyMeal/ingredient/ingredient.module';
 import { GroupModule } from './modules/happyMeal/group/group.module';
 import { ClassificationModule } from './modules/vgg19/classification/classification.module';
 import { AppController } from './app.controller';
@@ -10,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import entities from './entities';
 import * as dotenv from 'dotenv';
+import { MenuModule } from './modules/happyMeal/menu/menu.module';
 
 dotenv.config({
   path: `.env`,
@@ -20,6 +23,9 @@ dotenv.config({
     UserModule,
     DishModule,
     GroupModule,
+    MenuModule,
+    IngredientModule,
+    ShoppingListModule,
     ClassificationModule,
     TypeOrmModule.forRoot({
       type: 'mysql',

@@ -38,7 +38,7 @@ export class Ingredient {
   imageUrl: string;
 
   @Column()
-  suggestedPrice: string;
+  suggestedPrice: number;
 
   @CreateDateColumn()
   createdAt: Date;

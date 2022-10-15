@@ -1,3 +1,4 @@
+import { ShoppingListStatus } from './../constants/shoppingListStatus';
 import { ShoppingListType } from '../constants/shoppingListType';
 import {
   Column,
@@ -18,10 +19,10 @@ export class ShoppingList {
   id: string;
 
   @Column()
-  groupId: string;
+  groupId: number;
 
   @Column()
-  userId: string;
+  userId: number;
 
   @Column()
   marketTime: string;
@@ -34,7 +35,7 @@ export class ShoppingList {
   @Column({
     nullable: false,
   })
-  status: ShoppingListType;
+  status: ShoppingListStatus;
 
   @CreateDateColumn()
   createdAt: Date;

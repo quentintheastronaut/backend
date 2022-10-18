@@ -1,9 +1,10 @@
-import { ClassificationService } from './classification.service';
 import { ClassificationController } from './classification.controller';
 import { Module } from '@nestjs/common';
-
+import { DabizService } from 'src/services/dabiz/dabiz.service';
+import { HttpModule, HttpService } from '@nestjs/axios';
 @Module({
+  imports: [HttpModule],
   controllers: [ClassificationController],
-  providers: [ClassificationService],
+  providers: [DabizService],
 })
 export class ClassificationModule {}

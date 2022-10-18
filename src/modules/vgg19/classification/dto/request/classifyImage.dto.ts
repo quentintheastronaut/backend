@@ -3,9 +3,10 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class ClassifyImageDto {
   @ApiProperty({
-    example: 'Quentin',
+    example:
+      'https://statics.vinpearl.com/com-tam-ngon-o-sai-gon-0_1630562640.jpg',
   })
   @IsOptional()
   @IsString()
-  imageUrl: string;
+  image: string;
 }

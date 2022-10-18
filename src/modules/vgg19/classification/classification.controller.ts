@@ -1,13 +1,13 @@
 import { ClassifyImageDto } from './dto/request/classifyImage.dto';
-import { ClassificationService } from './classification.service';
 import { Body, Controller, Post } from '@nestjs/common';
+import { DabizService } from 'src/services/dabiz/dabiz.service';
 
 @Controller('classification')
 export class ClassificationController {
-  constructor(private classificationService: ClassificationService) {}
+  constructor(private _dabizService: DabizService) {}
 
   @Post()
   async classifyImage(@Body() classifyImageDto: ClassifyImageDto) {
-    return this.classificationService.classifyImage(classifyImageDto);
+    return this._dabizService.classify(classifyImageDto);
   }
 }

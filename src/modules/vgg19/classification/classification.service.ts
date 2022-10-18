@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable({})
 export class ClassificationService {
-  classifyImage(classifyImageDto: ClassifyImageDto) {
-    const { imageUrl } = classifyImageDto;
-    console.log(imageUrl);
-    return imageUrl;
+  async classifyImage(classifyImageDto: ClassifyImageDto) {
+    const { image } = classifyImageDto;
+    console.log(image);
+    return image;
   }
 }

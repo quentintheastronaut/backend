@@ -5,6 +5,7 @@ import { ClassificationModule } from './modules/vgg19/classification/classificat
 import { AppController } from './app.controller';
 import { AuthModule } from './modules/happyMeal/auth/auth.module';
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { AppService } from './app.service';
 import { UserModule } from './modules/happyMeal/user/user.module';
 import { DishModule } from './modules/happyMeal/dish/dish.module';
@@ -19,6 +20,7 @@ dotenv.config({
 });
 @Module({
   imports: [
+    HttpModule,
     AuthModule,
     UserModule,
     DishModule,

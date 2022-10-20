@@ -9,7 +9,7 @@ export class DabizService {
 
   async classify(classifyImageDto: ClassifyImageDto) {
     return this.http
-      .post('http://localhost:5000/classify', classifyImageDto)
+      .post(`${process.env.DABIZ_URL}/classify`, classifyImageDto)
       .pipe(
         map((res) => {
           console.log(res);

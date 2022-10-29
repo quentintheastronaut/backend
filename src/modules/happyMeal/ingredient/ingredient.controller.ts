@@ -47,7 +47,7 @@ export class IngredientController {
   @ApiPaginatedResponse(Ingredient)
   async getAllIngredients(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<Ingredient>> {
+  ): Promise<PageDto<Ingredient[]>> {
     return this._ingredientService.getAllIngredients(pageOptionsDto);
   }
 }

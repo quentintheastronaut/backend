@@ -5,10 +5,12 @@ import { Dish } from './Dish';
 import { Menu } from './Menu';
 import { User } from './User';
 import { UserToGroup } from './UserToGroup';
+import { DishToMenu } from './DishToMenu';
 
 export { User };
 
 const entities = [
+  DishToMenu,
   UserToGroup,
   User,
   Menu,

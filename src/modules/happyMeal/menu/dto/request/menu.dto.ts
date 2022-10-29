@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class MenuDto {
   @ApiProperty({
-    example: 0,
+    example: '30/10/2022',
   })
-  @IsOptional()
-  @IsNumber()
-  date: number;
+  @IsString()
+  date: string;
 }

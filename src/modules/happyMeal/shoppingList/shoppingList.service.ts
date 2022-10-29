@@ -81,7 +81,7 @@ export class ShoppingListService {
 
   public async getAllShoppingList(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<ShoppingList>> {
+  ): Promise<PageDto<ShoppingList[]>> {
     const queryBuilder = AppDataSource.createQueryBuilder();
 
     queryBuilder

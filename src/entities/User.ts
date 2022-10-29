@@ -99,8 +99,7 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Menu)
-  @JoinTable()
+  @OneToMany(() => Menu, (menu) => menu.user)
   menus: Menu[];
 
   @ManyToMany(() => ShoppingList)

@@ -124,7 +124,7 @@ export class GroupService {
 
   public async getAllGroups(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<Group>> {
+  ): Promise<PageDto<Group[]>> {
     const queryBuilder = AppDataSource.createQueryBuilder();
 
     queryBuilder
@@ -143,5 +143,38 @@ export class GroupService {
     const pageMetaDto = new PageMetaDto({ total: itemCount, pageOptionsDto });
 
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
+  }
+
+  public async getGroupDetail(id: string): Promise<PageDto<Group>> {
+    try {
+      const group = await AppDataSource.getRepository(Group).findOne({
+        where: {
+          id,
+        },
+      });
+      return new PageDto('OK', HttpStatus.OK, group);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getGroupByUserId(
+    jwtUser: JwtUser,
+  ): Promise<PageDto<UserToGroup[]>> {
+    const { sub } = jwtUser;
+    console.log(sub);
+    try {
+      const result = await AppDataSource.createQueryBuilder(
+        UserToGroup,
+        'user_to_group',
+      )
+        .leftJoinAndSelect('user_to_group.group', 'group')
+        .where('userId = :userId', { userId: sub })
+        .getMany();
+
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 }

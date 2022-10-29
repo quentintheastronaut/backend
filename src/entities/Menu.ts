@@ -1,11 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { User } from 'src/entities';
+import { DishToMenu } from './DishToMenu';
+import { IsString } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,9 +24,9 @@ export class Menu {
 
   @Column({
     nullable: false,
-    default: 1663606425,
   })
-  date: number;
+  @IsString()
+  date: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -34,4 +37,10 @@ export class Menu {
   @ManyToMany(() => Dish)
   @JoinTable()
   dishes: Dish[];
+
+  @ManyToOne(() => User, (user) => user.menus)
+  user: User;
+
+  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu)
+  public dishToMenus!: DishToMenu[];
 }

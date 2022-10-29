@@ -47,7 +47,7 @@ export class ShoppingListController {
   @ApiPaginatedResponse(ShoppingList)
   async getAllShoppingLists(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<ShoppingList>> {
+  ): Promise<PageDto<ShoppingList[]>> {
     return this._shoppingListService.getAllShoppingList(pageOptionsDto);
   }
 }

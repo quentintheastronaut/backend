@@ -5,9 +5,7 @@ import { IsArray } from 'class-validator';
 import { PageMetaDto } from './pageMeta.dto';
 
 export class PageDto<T> {
-  @IsArray()
-  @ApiProperty({ isArray: true })
-  readonly data: T[];
+  readonly data: T | T[];
 
   @ApiProperty({ type: () => PageMetaDto })
   readonly query?: PageMetaDto;
@@ -18,7 +16,7 @@ export class PageDto<T> {
   constructor(
     message?: string,
     statusCode?: HttpStatus,
-    data?: T[],
+    data?: T,
     meta?: PageMetaDto,
   ) {
     this.data = data;

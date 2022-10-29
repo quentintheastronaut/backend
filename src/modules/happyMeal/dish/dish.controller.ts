@@ -42,7 +42,13 @@ export class DishController {
   @ApiPaginatedResponse(Dish)
   async getAllDishes(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<Dish>> {
+  ): Promise<PageDto<Dish[]>> {
     return this._dishService.getAllDishes(pageOptionsDto);
+  }
+
+  @Get(':id')
+  @ApiPaginatedResponse(Dish)
+  async getDishDetail(@Param('id') id: string): Promise<PageDto<Dish>> {
+    return this._dishService.getDishDetail(id);
   }
 }

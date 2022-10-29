@@ -75,7 +75,7 @@ export class DishService {
 
   public async getAllDishes(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<Dish>> {
+  ): Promise<PageDto<Dish[]>> {
     const queryBuilder = AppDataSource.createQueryBuilder();
 
     queryBuilder
@@ -94,5 +94,18 @@ export class DishService {
     const pageMetaDto = new PageMetaDto({ total: itemCount, pageOptionsDto });
 
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
+  }
+
+  public async getDishDetail(id: string): Promise<PageDto<Dish>> {
+    try {
+      const dish = await AppDataSource.getRepository(Dish).findOne({
+        where: {
+          id,
+        },
+      });
+      return new PageDto('OK', HttpStatus.OK, dish);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 }

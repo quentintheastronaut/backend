@@ -86,6 +86,6 @@ export class AuthService {
       secret: process.env.JWT_SECRET,
     });
 
-    return new PageDto('OK', HttpStatus.OK, [{ accessToken: token }]);
+    return new PageDto('OK', HttpStatus.OK, { accessToken: token });
   }
 }

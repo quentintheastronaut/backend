@@ -14,6 +14,7 @@ import { DataSource } from 'typeorm';
 import entities from './entities';
 import * as dotenv from 'dotenv';
 import { MenuModule } from './modules/happyMeal/menu/menu.module';
+import moment from 'moment';
 
 dotenv.config({
   path: `.env`,
@@ -40,7 +41,13 @@ dotenv.config({
       port: parseInt(process.env.DATABASE_PORT, 10) || 3306,
     }),
   ],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: 'MomentWrapper',
+      useValue: moment,
+    },
+  ],
   controllers: [AppController],
 })
 export class AppModule {

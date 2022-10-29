@@ -1,3 +1,4 @@
+import { UserToGroup } from './../../../entities/UserToGroup';
 import { GroupService } from './group.service';
 import {
   Body,
@@ -52,7 +53,22 @@ export class GroupController {
   @ApiPaginatedResponse(Group)
   async getAllGroups(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<Group>> {
+  ): Promise<PageDto<Group[]>> {
     return this._groupService.getAllGroups(pageOptionsDto);
+  }
+
+  @Get(':id')
+  async getGroupDetail(@Param('id') id: string): Promise<PageDto<Group>> {
+    return this._groupService.getGroupDetail(id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('by-user')
+  async getGroupByUserId(
+    @Req() req: { user: JwtUser },
+  ): Promise<PageDto<UserToGroup[]>> {
+    const { user } = req;
+    console.log(user);
+    return this._groupService.getGroupByUserId(user);
   }
 }

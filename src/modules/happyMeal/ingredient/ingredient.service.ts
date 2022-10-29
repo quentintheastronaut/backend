@@ -77,7 +77,7 @@ export class IngredientService {
 
   public async getAllIngredients(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<Ingredient>> {
+  ): Promise<PageDto<Ingredient[]>> {
     const queryBuilder = AppDataSource.createQueryBuilder();
 
     queryBuilder

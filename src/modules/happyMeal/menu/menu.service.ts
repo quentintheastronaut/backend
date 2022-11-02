@@ -178,7 +178,7 @@ export class MenuService {
     });
 
     if (!menu) {
-      throw new BadRequestException('This plan is not exist !');
+      throw new BadRequestException('This plan is not existed !');
     }
 
     try {
@@ -215,7 +215,7 @@ export class MenuService {
     });
 
     if (!menu) {
-      throw new BadRequestException('This plan is not exist !');
+      throw new BadRequestException('This plan is not existed !');
     }
 
     try {
@@ -243,7 +243,7 @@ export class MenuService {
     });
 
     if (!dish) {
-      throw new NotFoundException('This dish is not exist in any menu !');
+      throw new NotFoundException('This dish is not existed in any menu !');
     }
 
     try {

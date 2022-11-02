@@ -1,3 +1,4 @@
+import { AddMemberDto } from './dto/request/addMember.dto';
 import { UserToGroup } from './../../../entities/UserToGroup';
 import { GroupService } from './group.service';
 import {
@@ -19,6 +20,7 @@ import { GroupDto } from './dto/request/group.dto';
 import { ApiPaginatedResponse } from 'src/decorators';
 import { JwtGuard } from '../auth/guard';
 import { JwtUser } from '../auth/dto/parsedToken.dto';
+import { RemoveMemberDto } from './dto/request/removeMember.dto';
 
 @ApiTags('Group')
 @ApiBearerAuth()
@@ -26,12 +28,21 @@ import { JwtUser } from '../auth/dto/parsedToken.dto';
 export class GroupController {
   constructor(private readonly _groupService: GroupService) {}
 
-  @Patch(':id')
-  async updateGroup(
-    @Param('id') id: number,
-    @Body() groupDto: GroupDto,
+  @UseGuards(JwtGuard)
+  @Get('/by-user')
+  async getGroupByUserId(@Req() req: { user: JwtUser }) {
+    const { user } = req;
+    return this._groupService.getGroupByUserId(user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('add-member')
+  async addMember(
+    @Req() req: { user: JwtUser },
+    @Body() addMemberDto: AddMemberDto,
   ): Promise<PageDto<Group>> {
-    return this._groupService.updateGroup(id, groupDto);
+    const { user } = req;
+    return this._groupService.addMember(user, addMemberDto);
   }
 
   @UseGuards(JwtGuard)
@@ -42,6 +53,24 @@ export class GroupController {
   ): Promise<PageDto<Group>> {
     const { user } = req;
     return this._groupService.createGroup(groupDto, user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('/remove-member')
+  async removeDish(
+    @Req() req: { user: JwtUser },
+    @Body() removeMemberDto: RemoveMemberDto,
+  ) {
+    const { user } = req;
+    return this._groupService.removeMember(removeMemberDto, user);
+  }
+
+  @Patch(':id')
+  async updateGroup(
+    @Param('id') id: number,
+    @Body() groupDto: GroupDto,
+  ): Promise<PageDto<Group>> {
+    return this._groupService.updateGroup(id, groupDto);
   }
 
   @Delete(':id')
@@ -62,13 +91,10 @@ export class GroupController {
     return this._groupService.getGroupDetail(id);
   }
 
-  @UseGuards(JwtGuard)
-  @Get('by-user')
-  async getGroupByUserId(
-    @Req() req: { user: JwtUser },
+  @Get('/member/:id')
+  async getAllMembers(
+    @Param('id') id: string,
   ): Promise<PageDto<UserToGroup[]>> {
-    const { user } = req;
-    console.log(user);
-    return this._groupService.getGroupByUserId(user);
+    return this._groupService.getAllMembers(id);
   }
 }

@@ -1,3 +1,5 @@
+import { RemoveMemberDto } from './dto/request/removeMember.dto';
+import { AddMemberDto } from './dto/request/addMember.dto';
 import { UserToGroup } from '../../../entities/UserToGroup';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { AppDataSource } from './../../../data-source';
@@ -7,6 +9,9 @@ import {
   InternalServerErrorException,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
+  UnauthorizedException,
+  ConsoleLogger,
 } from '@nestjs/common';
 import { Group } from 'src/entities/Group';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/dtos';
@@ -175,6 +180,110 @@ export class GroupService {
       return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {
       throw new InternalServerErrorException();
+    }
+  }
+
+  public async addMember(
+    jwtUser: JwtUser,
+    addMemberDto: AddMemberDto,
+  ): Promise<PageDto<Group>> {
+    const { sub } = jwtUser;
+    const userToGroup = await AppDataSource.getRepository(UserToGroup).findOne({
+      where: {
+        groupId: addMemberDto.groupId,
+        userId: sub.toString(),
+      },
+    });
+
+    if (userToGroup.role != GroupRole.ADMIN) {
+      throw new UnauthorizedException(
+        "You don't have permission to add new member.",
+      );
+    }
+
+    const newUser = await AppDataSource.getRepository(User).findOne({
+      where: {
+        email: addMemberDto.email,
+      },
+    });
+
+    if (!newUser) {
+      throw new BadRequestException('This user is not existed !');
+    }
+
+    try {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(UserToGroup)
+        .values({
+          groupId: addMemberDto.groupId,
+          userId: newUser.id,
+          role: GroupRole.MEMBER,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getAllMembers(id: string): Promise<PageDto<UserToGroup[]>> {
+    const group = await AppDataSource.getRepository(Group).findOne({
+      where: {
+        id,
+      },
+    });
+    if (!group) {
+      throw new BadRequestException('This group is not existed !');
+    }
+
+    try {
+      const result = await AppDataSource.createQueryBuilder(
+        UserToGroup,
+        'user_to_group',
+      )
+        .leftJoinAndSelect('user_to_group.user', 'user')
+        .where('user_to_group.groupId = :id', { id })
+        .getMany();
+
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async removeMember(
+    removeMemberDto: RemoveMemberDto,
+    jwtUser: JwtUser,
+  ): Promise<PageDto<UserToGroup>> {
+    const { sub } = jwtUser;
+    const userToGroup = await AppDataSource.getRepository(UserToGroup).findOne({
+      where: {
+        groupId: removeMemberDto.groupId,
+        userId: sub.toString(),
+      },
+    });
+
+    if (userToGroup.role != GroupRole.ADMIN) {
+      throw new UnauthorizedException(
+        "You don't have permission to remove new member.",
+      );
+    }
+
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(UserToGroup)
+        .where('userId = :userId and groupId = :groupId', {
+          ...removeMemberDto,
+        })
+        .execute();
+
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error);
     }
   }
 }

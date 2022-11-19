@@ -1,3 +1,4 @@
+import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { ShoppingListStatus } from './../constants/shoppingListStatus';
 import { ShoppingListType } from '../constants/shoppingListType';
 import {
@@ -6,10 +7,12 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Ingredient } from './Ingredient';
+import { IsString } from 'class-validator';
 
 @Entity()
 export class ShoppingList {
@@ -17,6 +20,12 @@ export class ShoppingList {
     name: 'id',
   })
   id: string;
+
+  @Column({
+    nullable: false,
+  })
+  @IsString()
+  date: string;
 
   @Column()
   groupId: number;
@@ -46,4 +55,10 @@ export class ShoppingList {
   @ManyToMany(() => Ingredient)
   @JoinTable()
   ingredients: Ingredient[];
+
+  @OneToMany(
+    () => IngredientToShoppingList,
+    (ingredientToShoppingList) => ingredientToShoppingList.shoppingList,
+  )
+  public ingredientsToShoppingList!: IngredientToShoppingList[];
 }

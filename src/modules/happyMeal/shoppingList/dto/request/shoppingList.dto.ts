@@ -12,6 +12,12 @@ export class ShoppingListDto {
   marketTime: string;
 
   @ApiProperty({
+    example: '30/10/2022',
+  })
+  @IsString()
+  date: string;
+
+  @ApiProperty({
     example: ShoppingListType.INDIVIDUAL,
   })
   @IsOptional()

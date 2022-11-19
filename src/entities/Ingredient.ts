@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { IsString } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -45,4 +46,10 @@ export class Ingredient {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(
+    () => IngredientToShoppingList,
+    (ingredientToShoppingList) => ingredientToShoppingList.ingredient,
+  )
+  public ingredientsToShoppingList!: IngredientToShoppingList[];
 }

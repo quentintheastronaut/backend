@@ -12,7 +12,6 @@ export class DabizService {
       .post(`${process.env.DABIZ_URL}/classify`, classifyImageDto)
       .pipe(
         map((res) => {
-          console.log(res);
           return res.data;
         }),
       )

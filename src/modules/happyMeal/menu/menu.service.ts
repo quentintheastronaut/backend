@@ -1,3 +1,4 @@
+import { TrackDto } from './dto/request/track.dto';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { DishToMenu } from './../../../entities/DishToMenu';
 import { MenuDto } from './dto/request/menu.dto';
@@ -18,9 +19,20 @@ import { Equal } from 'typeorm';
 import { User } from 'src/entities';
 import { RemoveDishDto } from './dto/request/removeDish.dto';
 import { UpdateDishToMenuDto } from './dto/request/updateDishToMenu.dto';
+import { GetMenuByDateDto } from './dto/request/getMenuByDate.dto';
 
 @Injectable({})
 export class MenuService {
+  async getUser(email: string) {
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: {
+        email,
+      },
+    });
+    delete user.password;
+    return user;
+  }
+
   public async updateMenu(
     id: number,
     menuDto: MenuDto,
@@ -202,7 +214,7 @@ export class MenuService {
     jwtUser: JwtUser,
   ): Promise<PageDto<DishToMenu[]>> {
     const { email } = jwtUser;
-    const menu = await AppDataSource.getRepository(Menu).findOne({
+    let menu = await AppDataSource.getRepository(Menu).findOne({
       relations: {
         user: true,
       },
@@ -215,8 +227,30 @@ export class MenuService {
     });
 
     if (!menu) {
-      throw new BadRequestException('This plan is not existed !');
+      const user = await this.getUser(email);
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(Menu)
+        .values([
+          {
+            date,
+            user: user,
+          },
+        ])
+        .execute();
     }
+
+    menu = await AppDataSource.getRepository(Menu).findOne({
+      relations: {
+        user: true,
+      },
+      where: {
+        date,
+        user: {
+          email: email,
+        },
+      },
+    });
 
     try {
       const result = await AppDataSource.createQueryBuilder(
@@ -252,6 +286,40 @@ export class MenuService {
         .set(updateDishDto)
         .where('dishToMenuId = :dishToMenuId', {
           dishToMenuId: updateDishDto.dishToMenuId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async track(trackDto: TrackDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(DishToMenu)
+        .set({
+          tracked: true,
+        })
+        .where('dishToMenuId = :dishToMenuId', {
+          dishToMenuId: trackDto.dishToMenuId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async untrack(trackDto: TrackDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(DishToMenu)
+        .set({
+          tracked: false,
+        })
+        .where('dishToMenuId = :dishToMenuId', {
+          dishToMenuId: trackDto.dishToMenuId,
         })
         .execute();
       return new PageDto('OK', HttpStatus.OK);

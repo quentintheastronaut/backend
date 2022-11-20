@@ -1,3 +1,4 @@
+import { IngredientToDish } from './IngredientToDish';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { IsString } from 'class-validator';
 import {
@@ -52,4 +53,10 @@ export class Ingredient {
     (ingredientToShoppingList) => ingredientToShoppingList.ingredient,
   )
   public ingredientsToShoppingList!: IngredientToShoppingList[];
+
+  @OneToMany(
+    () => IngredientToDish,
+    (ingredientToDish) => ingredientToDish.ingredient,
+  )
+  public ingredientsToDish!: IngredientToDish[];
 }

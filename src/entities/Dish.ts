@@ -1,3 +1,4 @@
+import { IngredientToDish } from './IngredientToDish';
 import { IsString } from 'class-validator';
 import {
   Column,
@@ -52,10 +53,12 @@ export class Dish {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Ingredient)
-  @JoinTable()
-  ingredients: Ingredient[];
-
   @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.dish)
   public dishToMenus!: DishToMenu[];
+
+  @OneToMany(
+    () => IngredientToDish,
+    (ingredientToDish) => ingredientToDish.dish,
+  )
+  public ingredientsToDish!: IngredientToDish[];
 }

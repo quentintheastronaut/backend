@@ -1,3 +1,4 @@
+import { IngredientToDish } from './IngredientToDish';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { ShoppingList } from './ShoppingList';
 import { Group } from './Group';
@@ -20,6 +21,7 @@ const entities = [
   Ingredient,
   Group,
   ShoppingList,
+  IngredientToDish,
 ];
 
 export default entities;

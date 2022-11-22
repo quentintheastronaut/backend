@@ -25,16 +25,30 @@ export class Dish {
   @Column()
   name: string;
 
-  @Column()
+  @IsString()
+  @Column({
+    nullable: true,
+  })
+  slug: string;
+
+  @Column({
+    nullable: true,
+  })
   carbohydrates: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   fat: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   protein: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   calories: number;
 
   @Column({

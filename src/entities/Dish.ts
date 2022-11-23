@@ -4,14 +4,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { DishToMenu } from './DishToMenu';
-import { Ingredient } from './Ingredient';
 
 @Entity()
 export class Dish {
@@ -32,21 +29,25 @@ export class Dish {
   slug: string;
 
   @Column({
+    default: 0,
     nullable: true,
   })
   carbohydrates: number;
 
   @Column({
+    default: 0,
     nullable: true,
   })
   fat: number;
 
   @Column({
+    default: 0,
     nullable: true,
   })
   protein: number;
 
   @Column({
+    default: 0,
     nullable: true,
   })
   calories: number;

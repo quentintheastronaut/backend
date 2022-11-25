@@ -36,12 +36,12 @@ export class ShoppingListDto {
   })
   @IsOptional()
   @IsString()
-  groupId: number;
+  groupId: string;
 
   @ApiProperty({
     example: 11,
   })
   @IsOptional()
   @IsString()
-  userId: number;
+  userId: string;
 }

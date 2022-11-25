@@ -22,16 +22,24 @@ export class Ingredient {
   @Column()
   name: string;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   carbohydrates: number;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   fat: number;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   protein: number;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   calories: number;
 
   @Column({

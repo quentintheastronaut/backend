@@ -24,6 +24,12 @@ export class Dish {
 
   @IsString()
   @Column({
+    default: '',
+  })
+  description: string;
+
+  @IsString()
+  @Column({
     nullable: true,
   })
   slug: string;

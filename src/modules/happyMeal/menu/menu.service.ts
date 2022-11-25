@@ -1,3 +1,7 @@
+import { Menu } from 'src/entities/Menu';
+import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
+import { ShoppingList } from 'src/entities/ShoppingList';
+import { IngredientToDish } from './../../../entities/IngredientToDish';
 import { TrackDto } from './dto/request/track.dto';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { DishToMenu } from './../../../entities/DishToMenu';
@@ -13,13 +17,11 @@ import {
 } from '@nestjs/common';
 import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
-import { Menu } from 'src/entities/Menu';
 import { AddDishDto } from './dto/request/addDish.dto';
-import { Equal } from 'typeorm';
 import { User } from 'src/entities';
 import { RemoveDishDto } from './dto/request/removeDish.dto';
 import { UpdateDishToMenuDto } from './dto/request/updateDishToMenu.dto';
-import { GetMenuByDateDto } from './dto/request/getMenuByDate.dto';
+import { ShoppingListStatus, ShoppingListType } from 'src/constants';
 
 @Injectable({})
 export class MenuService {
@@ -165,6 +167,10 @@ export class MenuService {
           })
           .execute();
       }
+
+      console.log(addDishDto);
+      console.log(jwtUser);
+      await this.addIngredientToList(addDishDto, jwtUser);
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -324,6 +330,84 @@ export class MenuService {
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async addIngredientToList(addDisDto: AddDishDto, jwtUser: JwtUser) {
+    const list = await AppDataSource.getRepository(ShoppingList).findOne({
+      where: {
+        date: addDisDto.date,
+        userId: jwtUser.sub.toString(),
+      },
+    });
+
+    if (!list) {
+      try {
+        const inserted = await this.createList(addDisDto, jwtUser);
+        const listId = inserted.identifiers[0].id;
+
+        const { entities } = await AppDataSource.createQueryBuilder()
+          .select('ingredientToDish')
+          .from(IngredientToDish, 'ingredientToDish')
+          .where('dishId = :dishId', {
+            dishId: addDisDto.dishId,
+          })
+          .getRawAndEntities();
+
+        const ingredientToList = entities.map((ingredient) => ({
+          ingredientId: ingredient.ingredientId,
+          ListId: listId,
+        }));
+
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(IngredientToShoppingList)
+          .values(ingredientToList)
+          .execute();
+      } catch (error) {
+        throw new InternalServerErrorException(error);
+      }
+    } else {
+      const listId = list.id;
+
+      const { entities } = await AppDataSource.createQueryBuilder()
+        .select('ingredientToDish')
+        .from(IngredientToDish, 'ingredientToDish')
+        .where('dishId = :dishId', {
+          dishId: addDisDto.dishId,
+        })
+        .getRawAndEntities();
+
+      const ingredientToList = entities.map((ingredient) => ({
+        ingredientId: ingredient.ingredientId,
+        ListId: listId,
+      }));
+
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(IngredientToShoppingList)
+        .values(ingredientToList)
+        .execute();
+    }
+  }
+
+  public async createList(addDisDto: AddDishDto, jwtUser: JwtUser) {
+    try {
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(ShoppingList)
+        .values([
+          {
+            date: addDisDto.date,
+            userId: jwtUser.sub.toString(),
+            type: ShoppingListType.INDIVIDUAL,
+            status: ShoppingListStatus.PENDING,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

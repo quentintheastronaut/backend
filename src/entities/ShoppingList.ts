@@ -28,10 +28,10 @@ export class ShoppingList {
   date: string;
 
   @Column()
-  groupId: number;
+  groupId: string;
 
   @Column()
-  userId: number;
+  userId: string;
 
   @Column()
   marketTime: string;

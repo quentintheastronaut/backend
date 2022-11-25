@@ -50,6 +50,7 @@ export class IngredientDto {
 
   @ApiProperty({
     example: 0,
+    default: 0,
   })
   @IsOptional()
   @IsNumber()

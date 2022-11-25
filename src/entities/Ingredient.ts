@@ -47,7 +47,9 @@ export class Ingredient {
   })
   imageUrl: string;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   suggestedPrice: number;
 
   @CreateDateColumn()

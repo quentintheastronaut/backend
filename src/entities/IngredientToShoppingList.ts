@@ -5,7 +5,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class IngredientToShoppingList {
   @PrimaryGeneratedColumn()
-  public ingredientToShoppingList!: string;
+  public ingredientToShoppingListId!: string;
 
   @Column()
   public ingredientId!: string;
@@ -27,6 +27,11 @@ export class IngredientToShoppingList {
     default: 0,
   })
   public weight!: number;
+
+  @Column({
+    default: false,
+  })
+  public checked!: boolean;
 
   @ManyToOne(
     () => ShoppingList,

@@ -1,3 +1,6 @@
+import { CheckDto } from './dto/request/check.dto';
+import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredientToShoppingList.dto';
+import { RemoveIngredientDto } from './dto/request/removeIngredient.dto';
 import { AddIngredientDto } from './dto/request/addIngredient.dto';
 import { ShoppingListStatus } from './../../../constants/shoppingListStatus';
 import { ShoppingListType } from './../../../constants/shoppingListType';
@@ -10,6 +13,7 @@ import {
   InternalServerErrorException,
   HttpStatus,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
@@ -213,6 +217,107 @@ export class ShoppingListService {
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async removeIngredient(
+    removeIngredientDto: RemoveIngredientDto,
+    jwtUser: JwtUser,
+  ): Promise<PageDto<ShoppingList>> {
+    const { email } = jwtUser;
+    const list = await AppDataSource.getRepository(ShoppingList).findOne({
+      relations: {
+        user: true,
+      },
+      where: {
+        date: removeIngredientDto.date,
+        user: {
+          email: email,
+        },
+      },
+    });
+
+    if (!list) {
+      throw new BadRequestException('This shopping list is not existed !');
+    }
+
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(IngredientToShoppingList)
+        .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
+          ...removeIngredientDto,
+        })
+        .execute();
+
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async updateIngredient(
+    updateIngredientToShoppingListDto: UpdateIngredientToShoppingListDto,
+  ) {
+    const list = await AppDataSource.getRepository(
+      IngredientToShoppingList,
+    ).findOne({
+      where: {
+        ingredientToShoppingListId:
+          updateIngredientToShoppingListDto.ingredientToShoppingListId,
+      },
+    });
+
+    if (!list) {
+      throw new NotFoundException('This dish is not existed in any menu !');
+    }
+
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(IngredientToShoppingList)
+        .set(updateIngredientToShoppingListDto)
+        .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
+          ingredientToShoppingListId:
+            updateIngredientToShoppingListDto.ingredientToShoppingListId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async check(checkDto: CheckDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(IngredientToShoppingList)
+        .set({
+          checked: true,
+        })
+        .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
+          ingredientToShoppingListId: checkDto.ingredientToShoppingListId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async uncheck(checkDto: CheckDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(IngredientToShoppingList)
+        .set({
+          checked: false,
+        })
+        .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
+          ingredientToShoppingListId: checkDto.ingredientToShoppingListId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
     }
   }
 }

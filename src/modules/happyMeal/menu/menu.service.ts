@@ -355,6 +355,9 @@ export class MenuService {
         const ingredientToList = entities.map((ingredient) => ({
           ingredientId: ingredient.ingredientId,
           shoppingListId: listId,
+          quantity: ingredient.quantity,
+          measurementType: ingredient.measurementType,
+          weight: ingredient.weight,
         }));
 
         await AppDataSource.createQueryBuilder()
@@ -379,6 +382,9 @@ export class MenuService {
       const ingredientToList = entities.map((ingredient) => ({
         ingredientId: ingredient.ingredientId,
         shoppingListId: listId,
+        quantity: ingredient.quantity,
+        measurementType: ingredient.measurementType,
+        weight: ingredient.weight,
       }));
 
       await AppDataSource.createQueryBuilder()

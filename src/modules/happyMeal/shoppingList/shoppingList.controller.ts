@@ -1,3 +1,6 @@
+import { CheckDto } from './dto/request/check.dto';
+import { RemoveIngredientDto } from './dto/request/removeIngredient.dto';
+import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredientToShoppingList.dto';
 import { AddIngredientDto } from './dto/request/addIngredient.dto';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { JwtGuard } from './../auth/guard/jwt.guard';
@@ -46,6 +49,43 @@ export class ShoppingListController {
   ) {
     const { user } = req;
     return this._shoppingListService.addIngredient(addIngredientDto, user);
+  }
+
+  @ApiOperation({ summary: 'Update a ingredient in the shopping list' })
+  @Patch('/update-ingredient')
+  async updateDish(
+    @Body()
+    updateIngredientToShoppingListDto: UpdateIngredientToShoppingListDto,
+  ) {
+    return this._shoppingListService.updateIngredient(
+      updateIngredientToShoppingListDto,
+    );
+  }
+
+  @ApiOperation({ summary: 'Remove dish into menu' })
+  @UseGuards(JwtGuard)
+  @Delete('/remove-ingredient')
+  async removeDish(
+    @Req() req: { user: JwtUser },
+    @Body() removeIngredientDto: RemoveIngredientDto,
+  ) {
+    const { user } = req;
+    return this._shoppingListService.removeIngredient(
+      removeIngredientDto,
+      user,
+    );
+  }
+
+  @ApiOperation({ summary: 'Check a ingredient in the shopping list' })
+  @Post('/check')
+  async track(@Body() checkDto: CheckDto) {
+    return this._shoppingListService.check(checkDto);
+  }
+
+  @ApiOperation({ summary: 'Check a ingredient in the shopping list' })
+  @Post('/uncheck')
+  async uncheck(@Body() checkDto: CheckDto) {
+    return this._shoppingListService.uncheck(checkDto);
   }
 
   @Patch(':id')

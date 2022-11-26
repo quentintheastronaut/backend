@@ -1,25 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { MealType } from 'src/constants/mealType';
 
-export class UpdateDishToMenuDto {
+export class UpdateIngredientToShoppingListDto {
   @ApiProperty({
     example: '1',
   })
   @IsString()
-  dishToMenuId: string;
-
-  @ApiProperty({
-    example: MealType.BREAKFAST,
-  })
-  @IsString()
-  @IsOptional()
-  meal: MealType;
+  ingredientToShoppingListId: string;
 
   @ApiProperty({
     example: 1,
   })
   @IsNumber()
   @IsOptional()
-  quantity: number;
+  quantity?: number;
+
+  @ApiProperty({
+    example: 1,
+  })
+  @IsNumber()
+  @IsOptional()
+  weight?: number;
+
+  @ApiProperty({
+    example: 'GRAMME',
+  })
+  @IsOptional()
+  @IsString()
+  measurementType?: string;
 }

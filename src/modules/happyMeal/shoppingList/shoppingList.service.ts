@@ -1,3 +1,4 @@
+import { AddIngredientDto } from './dto/request/addIngredient.dto';
 import { ShoppingListStatus } from './../../../constants/shoppingListStatus';
 import { ShoppingListType } from './../../../constants/shoppingListType';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
@@ -14,6 +15,7 @@ import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
 import { ShoppingList } from 'src/entities/ShoppingList';
 import { IngredientToShoppingList } from 'src/entities/IngredientToShoppingList';
+import { User } from 'src/entities';
 
 @Injectable({})
 export class ShoppingListService {
@@ -106,7 +108,7 @@ export class ShoppingListService {
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
   }
 
-  public async getMenuByDate(
+  public async getShoppingListByDate(
     date: string,
     jwtUser: JwtUser,
   ): Promise<PageDto<IngredientToShoppingList[]>> {
@@ -142,18 +144,75 @@ export class ShoppingListService {
     try {
       const result = await AppDataSource.createQueryBuilder(
         IngredientToShoppingList,
-        'ingredient_to_list',
-      );
-      //   .leftJoinAndSelect(
-      //     'ingredient_to_shopping_list.ingredient',
-      //     'ingredient',
-      //   )
-      //   .where('ListId = :listId', { listId: list.id })
-      //   .getMany();
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.ingredient',
+          'ingredient',
+        )
+        .where('shoppingListId = :listId', { listId: list.id })
+        .getMany();
 
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async addIngredient(
+    addIngredientDto: AddIngredientDto,
+    jwtUser: JwtUser,
+  ): Promise<PageDto<ShoppingList>> {
+    try {
+      const { email } = jwtUser;
+      const list = await AppDataSource.getRepository(ShoppingList).findOne({
+        where: {
+          date: addIngredientDto.date,
+          user: {
+            email: email,
+          },
+        },
+      });
+
+      const user = await AppDataSource.getRepository(User).findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (!list) {
+        const newMenuId = await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(ShoppingList)
+          .values({
+            date: addIngredientDto.date,
+            user: user,
+            status: ShoppingListStatus.PENDING,
+          })
+          .execute();
+
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(IngredientToShoppingList)
+          .values({
+            shoppingListId: newMenuId.identifiers[0].id,
+            ...addIngredientDto,
+          })
+          .execute();
+      } else {
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(IngredientToShoppingList)
+          .values({
+            shoppingListId: list.id,
+            ...addIngredientDto,
+          })
+          .execute();
+      }
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(error);
     }
   }
 }

@@ -102,8 +102,7 @@ export class User {
   @OneToMany(() => Menu, (menu) => menu.user)
   menus: Menu[];
 
-  @ManyToMany(() => ShoppingList)
-  @JoinTable()
+  @OneToMany(() => ShoppingList, (shoppingList) => shoppingList.user)
   shoppingLists: ShoppingList[];
 
   @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.user)

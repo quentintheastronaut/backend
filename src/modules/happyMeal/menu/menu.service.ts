@@ -167,9 +167,6 @@ export class MenuService {
           })
           .execute();
       }
-
-      console.log(addDishDto);
-      console.log(jwtUser);
       await this.addIngredientToList(addDishDto, jwtUser);
 
       return new PageDto('OK', HttpStatus.OK);
@@ -357,7 +354,7 @@ export class MenuService {
 
         const ingredientToList = entities.map((ingredient) => ({
           ingredientId: ingredient.ingredientId,
-          ListId: listId,
+          shoppingListId: listId,
         }));
 
         await AppDataSource.createQueryBuilder()
@@ -381,7 +378,7 @@ export class MenuService {
 
       const ingredientToList = entities.map((ingredient) => ({
         ingredientId: ingredient.ingredientId,
-        ListId: listId,
+        shoppingListId: listId,
       }));
 
       await AppDataSource.createQueryBuilder()

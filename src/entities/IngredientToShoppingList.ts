@@ -13,11 +13,20 @@ export class IngredientToShoppingList {
   @Column()
   public shoppingListId!: string;
 
-  @Column()
-  public measurementId!: string;
-
-  @Column()
+  @Column({
+    default: 1,
+  })
   public quantity!: number;
+
+  @Column({
+    default: 'GRAMME',
+  })
+  public measurementType!: string;
+
+  @Column({
+    default: 0,
+  })
+  public weight!: number;
 
   @ManyToOne(
     () => ShoppingList,

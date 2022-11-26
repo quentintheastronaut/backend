@@ -1,3 +1,4 @@
+import { MeasurementModule } from './modules/happyMeal/measurement/measurement.module';
 import { ShoppingListModule } from './modules/happyMeal/shoppingList/shoppingList.module';
 import { IngredientModule } from './modules/happyMeal/ingredient/ingredient.module';
 import { GroupModule } from './modules/happyMeal/group/group.module';
@@ -30,6 +31,7 @@ dotenv.config({
     IngredientModule,
     ShoppingListModule,
     ClassificationModule,
+    MeasurementModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       entities: entities,

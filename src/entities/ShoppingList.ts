@@ -1,3 +1,4 @@
+import { User } from 'src/entities';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { ShoppingListStatus } from './../constants/shoppingListStatus';
 import { ShoppingListType } from '../constants/shoppingListType';
@@ -7,6 +8,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -27,13 +29,19 @@ export class ShoppingList {
   @IsString()
   date: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   groupId: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   userId: string;
 
-  @Column()
+  @Column({
+    default: '',
+  })
   marketTime: string;
 
   @Column({
@@ -55,6 +63,9 @@ export class ShoppingList {
   @ManyToMany(() => Ingredient)
   @JoinTable()
   ingredients: Ingredient[];
+
+  @ManyToOne(() => User, (user) => user.shoppingLists)
+  user: User;
 
   @OneToMany(
     () => IngredientToShoppingList,

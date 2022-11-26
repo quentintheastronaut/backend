@@ -1,3 +1,6 @@
+import { AddIngredientDto } from './dto/request/addIngredient.dto';
+import { JwtUser } from './../auth/dto/parsedToken.dto';
+import { JwtGuard } from './../auth/guard/jwt.guard';
 import { ShoppingListService } from './shoppingList.service';
 import {
   Body,
@@ -8,8 +11,10 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PageDto, PageOptionsDto } from 'src/dtos';
 import { ShoppingList } from 'src/entities/ShoppingList';
 import { ShoppingListDto } from './dto/request/shoppingList.dto';
@@ -20,6 +25,28 @@ import { ApiPaginatedResponse } from 'src/decorators';
 @Controller('shoppingList')
 export class ShoppingListController {
   constructor(private readonly _shoppingListService: ShoppingListService) {}
+
+  @UseGuards(JwtGuard)
+  @Get('/:date')
+  @ApiOperation({ summary: 'Get detail shopping list by date' })
+  async getMenuByDate(
+    @Param('date') date: string,
+    @Req() req: { user: JwtUser },
+  ) {
+    const { user } = req;
+    return this._shoppingListService.getShoppingListByDate(date, user);
+  }
+
+  @ApiOperation({ summary: 'Add ingredient into shopping list' })
+  @UseGuards(JwtGuard)
+  @Post('/add-ingredient')
+  async addDish(
+    @Req() req: { user: JwtUser },
+    @Body() addIngredientDto: AddIngredientDto,
+  ) {
+    const { user } = req;
+    return this._shoppingListService.addIngredient(addIngredientDto, user);
+  }
 
   @Patch(':id')
   async updateShoppingList(

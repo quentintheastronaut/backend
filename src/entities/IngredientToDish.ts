@@ -13,13 +13,19 @@ export class IngredientToDish {
   @Column()
   public dishId!: string;
 
-  @Column()
+  @Column({
+    default: 1,
+  })
   public quantity!: number;
 
-  @Column()
+  @Column({
+    default: 'GRAMME',
+  })
   public measurementType!: string;
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   public weight!: number;
 
   @ManyToOne(() => Dish, (dish) => dish.ingredientsToDish)

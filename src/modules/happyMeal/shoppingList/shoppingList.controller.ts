@@ -64,7 +64,7 @@ export class ShoppingListController {
 
   @ApiOperation({ summary: 'Remove dish into menu' })
   @UseGuards(JwtGuard)
-  @Delete('/remove-ingredient')
+  @Post('/remove-ingredient')
   async removeDish(
     @Req() req: { user: JwtUser },
     @Body() removeIngredientDto: RemoveIngredientDto,

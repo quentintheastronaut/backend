@@ -177,7 +177,6 @@ export class MenuService {
 
   public async removeDish(
     removeDishDto: RemoveDishDto,
-    jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
     const menu = await AppDataSource.getRepository(DishToMenu).findOne({
       where: {

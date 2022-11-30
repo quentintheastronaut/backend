@@ -76,12 +76,8 @@ export class MenuController {
   @ApiOperation({ summary: 'Remove dish into menu' })
   @UseGuards(JwtGuard)
   @Post('/remove-dish')
-  async removeDish(
-    @Req() req: { user: JwtUser },
-    @Body() removeDishDto: RemoveDishDto,
-  ) {
-    const { user } = req;
-    return this._menuService.removeDish(removeDishDto, user);
+  async removeDish(@Body() removeDishDto: RemoveDishDto) {
+    return this._menuService.removeDish(removeDishDto);
   }
 
   @UseGuards(JwtGuard)

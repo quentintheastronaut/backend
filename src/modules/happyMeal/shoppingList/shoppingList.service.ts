@@ -150,13 +150,7 @@ export class ShoppingListService {
         IngredientToShoppingList,
         'ingredient_to_shopping_list',
       )
-        .leftJoinAndSelect(
-          'ingredient_to_shopping_list.ingredient',
-          'ingredient',
-        )
         .where('shoppingListId = :listId', { listId: list.id })
-        .addSelect('SUM(ingredient_to_shopping_list.quantity)', 'quantity')
-        .groupBy('ingredient_to_shopping_list.ingredientId')
         .getMany();
 
       return new PageDto('OK', HttpStatus.OK, result);

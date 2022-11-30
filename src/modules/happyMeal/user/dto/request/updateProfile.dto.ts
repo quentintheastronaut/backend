@@ -36,6 +36,12 @@ export class UpdateProfileDto {
   weight?: number;
 
   @ApiProperty({
+    example: '22',
+  })
+  @IsOptional()
+  age?: number;
+
+  @ApiProperty({
     example:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/OOjs_UI_icon_userAvatar-progressive.svg/1200px-OOjs_UI_icon_userAvatar-progressive.svg.png',
   })

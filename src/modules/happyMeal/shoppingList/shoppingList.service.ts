@@ -150,6 +150,10 @@ export class ShoppingListService {
         IngredientToShoppingList,
         'ingredient_to_shopping_list',
       )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.ingredient',
+          'ingredient',
+        )
         .where('shoppingListId = :listId', { listId: list.id })
         .getMany();
 

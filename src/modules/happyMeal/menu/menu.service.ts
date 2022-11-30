@@ -177,14 +177,23 @@ export class MenuService {
 
   public async removeDish(
     removeDishDto: RemoveDishDto,
+    jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
-    const menu = await AppDataSource.getRepository(DishToMenu).findOne({
+    const dishToMenu = await AppDataSource.getRepository(DishToMenu).findOne({
       where: {
         dishToMenuId: removeDishDto.dishToMenuId,
       },
     });
 
-    if (!menu) {
+    const menu = await AppDataSource.getRepository(Menu).findOne({
+      where: {
+        id: dishToMenu.menuId,
+      },
+    });
+
+    const date = menu.date;
+
+    if (!dishToMenu) {
       throw new BadRequestException('This plan is not existed !');
     }
 
@@ -196,6 +205,12 @@ export class MenuService {
           ...removeDishDto,
         })
         .execute();
+
+      await this.removeIngredient(
+        date,
+        jwtUser.sub.toString(),
+        dishToMenu.dishId,
+      );
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -404,6 +419,46 @@ export class MenuService {
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
+    }
+  }
+
+  public async removeIngredient(date: string, userId: string, dishId: string) {
+    const list = await AppDataSource.getRepository(ShoppingList).findOne({
+      where: {
+        date,
+        userId,
+      },
+    });
+
+    const ingredients = await AppDataSource.getRepository(
+      IngredientToDish,
+    ).find({
+      where: {
+        dishId: dishId,
+      },
+    });
+
+    const values = ingredients.map((ingredient) => ({
+      ingredientId: ingredient.ingredientId,
+      shoppingListId: list.id,
+    }));
+
+    try {
+      values.forEach(async (value) => {
+        await AppDataSource.createQueryBuilder()
+          .delete()
+          .from(IngredientToShoppingList)
+          .where(
+            'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
+            {
+              ...value,
+            },
+          )
+          .execute();
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error);
     }
   }
 }

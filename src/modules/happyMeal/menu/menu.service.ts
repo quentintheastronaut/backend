@@ -179,16 +179,9 @@ export class MenuService {
     removeDishDto: RemoveDishDto,
     jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
-    const { email } = jwtUser;
-    const menu = await AppDataSource.getRepository(Menu).findOne({
-      relations: {
-        user: true,
-      },
+    const menu = await AppDataSource.getRepository(DishToMenu).findOne({
       where: {
-        date: removeDishDto.date,
-        user: {
-          email: email,
-        },
+        dishToMenuId: removeDishDto.dishToMenuId,
       },
     });
 
@@ -200,9 +193,8 @@ export class MenuService {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(DishToMenu)
-        .where('dishId = :dishId and menuId = :menuId and meal = :meal', {
+        .where('dishToMenuId = :dishToMenuId', {
           ...removeDishDto,
-          menuId: menu.id,
         })
         .execute();
 

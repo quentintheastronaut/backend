@@ -44,6 +44,12 @@ export class MenuController {
     return this._menuService.getAllMenues(pageOptionsDto);
   }
 
+  @ApiOperation({ summary: 'Update a dish in the menu' })
+  @Patch('/update-dish')
+  async updateDish(@Body() updateDishDto: UpdateDishToMenuDto) {
+    return this._menuService.updateMenuDetail(updateDishDto);
+  }
+
   @ApiOperation({ summary: 'Update menu information' })
   @Patch(':id')
   async updateMenu(
@@ -87,12 +93,6 @@ export class MenuController {
   ) {
     const { user } = req;
     return this._menuService.getMenuByDate(date, user);
-  }
-
-  @ApiOperation({ summary: 'Update a dish in the menu' })
-  @Patch('/update-dish')
-  async updateDish(@Body() updateDishDto: UpdateDishToMenuDto) {
-    return this._menuService.updateMenuDetail(updateDishDto);
   }
 
   @ApiOperation({ summary: 'Track a dish in the menu' })

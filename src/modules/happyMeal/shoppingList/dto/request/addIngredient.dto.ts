@@ -22,7 +22,7 @@ export class AddIngredientDto {
   quantity: number;
 
   @ApiProperty({
-    example: 1,
+    example: 0,
   })
   @IsNumber()
   weight: number;

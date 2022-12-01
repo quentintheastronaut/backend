@@ -103,7 +103,6 @@ export class DishService {
           id,
         },
       });
-      console.log(dish);
       return new PageDto('OK', HttpStatus.OK, dish);
     } catch (error) {
       throw new InternalServerErrorException();

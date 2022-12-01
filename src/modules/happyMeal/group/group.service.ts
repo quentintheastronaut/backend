@@ -167,7 +167,6 @@ export class GroupService {
     jwtUser: JwtUser,
   ): Promise<PageDto<UserToGroup[]>> {
     const { sub } = jwtUser;
-    console.log(sub);
     try {
       const result = await AppDataSource.createQueryBuilder(
         UserToGroup,

@@ -168,8 +168,11 @@ export class MenuService {
           .execute();
       }
 
+      await this.addIngredientToList(addGroupDishDto, null);
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
@@ -244,17 +247,25 @@ export class MenuService {
       },
     });
 
+    if (!dishToMenu) {
+      throw new BadRequestException('This dish is not existed in this menu !');
+    }
+
     const menu = await AppDataSource.getRepository(Menu).findOne({
+      relations: {
+        group: true,
+        user: true,
+      },
       where: {
         id: dishToMenu.menuId,
       },
     });
 
-    const date = menu.date;
-
-    if (!dishToMenu) {
-      throw new BadRequestException('This plan is not existed !');
+    if (!menu) {
+      throw new BadRequestException('This menu is not existed !');
     }
+
+    const date = menu.date;
 
     try {
       await AppDataSource.createQueryBuilder()
@@ -265,14 +276,23 @@ export class MenuService {
         })
         .execute();
 
-      await this.removeIngredient(
-        date,
-        jwtUser.sub.toString(),
-        dishToMenu.dishId,
-      );
+      if (menu.type === ShoppingListType.GROUP) {
+        await this.removeGroupIngredient(
+          date,
+          menu.group.id,
+          dishToMenu.dishId,
+        );
+      } else {
+        await this.removeIngredient(
+          date,
+          jwtUser.sub.toString(),
+          dishToMenu.dishId,
+        );
+      }
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
@@ -282,7 +302,6 @@ export class MenuService {
     groupId: string,
   ): Promise<PageDto<DishToMenu[]>> {
     try {
-      console.log(groupId);
       const group = await AppDataSource.getRepository(Group).findOne({
         where: {
           id: groupId,
@@ -467,17 +486,24 @@ export class MenuService {
     }
   }
 
-  public async addIngredientToList(addDisDto: AddDishDto, jwtUser: JwtUser) {
+  public async addIngredientToList(addDisDto: any, jwtUser: JwtUser) {
+    const condition = !addDisDto.groupId
+      ? { userId: jwtUser.sub.toString() }
+      : {
+          groupId: addDisDto.groupId,
+        };
+
     const list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date: addDisDto.date,
-        userId: jwtUser.sub.toString(),
+        ...condition,
       },
     });
-
-    if (!list) {
-      try {
-        const inserted = await this.createList(addDisDto, jwtUser);
+    try {
+      if (!list) {
+        const inserted = !addDisDto.groupId
+          ? await this.createList(addDisDto, jwtUser)
+          : await this.createGroupList(addDisDto, addDisDto.groupId);
         const listId = inserted.identifiers[0].id;
 
         const { entities } = await AppDataSource.createQueryBuilder()
@@ -501,33 +527,34 @@ export class MenuService {
           .into(IngredientToShoppingList)
           .values(ingredientToList)
           .execute();
-      } catch (error) {
-        throw new InternalServerErrorException(error);
+      } else {
+        const listId = list.id;
+
+        const { entities } = await AppDataSource.createQueryBuilder()
+          .select('ingredientToDish')
+          .from(IngredientToDish, 'ingredientToDish')
+          .where('dishId = :dishId', {
+            dishId: addDisDto.dishId,
+          })
+          .getRawAndEntities();
+
+        const ingredientToList = entities.map((ingredient) => ({
+          ingredientId: ingredient.ingredientId,
+          shoppingListId: listId,
+          quantity: ingredient.quantity,
+          measurementType: ingredient.measurementType,
+          weight: ingredient.weight,
+        }));
+
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(IngredientToShoppingList)
+          .values(ingredientToList)
+          .execute();
       }
-    } else {
-      const listId = list.id;
-
-      const { entities } = await AppDataSource.createQueryBuilder()
-        .select('ingredientToDish')
-        .from(IngredientToDish, 'ingredientToDish')
-        .where('dishId = :dishId', {
-          dishId: addDisDto.dishId,
-        })
-        .getRawAndEntities();
-
-      const ingredientToList = entities.map((ingredient) => ({
-        ingredientId: ingredient.ingredientId,
-        shoppingListId: listId,
-        quantity: ingredient.quantity,
-        measurementType: ingredient.measurementType,
-        weight: ingredient.weight,
-      }));
-
-      await AppDataSource.createQueryBuilder()
-        .insert()
-        .into(IngredientToShoppingList)
-        .values(ingredientToList)
-        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -550,12 +577,75 @@ export class MenuService {
       throw new InternalServerErrorException();
     }
   }
+  public async createGroupList(addDisDto: AddDishDto, groupId: string) {
+    try {
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(ShoppingList)
+        .values([
+          {
+            date: addDisDto.date,
+            groupId,
+            type: ShoppingListType.INDIVIDUAL,
+            status: ShoppingListStatus.PENDING,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
 
   public async removeIngredient(date: string, userId: string, dishId: string) {
     const list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
         userId,
+      },
+    });
+
+    const ingredients = await AppDataSource.getRepository(
+      IngredientToDish,
+    ).find({
+      where: {
+        dishId: dishId,
+      },
+    });
+
+    const values = ingredients.map((ingredient) => ({
+      ingredientId: ingredient.ingredientId,
+      shoppingListId: list.id,
+    }));
+
+    try {
+      values.forEach(async (value) => {
+        await AppDataSource.createQueryBuilder()
+          .delete()
+          .from(IngredientToShoppingList)
+          .where(
+            'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
+            {
+              ...value,
+            },
+          )
+          .execute();
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async removeGroupIngredient(
+    date: string,
+    groupId: string,
+    dishId: string,
+  ) {
+    const list = await AppDataSource.getRepository(ShoppingList).findOne({
+      where: {
+        date,
+        groupId,
       },
     });
 

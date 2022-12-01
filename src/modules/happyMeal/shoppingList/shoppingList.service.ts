@@ -199,8 +199,6 @@ export class ShoppingListService {
       },
     });
 
-    console.log(groupId);
-
     try {
       const result = await AppDataSource.createQueryBuilder(
         IngredientToShoppingList,

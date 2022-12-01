@@ -32,6 +32,7 @@ export class Menu {
 
   @Column({
     nullable: false,
+    default: ShoppingListType.INDIVIDUAL,
   })
   @IsString()
   type: ShoppingListType;

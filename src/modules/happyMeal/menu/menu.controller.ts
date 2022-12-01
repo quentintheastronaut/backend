@@ -99,7 +99,6 @@ export class MenuController {
     @Query('date') date: string,
     @Query('groupId') groupId: string,
   ) {
-    console.log(groupId);
     return this._menuService.getGroupMenuByDate(date, groupId);
   }
 

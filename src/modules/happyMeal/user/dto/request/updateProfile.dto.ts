@@ -55,12 +55,6 @@ export class UpdateProfileDto {
   healthGoal?: string;
 
   @ApiProperty({
-    example: '',
-  })
-  @IsOptional()
-  groupId?: string;
-
-  @ApiProperty({
     example: '65',
   })
   @IsOptional()

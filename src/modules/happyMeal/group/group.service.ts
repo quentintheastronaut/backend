@@ -99,6 +99,14 @@ export class GroupService {
           },
         ])
         .execute();
+
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          groupId: newGroup.id.toString(),
+        })
+        .where('id = :id', { id: user.id.toString() })
+        .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();

@@ -1,3 +1,4 @@
+import { Group } from 'src/entities/Group';
 import { Menu } from 'src/entities/Menu';
 import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
 import { ShoppingList } from 'src/entities/ShoppingList';
@@ -218,6 +219,75 @@ export class MenuService {
     }
   }
 
+  public async getGroupMenuByDate(
+    date: string,
+    groupId: string,
+  ): Promise<PageDto<DishToMenu[]>> {
+    try {
+      console.log(groupId);
+      const group = await AppDataSource.getRepository(Group).findOne({
+        where: {
+          id: groupId,
+        },
+      });
+
+      if (!group) {
+        throw new NotFoundException('This group is not existed !');
+      }
+
+      let menu = await AppDataSource.getRepository(Menu).findOne({
+        relations: {
+          group: true,
+        },
+        where: {
+          date,
+          group: {
+            id: groupId,
+          },
+        },
+      });
+
+      if (!menu) {
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(Menu)
+          .values([
+            {
+              date,
+              group: group,
+              type: ShoppingListType.GROUP,
+            },
+          ])
+          .execute();
+      }
+
+      menu = await AppDataSource.getRepository(Menu).findOne({
+        relations: {
+          user: true,
+        },
+        where: {
+          date,
+          group: {
+            id: groupId,
+          },
+        },
+      });
+
+      const result = await AppDataSource.createQueryBuilder(
+        DishToMenu,
+        'dish_to_menu',
+      )
+        .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+        .where('menuId = :menuId', { menuId: menu.id })
+        .getMany();
+
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   public async getMenuByDate(
     date: string,
     jwtUser: JwtUser,
@@ -244,6 +314,7 @@ export class MenuService {
           {
             date,
             user: user,
+            type: ShoppingListType.INDIVIDUAL,
           },
         ])
         .execute();

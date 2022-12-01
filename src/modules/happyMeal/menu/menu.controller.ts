@@ -85,6 +85,17 @@ export class MenuController {
   }
 
   @UseGuards(JwtGuard)
+  @Get('/group')
+  @ApiOperation({ summary: 'Get detail menu by date' })
+  async getGroupMenuByDate(
+    @Query('date') date: string,
+    @Query('groupId') groupId: string,
+  ) {
+    console.log(groupId);
+    return this._menuService.getGroupMenuByDate(date, groupId);
+  }
+
+  @UseGuards(JwtGuard)
   @Get('/:date')
   @ApiOperation({ summary: 'Get detail menu by date' })
   async getMenuByDate(

@@ -1,3 +1,4 @@
+import { Menu } from 'src/entities/Menu';
 import { ShoppingList } from './ShoppingList';
 import { IsString } from 'class-validator';
 import {
@@ -49,6 +50,9 @@ export class Group {
   @ManyToMany(() => ShoppingList)
   @JoinTable()
   shoppingLists: ShoppingList[];
+
+  @OneToMany(() => Menu, (menu) => menu.group)
+  menus: Menu[];
 
   @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.group)
   public userToGroups!: UserToGroup[];

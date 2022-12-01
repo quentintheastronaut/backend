@@ -164,6 +164,60 @@ export class ShoppingListService {
     }
   }
 
+  public async getGroupShoppingListByDate(
+    date: string,
+    groupId: string,
+  ): Promise<PageDto<IngredientToShoppingList[]>> {
+    let list = await AppDataSource.getRepository(ShoppingList).findOne({
+      where: {
+        date,
+        groupId,
+      },
+    });
+
+    if (!list) {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(ShoppingList)
+        .values([
+          {
+            date,
+            groupId,
+            type: ShoppingListType.GROUP,
+            status: ShoppingListStatus.PENDING,
+          },
+        ])
+        .execute();
+    }
+
+    list = await AppDataSource.getRepository(ShoppingList).findOne({
+      where: {
+        date,
+        groupId,
+      },
+    });
+
+    console.log(groupId);
+
+    try {
+      const result = await AppDataSource.createQueryBuilder(
+        IngredientToShoppingList,
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.ingredient',
+          'ingredient',
+        )
+        .where('shoppingListId = :listId', { listId: list.id })
+        .getMany();
+
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   public async addIngredient(
     addIngredientDto: AddIngredientDto,
     jwtUser: JwtUser,

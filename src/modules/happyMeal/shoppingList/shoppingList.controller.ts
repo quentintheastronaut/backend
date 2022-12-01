@@ -29,10 +29,19 @@ import { ApiPaginatedResponse } from 'src/decorators';
 export class ShoppingListController {
   constructor(private readonly _shoppingListService: ShoppingListService) {}
 
+  @Get('/group')
+  @ApiOperation({ summary: "Get group's detail shopping list by date" })
+  async getGroupShoppingListByDate(
+    @Query('date') date: string,
+    @Query('groupId') groupId: string,
+  ) {
+    return this._shoppingListService.getGroupShoppingListByDate(date, groupId);
+  }
+
   @UseGuards(JwtGuard)
   @Get('/:date')
   @ApiOperation({ summary: 'Get detail shopping list by date' })
-  async getMenuByDate(
+  async getShoppingListByDate(
     @Param('date') date: string,
     @Req() req: { user: JwtUser },
   ) {

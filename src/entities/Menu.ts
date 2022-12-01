@@ -1,3 +1,5 @@
+import { Group } from 'src/entities/Group';
+import { ShoppingListType } from 'src/constants';
 import { User } from 'src/entities';
 import { DishToMenu } from './DishToMenu';
 import { IsString } from 'class-validator';
@@ -28,6 +30,12 @@ export class Menu {
   @IsString()
   date: string;
 
+  @Column({
+    nullable: false,
+  })
+  @IsString()
+  type: ShoppingListType;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -40,6 +48,9 @@ export class Menu {
 
   @ManyToOne(() => User, (user) => user.menus)
   user: User;
+
+  @ManyToOne(() => Group, (group) => group.menus)
+  group: Group;
 
   @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu)
   public dishToMenus!: DishToMenu[];

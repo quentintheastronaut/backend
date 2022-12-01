@@ -1,3 +1,5 @@
+import { Group } from 'src/entities/Group';
+import { AddGroupIngredientDto } from './dto/request/addGroupIngredient';
 import { CheckDto } from './dto/request/check.dto';
 import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredientToShoppingList.dto';
 import { RemoveIngredientDto } from './dto/request/removeIngredient.dto';
@@ -215,6 +217,53 @@ export class ShoppingListService {
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
+    }
+  }
+
+  public async addGroupIngredient(
+    addGroupIngredientDto: AddGroupIngredientDto,
+  ): Promise<PageDto<ShoppingList>> {
+    try {
+      const list = await AppDataSource.getRepository(ShoppingList).findOne({
+        where: {
+          date: addGroupIngredientDto.date,
+          groupId: addGroupIngredientDto.groupId,
+        },
+      });
+
+      if (!list) {
+        const newMenuId = await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(ShoppingList)
+          .values({
+            date: addGroupIngredientDto.date,
+            groupId: addGroupIngredientDto.groupId,
+            status: ShoppingListStatus.PENDING,
+          })
+          .execute();
+
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(IngredientToShoppingList)
+          .values({
+            shoppingListId: newMenuId.identifiers[0].id,
+            ...addGroupIngredientDto,
+          })
+          .execute();
+      } else {
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(IngredientToShoppingList)
+          .values({
+            shoppingListId: list.id,
+            ...addGroupIngredientDto,
+          })
+          .execute();
+      }
+
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
   }
 

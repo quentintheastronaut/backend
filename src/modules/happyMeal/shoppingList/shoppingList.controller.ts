@@ -1,3 +1,4 @@
+import { AddGroupIngredientDto } from './dto/request/addGroupIngredient';
 import { CheckDto } from './dto/request/check.dto';
 import { RemoveIngredientDto } from './dto/request/removeIngredient.dto';
 import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredientToShoppingList.dto';
@@ -49,10 +50,19 @@ export class ShoppingListController {
     return this._shoppingListService.getShoppingListByDate(date, user);
   }
 
+  @ApiOperation({ summary: "Add group's ingredient into shopping list" })
+  @UseGuards(JwtGuard)
+  @Post('/group/add-ingredient')
+  async addGroupIngredient(
+    @Body() addGroupIngredientDto: AddGroupIngredientDto,
+  ) {
+    return this._shoppingListService.addGroupIngredient(addGroupIngredientDto);
+  }
+
   @ApiOperation({ summary: 'Add ingredient into shopping list' })
   @UseGuards(JwtGuard)
   @Post('/add-ingredient')
-  async addDish(
+  async addIngredient(
     @Req() req: { user: JwtUser },
     @Body() addIngredientDto: AddIngredientDto,
   ) {

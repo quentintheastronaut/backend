@@ -1,3 +1,4 @@
+import { AddGroupDishDto } from './dto/request/addGroupDish';
 import { TrackDto } from './dto/request/track.dto';
 import { UpdateDishToMenuDto } from './dto/request/updateDishToMenu.dto';
 import { RemoveDishDto } from './dto/request/removeDish.dto';
@@ -63,6 +64,13 @@ export class MenuController {
   @Delete(':id')
   async deleteMenu(@Param('id') id: number): Promise<PageDto<Menu>> {
     return this._menuService.deleteMenu(id);
+  }
+
+  @ApiOperation({ summary: 'Add dish into menu' })
+  @UseGuards(JwtGuard)
+  @Post('/group/add-dish')
+  async addGroupDish(@Body() addGroupDishDto: AddGroupDishDto) {
+    return this._menuService.addGroupDish(addGroupDishDto);
   }
 
   @ApiOperation({ summary: 'Add dish into menu' })

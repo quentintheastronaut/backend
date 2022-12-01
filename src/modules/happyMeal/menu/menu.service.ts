@@ -1,3 +1,4 @@
+import { AddGroupDishDto } from './dto/request/addGroupDish';
 import { Group } from 'src/entities/Group';
 import { Menu } from 'src/entities/Menu';
 import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
@@ -114,6 +115,63 @@ export class MenuService {
     const pageMetaDto = new PageMetaDto({ total: itemCount, pageOptionsDto });
 
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
+  }
+
+  public async addGroupDish(
+    addGroupDishDto: AddGroupDishDto,
+  ): Promise<PageDto<Menu>> {
+    try {
+      const menu = await AppDataSource.getRepository(Menu).findOne({
+        relations: {
+          group: true,
+        },
+        where: {
+          date: addGroupDishDto.date,
+          group: {
+            id: addGroupDishDto.groupId,
+          },
+        },
+      });
+
+      const group = await AppDataSource.getRepository(Group).findOne({
+        where: {
+          id: addGroupDishDto.groupId,
+        },
+      });
+
+      if (!menu) {
+        const newMenuId = await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(Menu)
+          .values({
+            date: addGroupDishDto.date,
+            group: group,
+          })
+          .execute();
+
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(DishToMenu)
+          .values({
+            menuId: newMenuId.identifiers[0].id,
+            ...addGroupDishDto,
+          })
+          .execute();
+      } else {
+        await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(DishToMenu)
+          .values({
+            menuId: menu.id,
+            ...addGroupDishDto,
+          })
+          .execute();
+      }
+
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   public async addDish(

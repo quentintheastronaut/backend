@@ -182,22 +182,60 @@ export class GroupService {
     }
   }
 
+  public async hasGroup(userId: string) {
+    try {
+      const user = await AppDataSource.getRepository(UserToGroup).findOne({
+        where: {
+          userId,
+        },
+      });
+      return user ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async isAdmin(userId: string, groupId: string) {
+    try {
+      const user = await AppDataSource.getRepository(UserToGroup).findOne({
+        where: {
+          userId,
+          groupId,
+        },
+      });
+      return user.role != GroupRole.ADMIN;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async isValidEmail(email: string) {
+    try {
+      const user = await AppDataSource.getRepository(User).findOne({
+        where: {
+          email,
+        },
+      });
+      return user ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
   public async addMember(
     jwtUser: JwtUser,
     addMemberDto: AddMemberDto,
   ): Promise<PageDto<Group>> {
     const { sub } = jwtUser;
-    const userToGroup = await AppDataSource.getRepository(UserToGroup).findOne({
-      where: {
-        groupId: addMemberDto.groupId,
-        userId: sub.toString(),
-      },
-    });
 
-    if (userToGroup.role != GroupRole.ADMIN) {
+    if (!this.isAdmin(sub.toString(), addMemberDto.groupId)) {
       throw new UnauthorizedException(
         "You don't have permission to add new member.",
       );
+    }
+
+    if (!this.isValidEmail(addMemberDto.email)) {
+      throw new BadRequestException('This user is not existed !');
     }
 
     const newUser = await AppDataSource.getRepository(User).findOne({
@@ -206,10 +244,9 @@ export class GroupService {
       },
     });
 
-    if (!newUser) {
-      throw new BadRequestException('This user is not existed !');
+    if (this.hasGroup(newUser.id)) {
+      throw new BadRequestException('This user is already in another group !');
     }
-
     try {
       await AppDataSource.createQueryBuilder()
         .insert()
@@ -219,6 +256,14 @@ export class GroupService {
           userId: newUser.id,
           role: GroupRole.MEMBER,
         })
+        .execute();
+
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          groupId: addMemberDto.groupId,
+        })
+        .where('id = :id', { id: newUser.id })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -257,14 +302,8 @@ export class GroupService {
     jwtUser: JwtUser,
   ): Promise<PageDto<UserToGroup>> {
     const { sub } = jwtUser;
-    const userToGroup = await AppDataSource.getRepository(UserToGroup).findOne({
-      where: {
-        groupId: removeMemberDto.groupId,
-        userId: sub.toString(),
-      },
-    });
 
-    if (userToGroup.role != GroupRole.ADMIN) {
+    if (!this.isAdmin(sub.toString(), removeMemberDto.groupId)) {
       throw new UnauthorizedException(
         "You don't have permission to remove new member.",
       );
@@ -277,6 +316,14 @@ export class GroupService {
         .where('userId = :userId and groupId = :groupId', {
           ...removeMemberDto,
         })
+        .execute();
+
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          groupId: '',
+        })
+        .where('id = :id', { id: removeMemberDto.userId })
         .execute();
 
       return new PageDto('OK', HttpStatus.OK);

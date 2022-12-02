@@ -127,11 +127,26 @@ export class GroupService {
     try {
       await AppDataSource.createQueryBuilder()
         .delete()
+        .from(UserToGroup)
+        .where('groupId = :id', { id })
+        .execute();
+
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          groupId: '',
+        })
+        .where('groupId = :id', { id })
+        .execute();
+
+      await AppDataSource.createQueryBuilder()
+        .delete()
         .from(Group)
         .where('id = :id', { id })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

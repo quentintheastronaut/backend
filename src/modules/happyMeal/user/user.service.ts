@@ -1,3 +1,4 @@
+import { Group } from 'src/entities/Group';
 import { PhysicalActivityFactor } from './../../../constants/physicalAbilityFactor';
 import { PageDto } from 'src/dtos';
 import { BodyMassIndex } from './../../../constants/bodyMassIndex';
@@ -72,14 +73,19 @@ export class UserService {
   async getProfile(jwtUser: JwtUser) {
     try {
       const { email } = jwtUser;
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
-        },
-      });
+      const user = await AppDataSource.createQueryBuilder(User, 'user')
+        .leftJoinAndMapOne(
+          'user.group',
+          Group,
+          'group',
+          'user.groupId = group.id',
+        )
+        .where('email = :email', { email })
+        .getOneOrFail();
       delete user.password;
       return new PageDto('OK', HttpStatus.OK, user);
     } catch (error) {
+      console.log(error);
       throw new BadRequestException();
     }
   }

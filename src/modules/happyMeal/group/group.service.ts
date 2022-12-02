@@ -107,7 +107,8 @@ export class GroupService {
         })
         .where('id = :id', { id: user.id.toString() })
         .execute();
-      return new PageDto('OK', HttpStatus.OK);
+
+      return new PageDto('OK', HttpStatus.OK, newGroup);
     } catch (error) {
       throw new InternalServerErrorException();
     }

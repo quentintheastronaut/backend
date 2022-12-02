@@ -1,9 +1,23 @@
+import { PageDto, PageOptionsDto } from 'src/dtos';
+import { User } from 'src/entities';
+import { UserDto } from './dto/request/user.dto';
 import { UpdateProfileDto } from './dto/request/updateProfile.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { JwtUser } from '../auth/dto/parsedToken.dto';
 import { UserService } from './user.service';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiPaginatedResponse } from 'src/decorators';
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -42,5 +56,34 @@ export class UserController {
   async getBasalMetabolicRate(@Req() req: { user: JwtUser }) {
     const { user } = req;
     return this.userService.getBasalMetabolicRate(user);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create new user' })
+  async createUser(@Body() userDto: UserDto): Promise<PageDto<User>> {
+    return this.userService.createUser(userDto);
+  }
+
+  @Get()
+  @ApiPaginatedResponse(User)
+  @ApiOperation({ summary: 'Get all of users' })
+  async getAllUsers(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<User[]>> {
+    return this.userService.getAllUser(pageOptionsDto);
+  }
+
+  @Patch('/activate')
+  @ApiPaginatedResponse(User)
+  @ApiOperation({ summary: 'Activate user' })
+  async activateUser(@Param('id') id: number): Promise<PageDto<User>> {
+    return this.userService.activateUser(id);
+  }
+
+  @Patch('/deactivate')
+  @ApiPaginatedResponse(User)
+  @ApiOperation({ summary: 'Deactivate user' })
+  async deactivateUser(@Param('id') id: number): Promise<PageDto<User>> {
+    return this.userService.deactivateUser(id);
   }
 }

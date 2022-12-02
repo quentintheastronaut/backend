@@ -1,13 +1,20 @@
 import { Group } from 'src/entities/Group';
 import { PhysicalActivityFactor } from './../../../constants/physicalAbilityFactor';
-import { PageDto } from 'src/dtos';
+import { PageDto, PageOptionsDto, PageMetaDto } from 'src/dtos';
 import { BodyMassIndex } from './../../../constants/bodyMassIndex';
 import { SexType } from 'src/constants/sexType';
 import { UpdateProfileDto } from './dto/request/updateProfile.dto';
 import { User } from '../../../entities/User';
 import { AppDataSource } from '../../../data-source';
 import { JwtUser } from '../auth/dto/parsedToken.dto';
-import { BadRequestException, Injectable, HttpStatus } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { UserDto } from './dto/request/user.dto';
 
 @Injectable({})
 export class UserService {
@@ -146,6 +153,90 @@ export class UserService {
       return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {
       throw new BadRequestException();
+    }
+  }
+
+  public async getAllUser(
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<User[]>> {
+    const queryBuilder = AppDataSource.createQueryBuilder();
+
+    queryBuilder
+      .select('user')
+      .from(User, 'user')
+      .where('user.name like :name', {
+        name: `%${pageOptionsDto.search}%`,
+      })
+      .orderBy('user.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.limit);
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({ total: itemCount, pageOptionsDto });
+
+    return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
+  }
+
+  public async createUser(userDto: UserDto): Promise<PageDto<User>> {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(User)
+        .values([userDto])
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async deactivateUser(id: number): Promise<PageDto<User>> {
+    const dish = await AppDataSource.getRepository(User).findOne({
+      where: {
+        id: id.toString(),
+      },
+    });
+
+    if (!dish) {
+      throw new NotFoundException('Not found');
+    }
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          active: false,
+        })
+        .where('id = :id', { id })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async activateUser(id: number): Promise<PageDto<User>> {
+    const dish = await AppDataSource.getRepository(User).findOne({
+      where: {
+        id: id.toString(),
+      },
+    });
+
+    if (!dish) {
+      throw new NotFoundException('Not found');
+    }
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          active: true,
+        })
+        .where('id = :id', { id })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
     }
   }
 }

@@ -104,6 +104,11 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({
+    default: true,
+  })
+  active: boolean;
+
   @OneToMany(() => Menu, (menu) => menu.user)
   menus: Menu[];
 

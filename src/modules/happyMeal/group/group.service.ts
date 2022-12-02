@@ -213,6 +213,7 @@ export class GroupService {
           userId,
         },
       });
+      console.log(user);
       return user ? true : false;
     } catch (error) {
       throw new InternalServerErrorException();
@@ -252,13 +253,13 @@ export class GroupService {
   ): Promise<PageDto<Group>> {
     const { sub } = jwtUser;
 
-    if (!this.isAdmin(sub.toString(), addMemberDto.groupId)) {
+    if (!(await this.isAdmin(sub.toString(), addMemberDto.groupId))) {
       throw new UnauthorizedException(
         "You don't have permission to add new member.",
       );
     }
 
-    if (!this.isValidEmail(addMemberDto.email)) {
+    if (!(await this.isValidEmail(addMemberDto.email))) {
       throw new BadRequestException('This user is not existed !');
     }
 
@@ -268,7 +269,7 @@ export class GroupService {
       },
     });
 
-    if (this.hasGroup(newUser.id)) {
+    if (await this.hasGroup(newUser.id)) {
       throw new BadRequestException('This user is already in another group !');
     }
     try {
@@ -327,7 +328,7 @@ export class GroupService {
   ): Promise<PageDto<UserToGroup>> {
     const { sub } = jwtUser;
 
-    if (!this.isAdmin(sub.toString(), removeMemberDto.groupId)) {
+    if (!(await this.isAdmin(sub.toString(), removeMemberDto.groupId))) {
       throw new UnauthorizedException(
         "You don't have permission to remove new member.",
       );

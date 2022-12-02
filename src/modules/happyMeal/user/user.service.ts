@@ -13,6 +13,7 @@ import {
   HttpStatus,
   InternalServerErrorException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UserDto } from './dto/request/user.dto';
 
@@ -164,7 +165,7 @@ export class UserService {
     queryBuilder
       .select('user')
       .from(User, 'user')
-      .where('user.name like :name', {
+      .where('user.firstName like :name or user.lastName like :name', {
         name: `%${pageOptionsDto.search}%`,
       })
       .orderBy('user.createdAt', pageOptionsDto.order)
@@ -179,8 +180,25 @@ export class UserService {
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
   }
 
+  public async isValidEmail(email: string) {
+    try {
+      const user = await AppDataSource.getRepository(User).findOne({
+        where: {
+          email,
+        },
+      });
+      return user ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
   public async createUser(userDto: UserDto): Promise<PageDto<User>> {
     try {
+      if (!(await this.isValidEmail(userDto.email))) {
+        throw new ForbiddenException('Credentials taken');
+      }
+
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(User)
@@ -193,13 +211,13 @@ export class UserService {
   }
 
   public async deactivateUser(id: number): Promise<PageDto<User>> {
-    const dish = await AppDataSource.getRepository(User).findOne({
+    const user = await AppDataSource.getRepository(User).findOne({
       where: {
         id: id.toString(),
       },
     });
 
-    if (!dish) {
+    if (!user) {
       throw new NotFoundException('Not found');
     }
     try {
@@ -217,13 +235,15 @@ export class UserService {
   }
 
   public async activateUser(id: number): Promise<PageDto<User>> {
-    const dish = await AppDataSource.getRepository(User).findOne({
+    const user = await AppDataSource.getRepository(User).findOne({
       where: {
         id: id.toString(),
       },
     });
 
-    if (!dish) {
+    console.log(id);
+
+    if (!user) {
       throw new NotFoundException('Not found');
     }
     try {

@@ -73,14 +73,14 @@ export class UserController {
     return this.userService.getAllUser(pageOptionsDto);
   }
 
-  @Patch('/activate')
+  @Patch('/activate/:id')
   @ApiPaginatedResponse(User)
   @ApiOperation({ summary: 'Activate user' })
   async activateUser(@Param('id') id: number): Promise<PageDto<User>> {
     return this.userService.activateUser(id);
   }
 
-  @Patch('/deactivate')
+  @Patch('/deactivate/:id')
   @ApiPaginatedResponse(User)
   @ApiOperation({ summary: 'Deactivate user' })
   async deactivateUser(@Param('id') id: number): Promise<PageDto<User>> {

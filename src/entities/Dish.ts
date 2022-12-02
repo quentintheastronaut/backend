@@ -66,7 +66,12 @@ export class Dish {
   @Column({
     default: '',
   })
-  recipeId: string;
+  recipe: string;
+
+  @Column({
+    default: 30,
+  })
+  cookingTime: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -228,7 +228,7 @@ export class GroupService {
           groupId,
         },
       });
-      return user.role != GroupRole.ADMIN;
+      return user.role == GroupRole.ADMIN;
     } catch (error) {
       throw new InternalServerErrorException();
     }

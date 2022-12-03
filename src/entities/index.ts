@@ -1,3 +1,4 @@
+import { WeightRecord } from './WeightRecord';
 import { Measurement } from './Measurement';
 import { IngredientToDish } from './IngredientToDish';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
@@ -24,6 +25,7 @@ const entities = [
   ShoppingList,
   IngredientToDish,
   Measurement,
+  WeightRecord,
 ];
 
 export default entities;

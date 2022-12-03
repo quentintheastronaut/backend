@@ -1,6 +1,6 @@
-import { Group } from 'src/entities/Group';
+import { Group } from './Group';
 import { ShoppingListType } from 'src/constants';
-import { User } from 'src/entities';
+import { User } from './User';
 import { DishToMenu } from './DishToMenu';
 import { IsString } from 'class-validator';
 import {

@@ -1,4 +1,4 @@
-import { User } from 'src/entities';
+import { User } from './User';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { ShoppingListStatus } from './../constants/shoppingListStatus';
 import { ShoppingListType } from '../constants/shoppingListType';

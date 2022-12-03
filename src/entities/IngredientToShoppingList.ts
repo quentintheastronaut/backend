@@ -1,5 +1,5 @@
-import { Ingredient } from 'src/entities/Ingredient';
-import { ShoppingList } from 'src/entities/ShoppingList';
+import { Ingredient } from './Ingredient';
+import { ShoppingList } from './ShoppingList';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

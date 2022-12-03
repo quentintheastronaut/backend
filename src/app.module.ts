@@ -1,3 +1,4 @@
+import { WeightRecordModule } from './modules/happyMeal/weightRecord/weightRecord.module';
 import { MeasurementModule } from './modules/happyMeal/measurement/measurement.module';
 import { ShoppingListModule } from './modules/happyMeal/shoppingList/shoppingList.module';
 import { IngredientModule } from './modules/happyMeal/ingredient/ingredient.module';
@@ -32,6 +33,7 @@ dotenv.config({
     ShoppingListModule,
     ClassificationModule,
     MeasurementModule,
+    WeightRecordModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       entities: entities,

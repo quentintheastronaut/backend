@@ -1,10 +1,9 @@
+import { WeightRecord } from './WeightRecord';
 import { ShoppingList } from './ShoppingList';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -117,6 +116,9 @@ export class User {
 
   @OneToMany(() => Menu, (menu) => menu.user)
   menus: Menu[];
+
+  @OneToMany(() => WeightRecord, (weightRecord) => weightRecord.user)
+  weightRecords: WeightRecord[];
 
   @OneToMany(() => ShoppingList, (shoppingList) => shoppingList.user)
   shoppingLists: ShoppingList[];

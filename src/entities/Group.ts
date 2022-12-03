@@ -1,4 +1,4 @@
-import { Menu } from 'src/entities/Menu';
+import { Menu } from './Menu';
 import { ShoppingList } from './ShoppingList';
 import { IsString } from 'class-validator';
 import {

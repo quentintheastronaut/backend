@@ -11,7 +11,6 @@ import {
   ForbiddenException,
   BadRequestException,
   UnauthorizedException,
-  ConsoleLogger,
 } from '@nestjs/common';
 import { Group } from 'src/entities/Group';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/dtos';

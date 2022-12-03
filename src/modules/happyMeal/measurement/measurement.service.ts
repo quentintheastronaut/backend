@@ -1,7 +1,7 @@
 import { MeasurementDto } from './dto/request/measurement.dto';
 import { AppDataSource } from 'src/data-source';
 import { Measurement } from './../../../entities/Measurement';
-import { PageDto } from 'src/dtos';
+import { PageDto, PageOptionsDto } from 'src/dtos';
 import {
   Injectable,
   HttpStatus,
@@ -11,11 +11,16 @@ import {
 
 @Injectable({})
 export class MeasurementService {
-  public async getAllMeasurement(): Promise<PageDto<Measurement[]>> {
+  public async getAllMeasurement(
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Measurement[]>> {
     try {
       const { entities } = await AppDataSource.createQueryBuilder()
         .select('measurement')
         .from(Measurement, 'measurement')
+        .where('dish.name like :name', {
+          name: `%${pageOptionsDto.search}%`,
+        })
         .getRawAndEntities();
       return new PageDto('OK', HttpStatus.OK, entities);
     } catch (error) {}

@@ -1,5 +1,5 @@
 import { MeasurementDto } from './dto/request/measurement.dto';
-import { PageDto } from 'src/dtos';
+import { PageDto, PageOptionsDto } from 'src/dtos';
 import { Measurement } from './../../../entities/Measurement';
 import { MeasurementService } from './measurement.service';
 import {
@@ -10,6 +10,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiPaginatedResponse } from 'src/decorators';
 import { ApiTags } from '@nestjs/swagger';
@@ -19,17 +20,19 @@ import { ApiTags } from '@nestjs/swagger';
 export class MeasurementController {
   constructor(private readonly _measurementService: MeasurementService) {}
 
+  @Get()
+  @ApiPaginatedResponse(Measurement)
+  async getAllDishes(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Measurement[]>> {
+    return this._measurementService.getAllMeasurement(pageOptionsDto);
+  }
+
   @Post()
   async createDish(
     @Body() measurementDto: MeasurementDto,
   ): Promise<PageDto<Measurement>> {
     return this._measurementService.createMeasurement(measurementDto);
-  }
-
-  @Get()
-  @ApiPaginatedResponse(Measurement)
-  async getAllDishes(): Promise<PageDto<Measurement[]>> {
-    return this._measurementService.getAllMeasurement();
   }
 
   @Patch(':id')

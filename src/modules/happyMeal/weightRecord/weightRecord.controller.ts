@@ -24,7 +24,7 @@ export class WeightRecordController {
 
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Get weight records' })
-  @Get('weight-record')
+  @Get('/overview')
   async getWeightRecords(
     @Req() req: { user: JwtUser },
     @Query() getWeightRecordsDto: GetWeightRecordsDto,

@@ -25,6 +25,17 @@ import { ApiPaginatedResponse } from 'src/decorators';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: `Get user\'s health overview` })
+  @Get('/overview')
+  async getOverview(
+    @Req() req: { user: JwtUser },
+    @Query('date') date: string,
+  ): Promise<PageDto<any>> {
+    const { user } = req;
+    return this.userService.getOverview(user, date);
+  }
+
   @Patch('/:id')
   async updateUser(
     @Param('id') id: number,
@@ -93,16 +104,5 @@ export class UserController {
   @ApiOperation({ summary: 'Deactivate user' })
   async deactivateUser(@Param('id') id: number): Promise<PageDto<User>> {
     return this.userService.deactivateUser(id);
-  }
-
-  @UseGuards(JwtGuard)
-  @Get('/overview')
-  @ApiOperation({ summary: `Get user\'s health overview` })
-  async getOverview(
-    @Req() req: { user: JwtUser },
-    @Param('date') date: string,
-  ): Promise<PageDto<any>> {
-    const { user } = req;
-    return this.userService.getOverview(user, date);
   }
 }

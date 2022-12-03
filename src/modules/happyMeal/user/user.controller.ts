@@ -94,4 +94,15 @@ export class UserController {
   async deactivateUser(@Param('id') id: number): Promise<PageDto<User>> {
     return this.userService.deactivateUser(id);
   }
+
+  @UseGuards(JwtGuard)
+  @Get('/overview')
+  @ApiOperation({ summary: `Get user\'s health overview` })
+  async getOverview(
+    @Req() req: { user: JwtUser },
+    @Param('date') date: string,
+  ): Promise<PageDto<any>> {
+    const { user } = req;
+    return this.userService.getOverview(user, date);
+  }
 }

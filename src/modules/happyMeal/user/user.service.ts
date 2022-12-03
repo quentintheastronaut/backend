@@ -1,3 +1,5 @@
+import { DishToMenu } from './../../../entities/DishToMenu';
+import { Menu } from 'src/entities/Menu';
 import { Group } from 'src/entities/Group';
 import { PhysicalActivityFactor } from './../../../constants/physicalAbilityFactor';
 import { PageDto, PageOptionsDto, PageMetaDto } from 'src/dtos';
@@ -271,6 +273,133 @@ export class UserService {
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getMenuByDate(jwtUser: JwtUser, date: string) {
+    const { email } = jwtUser;
+    const menu = await AppDataSource.getRepository(Menu).findOne({
+      relations: {
+        user: true,
+      },
+      where: {
+        date,
+        user: {
+          email: email,
+        },
+      },
+    });
+
+    if (!menu) {
+      return [];
+    }
+
+    const dishes = await AppDataSource.createQueryBuilder(
+      DishToMenu,
+      'dish_to_menu',
+    )
+      .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+      .where('menuId = :menuId', { menuId: menu.id })
+      .getMany();
+
+    return dishes;
+  }
+
+  public async getCurrentCalories(
+    jwtUser: JwtUser,
+    date: string,
+  ): Promise<number> {
+    const dishes = await this.getMenuByDate(jwtUser, date);
+
+    if (dishes.length === 0) {
+      return 0;
+    }
+    return dishes
+      .filter((dish) => dish.tracked)
+      .reduce((prev, curr) => {
+        return prev + curr.dish.calories;
+      }, 0);
+  }
+
+  public async getTotalCalories(
+    jwtUser: JwtUser,
+    date: string,
+  ): Promise<number> {
+    const dishes = await this.getMenuByDate(jwtUser, date);
+
+    if (dishes.length === 0) {
+      return 0;
+    }
+    return dishes.reduce((prev, curr) => {
+      return prev + curr.dish.calories;
+    }, 0);
+  }
+
+  public async getTotalFatByDate(jwtUser: JwtUser, date: string) {
+    const dishes = await this.getMenuByDate(jwtUser, date);
+
+    if (dishes.length === 0) {
+      return 0;
+    }
+
+    return dishes.reduce((prev, curr) => {
+      return prev + curr.dish.fat;
+    }, 0);
+  }
+  public async getTotalProteinByDate(jwtUser: JwtUser, date: string) {
+    const dishes = await this.getMenuByDate(jwtUser, date);
+
+    if (dishes.length === 0) {
+      return 0;
+    }
+    return dishes.reduce((prev, curr) => {
+      return prev + curr.dish.protein;
+    }, 0);
+  }
+  public async getTotalCarbByDate(jwtUser: JwtUser, date: string) {
+    const dishes = await this.getMenuByDate(jwtUser, date);
+
+    if (dishes.length === 0) {
+      return 0;
+    }
+    return dishes.reduce((prev, curr) => {
+      return prev + curr.dish.carbohydrates;
+    }, 0);
+  }
+
+  public async getOverview(jwtUser: JwtUser, date: string) {
+    try {
+      const { email } = jwtUser;
+      const user = await AppDataSource.getRepository(User).findOne({
+        where: {
+          email,
+        },
+      });
+
+      const currentBMR = this.bmr(user.weight, user.height, user.age, user.sex);
+
+      const currentCalories = await this.getCurrentCalories(jwtUser, date);
+      const totalCalories = await this.getTotalCalories(jwtUser, date);
+      const baseCalories = this.dailyCalories(
+        currentBMR,
+        user.activityIntensity,
+      );
+      const protein = await this.getTotalProteinByDate(jwtUser, date);
+      const fat = await this.getTotalFatByDate(jwtUser, date);
+      const carb = await this.getTotalCarbByDate(jwtUser, date);
+
+      const result = {
+        baseCalories: baseCalories || 0,
+        currentCalories,
+        totalCalories,
+        protein,
+        fat,
+        carb,
+      };
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

@@ -38,6 +38,12 @@ export class User {
   lastName: string;
 
   @Column({
+    nullable: true,
+    default: '',
+  })
+  dob: string;
+
+  @Column({
     nullable: false,
     type: 'enum',
     enum: Sex,

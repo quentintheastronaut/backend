@@ -25,7 +25,6 @@ import { ApiPaginatedResponse } from 'src/decorators';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @UseGuards(JwtGuard)
   @Patch('/:id')
   async updateUser(
     @Param('id') id: number,

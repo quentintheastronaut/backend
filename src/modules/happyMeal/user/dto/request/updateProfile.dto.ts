@@ -24,6 +24,12 @@ export class UpdateProfileDto {
   sex?: SexType;
 
   @ApiProperty({
+    example: '12/06/2022',
+  })
+  @IsOptional()
+  dob?: string;
+
+  @ApiProperty({
     example: '170',
   })
   @IsOptional()

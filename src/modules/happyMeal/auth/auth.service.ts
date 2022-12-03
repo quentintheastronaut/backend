@@ -1,10 +1,18 @@
+import { JwtUser } from './dto/parsedToken.dto';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 import { PageDto } from 'src/dtos/page.dto';
 import * as dotenv from 'dotenv';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../../entities/User';
 import { AppDataSource } from '../../../data-source';
 import { AuthDto } from './dto/auth.dto';
-import { ForbiddenException, Injectable, HttpStatus } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  HttpStatus,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import * as argon from 'argon2';
 
 dotenv.config({
@@ -49,6 +57,42 @@ export class AuthService {
     // save the new user into db
   }
 
+  async isValidOldPassword(jwtUser: JwtUser, oldPassword: string) {
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: {
+        email: jwtUser.email,
+      },
+    });
+    const pwMatches = await argon.verify(user.password, oldPassword);
+    if (!pwMatches) {
+      return false;
+    }
+    return true;
+  }
+
+  async changePassword(jwtUser: JwtUser, changePasswordDto: ChangePasswordDto) {
+    if (
+      !(await this.isValidOldPassword(jwtUser, changePasswordDto.oldPassword))
+    ) {
+      throw new BadRequestException('Old password is wrong !');
+    }
+
+    const hash = await argon.hash(changePasswordDto.newPassword);
+
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          password: hash,
+        })
+        .where('id = :id', { id: jwtUser.sub })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
   async login(authDto: AuthDto) {
     const { email, password } = authDto;
 
@@ -87,5 +131,25 @@ export class AuthService {
     });
 
     return new PageDto('OK', HttpStatus.OK, { accessToken: token });
+  }
+
+  async resetPassword(id: number, password: string) {
+    const hash = await argon.hash(password);
+
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          password: hash,
+        })
+        .where('id = :id', { id: id.toString() })
+        .execute();
+
+      console.log(password);
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
   }
 }

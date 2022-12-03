@@ -194,11 +194,11 @@ export class UserService {
   }
 
   public async createUser(userDto: UserDto): Promise<PageDto<User>> {
-    try {
-      if (!(await this.isValidEmail(userDto.email))) {
-        throw new ForbiddenException('Credentials taken');
-      }
+    if (await this.isValidEmail(userDto.email)) {
+      throw new ForbiddenException('Credentials taken');
+    }
 
+    try {
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(User)
@@ -206,7 +206,22 @@ export class UserService {
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
+    }
+  }
+
+  public async updateUser(id: number, updateProfileDto: UpdateProfileDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set(updateProfileDto)
+        .where('id = :id', { id: id.toString() })
+        .execute();
+
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new BadRequestException();
     }
   }
 

@@ -26,6 +26,15 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @UseGuards(JwtGuard)
+  @Patch('/:id')
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    return this.userService.updateUser(id, updateProfileDto);
+  }
+
+  @UseGuards(JwtGuard)
   @Get('/profile')
   async getProfile(@Req() req: { user: JwtUser }) {
     const { user } = req;

@@ -1,7 +1,7 @@
 import { MeasurementDto } from './dto/request/measurement.dto';
 import { AppDataSource } from 'src/data-source';
 import { Measurement } from './../../../entities/Measurement';
-import { PageDto, PageOptionsDto } from 'src/dtos';
+import { PageDto, PageOptionsDto, PageMetaDto } from 'src/dtos';
 import {
   Injectable,
   HttpStatus,
@@ -15,15 +15,28 @@ export class MeasurementService {
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Measurement[]>> {
     try {
-      const { entities } = await AppDataSource.createQueryBuilder()
+      const queryBuilder = AppDataSource.createQueryBuilder();
+
+      queryBuilder
         .select('measurement')
         .from(Measurement, 'measurement')
-        .where('dish.name like :name', {
+        .where('measurement.name like :name', {
           name: `%${pageOptionsDto.search}%`,
         })
-        .getRawAndEntities();
-      return new PageDto('OK', HttpStatus.OK, entities);
-    } catch (error) {}
+        .orderBy('measurement.name', pageOptionsDto.order)
+        .skip(pageOptionsDto.skip)
+        .take(pageOptionsDto.limit);
+
+      const itemCount = await queryBuilder.getCount();
+      const { entities } = await queryBuilder.getRawAndEntities();
+
+      const pageMetaDto = new PageMetaDto({ total: itemCount, pageOptionsDto });
+
+      return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   public async createMeasurement(

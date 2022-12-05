@@ -304,15 +304,62 @@ export class UserService {
     return dishes;
   }
 
+  public async getGroupMenuByDate(jwtUser: JwtUser, date: string) {
+    const { email } = jwtUser;
+
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: {
+        email,
+      },
+    });
+
+    const group = await AppDataSource.getRepository(Group).findOne({
+      where: {
+        id: user.groupId,
+      },
+    });
+
+    if (!group) {
+      return [];
+    }
+
+    const menu = await AppDataSource.getRepository(Menu).findOne({
+      relations: {
+        group: true,
+      },
+      where: {
+        date,
+        group,
+      },
+    });
+
+    if (!menu) {
+      return [];
+    }
+
+    const dishes = await AppDataSource.createQueryBuilder(
+      DishToMenu,
+      'dish_to_menu',
+    )
+      .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+      .where('menuId = :menuId', { menuId: menu.id })
+      .getMany();
+
+    return dishes;
+  }
+
   public async getCurrentCalories(
     jwtUser: JwtUser,
     date: string,
   ): Promise<number> {
-    const dishes = await this.getMenuByDate(jwtUser, date);
+    const individualDishes = await this.getMenuByDate(jwtUser, date);
+    const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (dishes.length === 0) {
+    if (individualDishes.length + groupDishes.length === 0) {
       return 0;
     }
+
+    const dishes = [...individualDishes, ...groupDishes];
     return dishes
       .filter((dish) => dish.tracked)
       .reduce((prev, curr) => {
@@ -324,43 +371,56 @@ export class UserService {
     jwtUser: JwtUser,
     date: string,
   ): Promise<number> {
-    const dishes = await this.getMenuByDate(jwtUser, date);
+    const individualDishes = await this.getMenuByDate(jwtUser, date);
+    const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (dishes.length === 0) {
+    if (individualDishes.length + groupDishes.length === 0) {
       return 0;
     }
+
+    const dishes = [...individualDishes, ...groupDishes];
+
     return dishes.reduce((prev, curr) => {
       return prev + curr.dish.calories;
     }, 0);
   }
 
   public async getTotalFatByDate(jwtUser: JwtUser, date: string) {
-    const dishes = await this.getMenuByDate(jwtUser, date);
+    const individualDishes = await this.getMenuByDate(jwtUser, date);
+    const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (dishes.length === 0) {
+    if (individualDishes.length + groupDishes.length === 0) {
       return 0;
     }
+
+    const dishes = [...individualDishes, ...groupDishes];
 
     return dishes.reduce((prev, curr) => {
       return prev + curr.dish.fat;
     }, 0);
   }
   public async getTotalProteinByDate(jwtUser: JwtUser, date: string) {
-    const dishes = await this.getMenuByDate(jwtUser, date);
+    const individualDishes = await this.getMenuByDate(jwtUser, date);
+    const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (dishes.length === 0) {
+    if (individualDishes.length + groupDishes.length === 0) {
       return 0;
     }
+
+    const dishes = [...individualDishes, ...groupDishes];
     return dishes.reduce((prev, curr) => {
       return prev + curr.dish.protein;
     }, 0);
   }
   public async getTotalCarbByDate(jwtUser: JwtUser, date: string) {
-    const dishes = await this.getMenuByDate(jwtUser, date);
+    const individualDishes = await this.getMenuByDate(jwtUser, date);
+    const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (dishes.length === 0) {
+    if (individualDishes.length + groupDishes.length === 0) {
       return 0;
     }
+
+    const dishes = [...individualDishes, ...groupDishes];
     return dishes.reduce((prev, curr) => {
       return prev + curr.dish.carbohydrates;
     }, 0);

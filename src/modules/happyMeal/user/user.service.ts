@@ -322,6 +322,7 @@ export class UserService {
     });
 
     if (!group) {
+      console.log('khong co group');
       return [];
     }
 
@@ -336,6 +337,7 @@ export class UserService {
     });
 
     if (!menu) {
+      console.log('khong co menu');
       return [];
     }
 

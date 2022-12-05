@@ -1,3 +1,5 @@
+import { map } from 'rxjs';
+import { UserToGroup } from './../../../entities/UserToGroup';
 import { AddGroupDishDto } from './dto/request/addGroupDish';
 import { Group } from 'src/entities/Group';
 import { Menu } from 'src/entities/Menu';
@@ -295,6 +297,27 @@ export class MenuService {
       console.log(error);
       throw new InternalServerErrorException(error);
     }
+  }
+
+  public async countMember(jwtUser: JwtUser) {
+    const { email } = jwtUser;
+
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: {
+        email,
+      },
+    });
+
+    const group = await AppDataSource.getRepository(Group).findOne({
+      where: {
+        id: user.groupId,
+      },
+    });
+
+    return await AppDataSource.createQueryBuilder(UserToGroup, 'user_to_group')
+      .select()
+      .where('groupId = :groupId', { groupId: group.id })
+      .getCount();
   }
 
   public async getGroupMenuByDate(

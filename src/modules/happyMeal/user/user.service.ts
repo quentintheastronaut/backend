@@ -19,7 +19,6 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { UserDto } from './dto/request/user.dto';
-import { group } from 'console';
 
 @Injectable({})
 export class UserService {
@@ -383,6 +382,8 @@ export class UserService {
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
     const countMember = await this.countMember(jwtUser);
+
+    console.log(countMember);
 
     const individual = individualDishes
       .filter((dish) => dish.tracked)

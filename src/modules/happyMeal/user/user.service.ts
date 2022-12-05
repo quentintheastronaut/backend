@@ -326,13 +326,15 @@ export class UserService {
       return [];
     }
 
+    console.log(group);
+
     const menu = await AppDataSource.getRepository(Menu).findOne({
       relations: {
         group: true,
       },
       where: {
         date,
-        group,
+        group: group,
       },
     });
 

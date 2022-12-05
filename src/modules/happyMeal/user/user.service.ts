@@ -322,11 +322,8 @@ export class UserService {
     });
 
     if (!group) {
-      console.log('khong co group');
       return [];
     }
-
-    console.log(group);
 
     const menu = await AppDataSource.getRepository(Menu).findOne({
       relations: {
@@ -341,7 +338,6 @@ export class UserService {
     });
 
     if (!menu) {
-      console.log('khong co menu');
       return [];
     }
 

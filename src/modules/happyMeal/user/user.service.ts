@@ -65,7 +65,7 @@ export class UserService {
     return BodyMassIndex.OBESE_CLASS_3;
   }
 
-  dailyCalories(bmr: number, activityIntensity: string) {
+  dailyCalories(bmr: number, activityIntensity: string): number {
     switch (activityIntensity) {
       case PhysicalActivityFactor.SEDENTARY:
         return bmr * 1.2;
@@ -448,12 +448,12 @@ export class UserService {
       const carb = await this.getTotalCarbByDate(jwtUser, date);
 
       const result = {
-        baseCalories: baseCalories || 0,
-        currentCalories,
-        totalCalories,
-        protein,
-        fat,
-        carb,
+        baseCalories: baseCalories ? Math.floor(baseCalories) : 0,
+        currentCalories: currentCalories ? Math.floor(currentCalories) : 0,
+        totalCalories: totalCalories ? Math.floor(totalCalories) : 0,
+        protein: protein ? Math.floor(protein) : 0,
+        fat: fat ? Math.floor(fat) : 0,
+        carb: carb ? Math.floor(carb) : 0,
       };
       return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {

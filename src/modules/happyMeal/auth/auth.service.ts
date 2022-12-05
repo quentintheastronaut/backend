@@ -144,8 +144,6 @@ export class AuthService {
         })
         .where('id = :id', { id: id.toString() })
         .execute();
-
-      console.log(password);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);

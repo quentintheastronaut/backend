@@ -47,10 +47,14 @@ export class Menu {
   @JoinTable()
   dishes: Dish[];
 
-  @ManyToOne(() => User, (user) => user.menus)
+  @ManyToOne(() => User, (user) => user.menus, {
+    onDelete: 'SET NULL',
+  })
   user: User;
 
-  @ManyToOne(() => Group, (group) => group.menus)
+  @ManyToOne(() => Group, (group) => group.menus, {
+    onDelete: 'SET NULL',
+  })
   group: Group;
 
   @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu)

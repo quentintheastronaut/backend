@@ -258,8 +258,6 @@ export class UserService {
       },
     });
 
-    console.log(id);
-
     if (!user) {
       throw new NotFoundException('Not found');
     }

@@ -1,3 +1,6 @@
+import { Menu } from 'src/entities/Menu';
+import { ShoppingList } from 'src/entities/ShoppingList';
+import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
 import { RemoveMemberDto } from './dto/request/removeMember.dto';
 import { AddMemberDto } from './dto/request/addMember.dto';
 import { UserToGroup } from '../../../entities/UserToGroup';
@@ -17,6 +20,7 @@ import { PageDto, PageMetaDto, PageOptionsDto } from 'src/dtos';
 import { GroupDto } from './dto/request/group.dto';
 import { User } from 'src/entities';
 import { GroupRole } from 'src/constants/groupRole';
+import { DishToMenu } from 'src/entities/DishToMenu';
 
 @Injectable({})
 export class GroupService {
@@ -120,10 +124,36 @@ export class GroupService {
       },
     });
 
+    const shoppingList = await AppDataSource.getRepository(
+      ShoppingList,
+    ).findOne({
+      where: {
+        groupId: id.toString(),
+      },
+    });
+
+    const menu = await AppDataSource.getRepository(Menu).findOne({
+      where: {
+        group,
+      },
+    });
+
     if (!group) {
       throw new NotFoundException('Not found');
     }
     try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(DishToMenu)
+        .where('menuId = :id', { id: menu.id })
+        .execute();
+
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(IngredientToShoppingList)
+        .where('shoppingId = :id', { id: shoppingList.id })
+        .execute();
+
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(UserToGroup)
@@ -133,7 +163,7 @@ export class GroupService {
       await AppDataSource.createQueryBuilder()
         .update(User)
         .set({
-          groupId: '',
+          groupId: null,
         })
         .where('groupId = :id', { id })
         .execute();
@@ -212,7 +242,6 @@ export class GroupService {
           userId,
         },
       });
-      console.log(user);
       return user ? true : false;
     } catch (error) {
       throw new InternalServerErrorException();

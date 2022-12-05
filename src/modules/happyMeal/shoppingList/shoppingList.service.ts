@@ -1,4 +1,3 @@
-import { Group } from 'src/entities/Group';
 import { AddGroupIngredientDto } from './dto/request/addGroupIngredient';
 import { CheckDto } from './dto/request/check.dto';
 import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredientToShoppingList.dto';
@@ -415,27 +414,6 @@ export class ShoppingListService {
         .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
           ingredientToShoppingListId: checkDto.ingredientToShoppingListId,
         })
-        .execute();
-      return new PageDto('OK', HttpStatus.OK);
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
-  public async assignMarketer(jwtUser: JwtUser, shoppingListId: string) {
-    try {
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email: jwtUser.email,
-        },
-      });
-
-      await AppDataSource.createQueryBuilder()
-        .update(ShoppingList)
-        .set({
-          marketer: user,
-        })
-        .where('id = :id', { id: shoppingListId })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {

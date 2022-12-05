@@ -368,6 +368,10 @@ export class UserService {
       },
     });
 
+    if (!group) {
+      return 1;
+    }
+
     return await AppDataSource.createQueryBuilder(UserToGroup, 'user_to_group')
       .select()
       .where('groupId = :groupId', { groupId: group.id })
@@ -382,8 +386,6 @@ export class UserService {
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
     const countMember = await this.countMember(jwtUser);
-
-    console.log(countMember);
 
     const individual = individualDishes
       .filter((dish) => dish.tracked)

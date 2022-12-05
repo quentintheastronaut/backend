@@ -334,7 +334,9 @@ export class UserService {
       },
       where: {
         date,
-        group: group,
+        group: {
+          id: group.id,
+        },
       },
     });
 

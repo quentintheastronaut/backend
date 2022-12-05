@@ -6,10 +6,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -66,6 +68,12 @@ export class ShoppingList {
 
   @ManyToOne(() => User, (user) => user.shoppingLists)
   user: User;
+
+  @OneToOne(() => User, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn()
+  marketer: User;
 
   @OneToMany(
     () => IngredientToShoppingList,

@@ -1,3 +1,4 @@
+import { UserToGroup } from './../../../entities/UserToGroup';
 import { DishToMenu } from './../../../entities/DishToMenu';
 import { Menu } from 'src/entities/Menu';
 import { Group } from 'src/entities/Group';
@@ -18,6 +19,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { UserDto } from './dto/request/user.dto';
+import { group } from 'console';
 
 @Injectable({})
 export class UserService {
@@ -352,6 +354,27 @@ export class UserService {
     return dishes;
   }
 
+  public async countMember(jwtUser: JwtUser) {
+    const { email } = jwtUser;
+
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: {
+        email,
+      },
+    });
+
+    const group = await AppDataSource.getRepository(Group).findOne({
+      where: {
+        id: user.groupId,
+      },
+    });
+
+    return await AppDataSource.createQueryBuilder(UserToGroup, 'user_to_group')
+      .select()
+      .where('groupId = :groupId', { groupId: group.id })
+      .getCount();
+  }
+
   public async getCurrentCalories(
     jwtUser: JwtUser,
     date: string,
@@ -359,12 +382,21 @@ export class UserService {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    const dishes = [...individualDishes, ...groupDishes];
-    return dishes
+    const countMember = await this.countMember(jwtUser);
+
+    const individual = individualDishes
       .filter((dish) => dish.tracked)
       .reduce((prev, curr) => {
         return prev + curr.dish.calories;
       }, 0);
+
+    const group = groupDishes
+      .filter((dish) => dish.tracked)
+      .reduce((prev, curr) => {
+        return prev + Math.floor(curr.dish.calories / countMember);
+      }, 0);
+
+    return group + individual;
   }
 
   public async getTotalCalories(
@@ -374,40 +406,66 @@ export class UserService {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    const dishes = [...individualDishes, ...groupDishes];
+    const countMember = await this.countMember(jwtUser);
 
-    return dishes.reduce((prev, curr) => {
+    const individual = individualDishes.reduce((prev, curr) => {
       return prev + curr.dish.calories;
     }, 0);
+
+    const group = groupDishes.reduce((prev, curr) => {
+      return prev + Math.floor(curr.dish.calories / countMember);
+    }, 0);
+
+    return group + individual;
   }
 
   public async getTotalFatByDate(jwtUser: JwtUser, date: string) {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    const dishes = [...individualDishes, ...groupDishes];
+    const countMember = await this.countMember(jwtUser);
 
-    return dishes.reduce((prev, curr) => {
+    const individual = individualDishes.reduce((prev, curr) => {
       return prev + curr.dish.fat;
     }, 0);
+
+    const group = groupDishes.reduce((prev, curr) => {
+      return prev + Math.floor(curr.dish.fat / countMember);
+    }, 0);
+
+    return group + individual;
   }
   public async getTotalProteinByDate(jwtUser: JwtUser, date: string) {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    const dishes = [...individualDishes, ...groupDishes];
-    return dishes.reduce((prev, curr) => {
+    const countMember = await this.countMember(jwtUser);
+
+    const individual = individualDishes.reduce((prev, curr) => {
       return prev + curr.dish.protein;
     }, 0);
+
+    const group = groupDishes.reduce((prev, curr) => {
+      return prev + Math.floor(curr.dish.protein / countMember);
+    }, 0);
+
+    return group + individual;
   }
   public async getTotalCarbByDate(jwtUser: JwtUser, date: string) {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    const dishes = [...individualDishes, ...groupDishes];
-    return dishes.reduce((prev, curr) => {
+    const countMember = await this.countMember(jwtUser);
+
+    const individual = individualDishes.reduce((prev, curr) => {
       return prev + curr.dish.carbohydrates;
     }, 0);
+
+    const group = groupDishes.reduce((prev, curr) => {
+      return prev + Math.floor(curr.dish.carbohydrates / countMember);
+    }, 0);
+
+    return group + individual;
   }
 
   public async getOverview(jwtUser: JwtUser, date: string) {

@@ -77,6 +77,8 @@ export class UserService {
         return bmr * 1.725;
       case PhysicalActivityFactor.EXTRA_ACTIVE:
         return bmr * 1.9;
+      default:
+        return bmr;
     }
   }
 
@@ -355,10 +357,6 @@ export class UserService {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (individualDishes.length + groupDishes.length === 0) {
-      return 0;
-    }
-
     const dishes = [...individualDishes, ...groupDishes];
     return dishes
       .filter((dish) => dish.tracked)
@@ -374,10 +372,6 @@ export class UserService {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (individualDishes.length + groupDishes.length === 0) {
-      return 0;
-    }
-
     const dishes = [...individualDishes, ...groupDishes];
 
     return dishes.reduce((prev, curr) => {
@@ -389,10 +383,6 @@ export class UserService {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (individualDishes.length + groupDishes.length === 0) {
-      return 0;
-    }
-
     const dishes = [...individualDishes, ...groupDishes];
 
     return dishes.reduce((prev, curr) => {
@@ -403,10 +393,6 @@ export class UserService {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
 
-    if (individualDishes.length + groupDishes.length === 0) {
-      return 0;
-    }
-
     const dishes = [...individualDishes, ...groupDishes];
     return dishes.reduce((prev, curr) => {
       return prev + curr.dish.protein;
@@ -415,10 +401,6 @@ export class UserService {
   public async getTotalCarbByDate(jwtUser: JwtUser, date: string) {
     const individualDishes = await this.getMenuByDate(jwtUser, date);
     const groupDishes = await this.getGroupMenuByDate(jwtUser, date);
-
-    if (individualDishes.length + groupDishes.length === 0) {
-      return 0;
-    }
 
     const dishes = [...individualDishes, ...groupDishes];
     return dishes.reduce((prev, curr) => {
@@ -448,12 +430,12 @@ export class UserService {
       const carb = await this.getTotalCarbByDate(jwtUser, date);
 
       const result = {
-        baseCalories: baseCalories ? Math.floor(baseCalories) : 0,
-        currentCalories: currentCalories ? Math.floor(currentCalories) : 0,
-        totalCalories: totalCalories ? Math.floor(totalCalories) : 0,
-        protein: protein ? Math.floor(protein) : 0,
-        fat: fat ? Math.floor(fat) : 0,
-        carb: carb ? Math.floor(carb) : 0,
+        baseCalories: Math.floor(baseCalories),
+        currentCalories: Math.floor(currentCalories),
+        totalCalories: Math.floor(totalCalories),
+        protein: Math.floor(protein),
+        fat: Math.floor(fat),
+        carb: Math.floor(carb),
       };
       return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {

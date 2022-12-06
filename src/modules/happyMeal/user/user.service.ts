@@ -390,7 +390,7 @@ export class UserService {
     const individual = individualDishes
       .filter((dish) => dish.tracked)
       .reduce((prev, curr) => {
-        return prev + curr.dish.calories;
+        return prev + curr.dish.calories * curr.quantity;
       }, 0);
 
     const group = groupDishes
@@ -400,9 +400,6 @@ export class UserService {
           prev + Math.floor((curr.dish.calories * curr.quantity) / countMember)
         );
       }, 0);
-
-    console.log(individualDishes);
-    console.log(groupDishes);
 
     return group + individual;
   }
@@ -417,7 +414,7 @@ export class UserService {
     const countMember = await this.countMember(jwtUser);
 
     const individual = individualDishes.reduce((prev, curr) => {
-      return prev + curr.dish.calories;
+      return prev + curr.dish.calories * curr.quantity;
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {
@@ -436,7 +433,7 @@ export class UserService {
     const countMember = await this.countMember(jwtUser);
 
     const individual = individualDishes.reduce((prev, curr) => {
-      return prev + curr.dish.fat;
+      return prev + curr.dish.fat * curr.quantity;
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {
@@ -452,7 +449,7 @@ export class UserService {
     const countMember = await this.countMember(jwtUser);
 
     const individual = individualDishes.reduce((prev, curr) => {
-      return prev + curr.dish.protein;
+      return prev + curr.dish.protein * curr.quantity;
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {
@@ -470,7 +467,7 @@ export class UserService {
     const countMember = await this.countMember(jwtUser);
 
     const individual = individualDishes.reduce((prev, curr) => {
-      return prev + curr.dish.carbohydrates;
+      return prev + curr.dish.carbohydrates * curr.quantity;
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {

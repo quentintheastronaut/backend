@@ -419,7 +419,9 @@ export class UserService {
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {
-      return prev + Math.floor(curr.dish.calories / countMember);
+      return (
+        prev + Math.floor((curr.dish.calories * curr.quantity) / countMember)
+      );
     }, 0);
 
     return group + individual;

@@ -1,3 +1,4 @@
+import { AssignMarketerDto } from './dto/request/assignMarketer.dto';
 import { AddGroupIngredientDto } from './dto/request/addGroupIngredient';
 import { CheckDto } from './dto/request/check.dto';
 import { RemoveIngredientDto } from './dto/request/removeIngredient.dto';
@@ -29,6 +30,37 @@ import { ApiPaginatedResponse } from 'src/decorators';
 @Controller('shoppingList')
 export class ShoppingListController {
   constructor(private readonly _shoppingListService: ShoppingListService) {}
+
+  @Get('/detail')
+  @ApiOperation({ summary: "Get group's detail shopping list by date" })
+  async getShoppingListDetail(
+    @Query('date') date: string,
+    @Query('groupId') groupId: string,
+  ) {
+    const assignMarketerDto: AssignMarketerDto = {
+      date,
+      groupId,
+    };
+    return this._shoppingListService.getShoppingListDetail(assignMarketerDto);
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: `Assign to be group\'s marketer ` })
+  @Post('/assign-marketer')
+  async assignMarketer(
+    @Req() req: { user: JwtUser },
+    @Body() assignMarketerDto: AssignMarketerDto,
+  ) {
+    const { user } = req;
+    return this._shoppingListService.assignMarketer(user, assignMarketerDto);
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: `Cancel assign to be group\'s marketer ` })
+  @Post('/unassign-marketer')
+  async unassignMarketer(@Body() assignMarketerDto: AssignMarketerDto) {
+    return this._shoppingListService.unassignMarketer(assignMarketerDto);
+  }
 
   @Get('/group')
   @ApiOperation({ summary: "Get group's detail shopping list by date" })

@@ -1,3 +1,4 @@
+import { AssignMarketerDto } from './dto/request/assignMarketer.dto';
 import { AddGroupIngredientDto } from './dto/request/addGroupIngredient';
 import { CheckDto } from './dto/request/check.dto';
 import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredientToShoppingList.dto';
@@ -417,6 +418,74 @@ export class ShoppingListService {
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async assignMarketer(
+    jwtUser: JwtUser,
+    assignMarketerDto: AssignMarketerDto,
+  ) {
+    try {
+      const { email } = jwtUser;
+
+      const user = await AppDataSource.getRepository(User).findOne({
+        where: {
+          email,
+        },
+      });
+
+      await AppDataSource.createQueryBuilder()
+        .update(ShoppingList)
+        .set({
+          marketer: {
+            id: user.id,
+          },
+        })
+        .where('date = :date AND groupId = :groupId', {
+          date: assignMarketerDto.date,
+          groupId: assignMarketerDto.groupId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async unassignMarketer(assignMarketerDto: AssignMarketerDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(ShoppingList)
+        .set({
+          marketer: null,
+        })
+        .where('date = :date AND groupId = :groupId', {
+          date: assignMarketerDto.date,
+          groupId: assignMarketerDto.groupId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getShoppingListDetail(assignMarketerDto: AssignMarketerDto) {
+    try {
+      const result = await AppDataSource.createQueryBuilder(
+        ShoppingList,
+        'shopping_list',
+      )
+        .leftJoinAndSelect('shopping_list.marketer', 'marketer')
+        .where('date = :date AND shopping_list.groupId = :groupId', {
+          date: assignMarketerDto.date,
+          groupId: assignMarketerDto.groupId,
+        })
+        .getOne();
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

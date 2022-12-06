@@ -63,9 +63,7 @@ export class Dish {
   })
   imageUrl: string;
 
-  @Column({
-    default: '',
-  })
+  @Column('varchar', { length: 10000, default: '' })
   recipe: string;
 
   @Column({

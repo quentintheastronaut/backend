@@ -60,7 +60,7 @@ export class DishDto {
   })
   @IsOptional()
   @IsString()
-  recipeId: string;
+  recipe: string;
 
   @ApiProperty({
     example: '',

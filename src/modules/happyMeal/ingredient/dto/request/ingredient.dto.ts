@@ -61,5 +61,5 @@ export class IngredientDto {
   })
   @IsOptional()
   @IsString()
-  recipeId: string;
+  recipe: string;
 }

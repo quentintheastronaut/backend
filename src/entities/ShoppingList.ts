@@ -66,7 +66,9 @@ export class ShoppingList {
   @JoinTable()
   ingredients: Ingredient[];
 
-  @ManyToOne(() => User, (user) => user.shoppingLists)
+  @ManyToOne(() => User, (user) => user.shoppingLists, {
+    onDelete: 'SET NULL',
+  })
   user: User;
 
   @OneToOne(() => User, {
@@ -78,6 +80,9 @@ export class ShoppingList {
   @OneToMany(
     () => IngredientToShoppingList,
     (ingredientToShoppingList) => ingredientToShoppingList.shoppingList,
+    {
+      onDelete: 'SET NULL',
+    },
   )
   public ingredientsToShoppingList!: IngredientToShoppingList[];
 }

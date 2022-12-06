@@ -43,7 +43,9 @@ export class Menu {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Dish)
+  @ManyToMany(() => Dish, {
+    onDelete: 'SET NULL',
+  })
   @JoinTable()
   dishes: Dish[];
 
@@ -57,6 +59,8 @@ export class Menu {
   })
   group: Group;
 
-  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu)
+  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu, {
+    onDelete: 'SET NULL',
+  })
   public dishToMenus!: DishToMenu[];
 }

@@ -117,12 +117,18 @@ export class User {
   @OneToMany(() => Menu, (menu) => menu.user)
   menus: Menu[];
 
-  @OneToMany(() => WeightRecord, (weightRecord) => weightRecord.user)
+  @OneToMany(() => WeightRecord, (weightRecord) => weightRecord.user, {
+    onDelete: 'SET NULL',
+  })
   weightRecords: WeightRecord[];
 
-  @OneToMany(() => ShoppingList, (shoppingList) => shoppingList.user)
+  @OneToMany(() => ShoppingList, (shoppingList) => shoppingList.user, {
+    onDelete: 'SET NULL',
+  })
   shoppingLists: ShoppingList[];
 
-  @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.user)
+  @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.user, {
+    onDelete: 'SET NULL',
+  })
   public userToGroups!: UserToGroup[];
 }

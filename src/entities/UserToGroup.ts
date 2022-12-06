@@ -17,9 +17,13 @@ export class UserToGroup {
   @Column()
   public role!: GroupRole;
 
-  @ManyToOne(() => User, (user) => user.userToGroups)
+  @ManyToOne(() => User, (user) => user.userToGroups, {
+    onDelete: 'SET NULL',
+  })
   public user!: User;
 
-  @ManyToOne(() => Group, (group) => group.userToGroups)
+  @ManyToOne(() => Group, (group) => group.userToGroups, {
+    onDelete: 'SET NULL',
+  })
   public group!: Group;
 }

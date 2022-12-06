@@ -36,12 +36,18 @@ export class IngredientToShoppingList {
   @ManyToOne(
     () => ShoppingList,
     (shoppingList) => shoppingList.ingredientsToShoppingList,
+    {
+      onDelete: 'SET NULL',
+    },
   )
   public shoppingList!: ShoppingList;
 
   @ManyToOne(
     () => Ingredient,
     (ingredient) => ingredient.ingredientsToShoppingList,
+    {
+      onDelete: 'SET NULL',
+    },
   )
   public ingredient!: Ingredient;
 }

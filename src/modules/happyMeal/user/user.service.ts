@@ -399,6 +399,9 @@ export class UserService {
         return prev + Math.floor(curr.dish.calories / countMember);
       }, 0);
 
+    console.log(individualDishes);
+    console.log(group);
+
     return group + individual;
   }
 

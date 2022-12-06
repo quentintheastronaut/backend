@@ -7,11 +7,11 @@ export class IngredientToDish {
   @PrimaryGeneratedColumn()
   public ingredientToDishId!: string;
 
-  @Column()
-  public ingredientId!: string;
+  // @Column()
+  // public ingredientId!: string;
 
-  @Column()
-  public dishId!: string;
+  // @Column()
+  // public dishId!: string;
 
   @Column({
     default: 1,

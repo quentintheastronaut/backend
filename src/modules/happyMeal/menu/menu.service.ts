@@ -538,7 +538,9 @@ export class MenuService {
           .getRawAndEntities();
 
         const ingredientToList = entities.map((ingredient) => ({
-          ingredientId: ingredient.ingredientId,
+          // clean-code
+          // ingredientId: ingredient.ingredientId,
+          ingredientId: ingredient.ingredient.id,
           shoppingListId: listId,
           quantity: ingredient.quantity,
           measurementType: ingredient.measurementType,
@@ -562,7 +564,8 @@ export class MenuService {
           .getRawAndEntities();
 
         const ingredientToList = entities.map((ingredient) => ({
-          ingredientId: ingredient.ingredientId,
+          // clear-code
+          ingredientId: ingredient.ingredient.id,
           shoppingListId: listId,
           quantity: ingredient.quantity,
           measurementType: ingredient.measurementType,
@@ -632,12 +635,16 @@ export class MenuService {
       IngredientToDish,
     ).find({
       where: {
-        dishId: dishId,
+        dish: {
+          id: dishId,
+        },
+        // clean-code
+        // dishId: dishId,
       },
     });
 
     const values = ingredients.map((ingredient) => ({
-      ingredientId: ingredient.ingredientId,
+      ingredientId: ingredient.ingredient.id,
       shoppingListId: list.id,
     }));
 
@@ -676,12 +683,18 @@ export class MenuService {
       IngredientToDish,
     ).find({
       where: {
-        dishId: dishId,
+        // clean-code
+        // dishId: dishId,
+        dish: {
+          id: dishId,
+        },
       },
     });
 
     const values = ingredients.map((ingredient) => ({
-      ingredientId: ingredient.ingredientId,
+      // clean-code
+      // ingredientId: ingredient.ingredientId,
+      ingredientId: ingredient.ingredient.id,
       shoppingListId: list.id,
     }));
 

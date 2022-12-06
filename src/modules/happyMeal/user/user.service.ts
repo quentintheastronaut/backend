@@ -396,7 +396,9 @@ export class UserService {
     const group = groupDishes
       .filter((dish) => dish.tracked)
       .reduce((prev, curr) => {
-        return prev + Math.floor(curr.dish.calories / countMember);
+        return (
+          prev + Math.floor((curr.dish.calories * curr.quantity) / countMember)
+        );
       }, 0);
 
     console.log(individualDishes);
@@ -438,7 +440,7 @@ export class UserService {
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {
-      return prev + Math.floor(curr.dish.fat / countMember);
+      return prev + Math.floor((curr.dish.fat * curr.quantity) / countMember);
     }, 0);
 
     return group + individual;
@@ -454,7 +456,9 @@ export class UserService {
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {
-      return prev + Math.floor(curr.dish.protein / countMember);
+      return (
+        prev + Math.floor((curr.dish.protein * curr.quantity) / countMember)
+      );
     }, 0);
 
     return group + individual;
@@ -470,7 +474,10 @@ export class UserService {
     }, 0);
 
     const group = groupDishes.reduce((prev, curr) => {
-      return prev + Math.floor(curr.dish.carbohydrates / countMember);
+      return (
+        prev +
+        Math.floor((curr.dish.carbohydrates * curr.quantity) / countMember)
+      );
     }, 0);
 
     return group + individual;

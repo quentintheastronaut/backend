@@ -626,10 +626,7 @@ export class MenuService {
     const list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        // userId,
-        user: {
-          id: userId,
-        },
+        userId,
       },
     });
 
@@ -674,9 +671,6 @@ export class MenuService {
       where: {
         date,
         groupId,
-        // group: {
-        //   id: groupId,
-        // },
       },
     });
 

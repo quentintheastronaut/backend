@@ -121,7 +121,9 @@ export class ShoppingListService {
     let list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        userId: jwtUser.sub.toString(),
+        user: {
+          id: jwtUser.sub.toString(),
+        },
       },
     });
 
@@ -132,7 +134,9 @@ export class ShoppingListService {
         .values([
           {
             date,
-            userId: jwtUser.sub.toString(),
+            user: {
+              id: jwtUser.sub.toString(),
+            },
             type: ShoppingListType.INDIVIDUAL,
             status: ShoppingListStatus.PENDING,
           },
@@ -143,7 +147,9 @@ export class ShoppingListService {
     list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        userId: jwtUser.sub.toString(),
+        user: {
+          id: jwtUser.sub.toString(),
+        },
       },
     });
 
@@ -173,7 +179,9 @@ export class ShoppingListService {
     let list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        groupId,
+        group: {
+          id: groupId,
+        },
       },
     });
 
@@ -184,7 +192,10 @@ export class ShoppingListService {
         .values([
           {
             date,
-            groupId,
+            // groupId,
+            group: {
+              id: groupId,
+            },
             type: ShoppingListType.GROUP,
             status: ShoppingListStatus.PENDING,
           },
@@ -195,7 +206,9 @@ export class ShoppingListService {
     list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        groupId,
+        group: {
+          id: groupId,
+        },
       },
     });
 
@@ -225,7 +238,9 @@ export class ShoppingListService {
       const list = await AppDataSource.getRepository(ShoppingList).findOne({
         where: {
           date: addGroupIngredientDto.date,
-          groupId: addGroupIngredientDto.groupId,
+          group: {
+            id: addGroupIngredientDto.groupId,
+          },
         },
       });
 
@@ -235,7 +250,10 @@ export class ShoppingListService {
           .into(ShoppingList)
           .values({
             date: addGroupIngredientDto.date,
-            groupId: addGroupIngredientDto.groupId,
+            // groupId: addGroupIngredientDto.groupId,
+            group: {
+              id: addGroupIngredientDto.groupId,
+            },
             status: ShoppingListStatus.PENDING,
           })
           .execute();
@@ -244,7 +262,11 @@ export class ShoppingListService {
           .insert()
           .into(IngredientToShoppingList)
           .values({
-            shoppingListId: newMenuId.identifiers[0].id,
+            // clean-code
+            // shoppingListId: newMenuId.identifiers[0].id,
+            shoppingList: {
+              id: newMenuId.identifiers[0].id,
+            },
             ...addGroupIngredientDto,
           })
           .execute();
@@ -253,7 +275,11 @@ export class ShoppingListService {
           .insert()
           .into(IngredientToShoppingList)
           .values({
-            shoppingListId: list.id,
+            // clean-code
+            // shoppingListId: newMenuId.identifiers[0].id,
+            shoppingList: {
+              id: list.id,
+            },
             ...addGroupIngredientDto,
           })
           .execute();
@@ -301,7 +327,11 @@ export class ShoppingListService {
           .insert()
           .into(IngredientToShoppingList)
           .values({
-            shoppingListId: newMenuId.identifiers[0].id,
+            // clean-code
+            // shoppingListId: newMenuId.identifiers[0].id,
+            shoppingList: {
+              id: newMenuId.identifiers[0].id,
+            },
             ...addIngredientDto,
           })
           .execute();
@@ -310,7 +340,11 @@ export class ShoppingListService {
           .insert()
           .into(IngredientToShoppingList)
           .values({
-            shoppingListId: list.id,
+            // clean-code
+            // shoppingListId: newMenuId.identifiers[0].id,
+            shoppingList: {
+              id: list.id,
+            },
             ...addIngredientDto,
           })
           .execute();

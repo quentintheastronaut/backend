@@ -1,3 +1,4 @@
+import { Group } from 'src/entities/Group';
 import { User } from './User';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { ShoppingListStatus } from './../constants/shoppingListStatus';
@@ -31,15 +32,16 @@ export class ShoppingList {
   @IsString()
   date: string;
 
-  @Column({
-    nullable: true,
-  })
-  groupId: string;
+  // clean-code
+  // @Column({
+  //   nullable: true,
+  // })
+  // groupId: string;
 
-  @Column({
-    nullable: true,
-  })
-  userId: string;
+  // @Column({
+  //   nullable: true,
+  // })
+  // userId: string;
 
   @Column({
     default: '',
@@ -68,6 +70,9 @@ export class ShoppingList {
 
   @ManyToOne(() => User, (user) => user.shoppingLists)
   user: User;
+
+  @ManyToOne(() => Group, (group) => group.shoppingLists)
+  group: Group;
 
   @OneToOne(() => User, {
     onDelete: 'SET NULL',

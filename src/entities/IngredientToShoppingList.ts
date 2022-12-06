@@ -7,11 +7,12 @@ export class IngredientToShoppingList {
   @PrimaryGeneratedColumn()
   public ingredientToShoppingListId!: string;
 
-  @Column()
-  public ingredientId!: string;
+  // clean-code
+  // @Column()
+  // public ingredientId!: string;
 
-  @Column()
-  public shoppingListId!: string;
+  // @Column()
+  // public shoppingListId!: string;
 
   @Column({
     default: 1,

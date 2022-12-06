@@ -43,9 +43,9 @@ export class Group {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => User)
-  @JoinTable()
-  users: User[];
+  // @ManyToMany(() => User)
+  // @JoinTable()
+  // users: User[];
 
   @ManyToMany(() => ShoppingList)
   @JoinTable()

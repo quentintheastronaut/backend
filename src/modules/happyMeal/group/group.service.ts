@@ -128,7 +128,11 @@ export class GroupService {
       ShoppingList,
     ).findOne({
       where: {
-        groupId: id.toString(),
+        group: {
+          id: id.toString(),
+        },
+        // clean-code
+        // groupId: d.toString(),
       },
     });
 

@@ -592,7 +592,11 @@ export class MenuService {
         .values([
           {
             date: addDisDto.date,
-            userId: jwtUser.sub.toString(),
+            // clean-code
+            // userId: jwtUser.sub.toString(),
+            user: {
+              id: jwtUser.sub.toString(),
+            },
             type: ShoppingListType.INDIVIDUAL,
             status: ShoppingListStatus.PENDING,
           },
@@ -611,7 +615,11 @@ export class MenuService {
         .values([
           {
             date: addDisDto.date,
-            groupId,
+            // clean-code
+            // groupId,
+            group: {
+              id: groupId,
+            },
             type: ShoppingListType.INDIVIDUAL,
             status: ShoppingListStatus.PENDING,
           },
@@ -627,7 +635,10 @@ export class MenuService {
     const list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        userId,
+        // userId,
+        user: {
+          id: userId,
+        },
       },
     });
 
@@ -675,7 +686,10 @@ export class MenuService {
     const list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        groupId,
+        // groupId,
+        group: {
+          id: groupId,
+        },
       },
     });
 

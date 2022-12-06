@@ -7,9 +7,11 @@ export class IngredientToDish {
   @PrimaryGeneratedColumn()
   public ingredientToDishId!: string;
 
+  // clean-code
   // @Column()
   // public ingredientId!: string;
 
+  // clean-code
   // @Column()
   // public dishId!: string;
 

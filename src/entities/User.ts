@@ -118,17 +118,17 @@ export class User {
   menus: Menu[];
 
   @OneToMany(() => WeightRecord, (weightRecord) => weightRecord.user, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   weightRecords: WeightRecord[];
 
   @OneToMany(() => ShoppingList, (shoppingList) => shoppingList.user, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   shoppingLists: ShoppingList[];
 
   @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.user, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public userToGroups!: UserToGroup[];
 }

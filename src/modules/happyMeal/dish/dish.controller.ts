@@ -14,11 +14,33 @@ import { PageDto, PageOptionsDto } from 'src/dtos';
 import { Dish } from 'src/entities/Dish';
 import { DishService } from './dish.service';
 import { ApiPaginatedResponse } from 'src/decorators/api-paginated-response.decorator';
+import { AddIngredientToDishDto } from './dto/request/addIngredient.dto';
 
 @ApiTags('Dish')
 @Controller('dish')
 export class DishController {
   constructor(private readonly _dishService: DishService) {}
+
+  @Get('/ingredient/:id')
+  @ApiPaginatedResponse(Dish)
+  async getIngredient(@Param('id') dishId: string) {
+    return this._dishService.getIngredient(dishId);
+  }
+
+  @Post('/add-ingredient')
+  async addIngredient(@Body() addIngredientDto: AddIngredientToDishDto) {
+    return this._dishService.addIngredient(addIngredientDto);
+  }
+
+  @Patch('/update-ingredient')
+  async updateIngredient(@Body() addIngredientDto: AddIngredientToDishDto) {
+    return this._dishService.updateIngredient(addIngredientDto);
+  }
+
+  @Delete('/remove-ingredient/:id')
+  async removeIngredient(@Param('id') id: number) {
+    return this._dishService.removeIngredient(id);
+  }
 
   @Patch(':id')
   async updateDish(

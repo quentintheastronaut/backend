@@ -562,7 +562,8 @@ export class MenuService {
           .getRawAndEntities();
 
         const ingredientToList = entities.map((ingredient) => ({
-          ingredientId: ingredient.ingredientId,
+          // clear-code
+          ingredientId: ingredient.ingredient.id,
           shoppingListId: listId,
           quantity: ingredient.quantity,
           measurementType: ingredient.measurementType,
@@ -609,6 +610,7 @@ export class MenuService {
           {
             date: addDisDto.date,
             groupId,
+
             type: ShoppingListType.INDIVIDUAL,
             status: ShoppingListStatus.PENDING,
           },
@@ -624,7 +626,10 @@ export class MenuService {
     const list = await AppDataSource.getRepository(ShoppingList).findOne({
       where: {
         date,
-        userId,
+        // userId,
+        user: {
+          id: userId,
+        },
       },
     });
 
@@ -637,7 +642,7 @@ export class MenuService {
     });
 
     const values = ingredients.map((ingredient) => ({
-      ingredientId: ingredient.ingredientId,
+      ingredientId: ingredient.ingredient.id,
       shoppingListId: list.id,
     }));
 
@@ -669,6 +674,9 @@ export class MenuService {
       where: {
         date,
         groupId,
+        // group: {
+        //   id: groupId,
+        // },
       },
     });
 

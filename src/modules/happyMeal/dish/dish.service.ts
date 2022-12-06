@@ -1,3 +1,5 @@
+import { IngredientToDish } from './../../../entities/IngredientToDish';
+import { AddIngredientToDishDto } from './dto/request/addIngredient.dto';
 import { DishDto } from './dto/request/dish.dto';
 import { AppDataSource } from './../../../data-source';
 import { PageOptionsDto } from './../../../dtos/pageOption.dto';
@@ -13,6 +15,21 @@ import { Dish } from 'src/entities/Dish';
 
 @Injectable({})
 export class DishService {
+  public async getIngredient(dishId) {
+    try {
+      const result = await AppDataSource.createQueryBuilder(
+        IngredientToDish,
+        'ingredient_to_dish',
+      )
+        .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
+        .where('ingredient_to_dish.dishId = :dishId', { dishId })
+        .getMany();
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
   public async updateDish(
     id: number,
     dishDto: DishDto,
@@ -31,6 +48,53 @@ export class DishService {
         .update(Dish)
         .set(dishDto)
         .where('id = :id', { id })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async addIngredient(addIngredientDto: AddIngredientToDishDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(IngredientToDish)
+        .values([addIngredientDto])
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async updateIngredient(addIngredientDto: AddIngredientToDishDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(IngredientToDish)
+        .set({
+          quantity: addIngredientDto.quantity,
+          measurementType: addIngredientDto.measurementType,
+        })
+        .where('dishId = :dishId AND ingredientId = :ingredientId', {
+          dishId: addIngredientDto.dishId,
+          ingredientId: addIngredientDto.ingredientId,
+        })
+        .execute();
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async removeIngredient(id: number) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(IngredientToDish)
+        .where('id = :id', {
+          id: id.toString(),
+        })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {

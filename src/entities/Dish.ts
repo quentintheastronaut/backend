@@ -80,7 +80,7 @@ export class Dish {
   updatedAt: Date;
 
   @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.dish, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public dishToMenus!: DishToMenu[];
 
@@ -88,7 +88,7 @@ export class Dish {
     () => IngredientToDish,
     (ingredientToDish) => ingredientToDish.dish,
     {
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
     },
   )
   public ingredientsToDish!: IngredientToDish[];

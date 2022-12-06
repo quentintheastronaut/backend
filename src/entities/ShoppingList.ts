@@ -67,12 +67,12 @@ export class ShoppingList {
   ingredients: Ingredient[];
 
   @ManyToOne(() => User, (user) => user.shoppingLists, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   user: User;
 
   @OneToOne(() => User, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   marketer: User;
@@ -81,7 +81,7 @@ export class ShoppingList {
     () => IngredientToShoppingList,
     (ingredientToShoppingList) => ingredientToShoppingList.shoppingList,
     {
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
     },
   )
   public ingredientsToShoppingList!: IngredientToShoppingList[];

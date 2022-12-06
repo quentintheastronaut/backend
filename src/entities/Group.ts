@@ -44,24 +44,24 @@ export class Group {
   updatedAt: Date;
 
   @ManyToMany(() => User, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   @JoinTable()
   users: User[];
 
   @ManyToMany(() => ShoppingList, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   @JoinTable()
   shoppingLists: ShoppingList[];
 
   @OneToMany(() => Menu, (menu) => menu.group, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   menus: Menu[];
 
   @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.group, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public userToGroups!: UserToGroup[];
 }

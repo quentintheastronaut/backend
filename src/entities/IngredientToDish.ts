@@ -29,12 +29,12 @@ export class IngredientToDish {
   public weight!: number;
 
   @ManyToOne(() => Dish, (dish) => dish.ingredientsToDish, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public dish!: Dish;
 
   @ManyToOne(() => Ingredient, (ingredient) => ingredient.ingredientsToDish, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public ingredient!: Ingredient;
 }

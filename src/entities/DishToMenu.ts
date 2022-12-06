@@ -30,12 +30,12 @@ export class DishToMenu {
   public tracked!: boolean;
 
   @ManyToOne(() => Dish, (dish) => dish.dishToMenus, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public dish!: Dish;
 
   @ManyToOne(() => Menu, (menu) => menu.dishToMenus, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public menu!: Menu;
 }

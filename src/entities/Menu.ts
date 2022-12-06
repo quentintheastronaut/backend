@@ -44,23 +44,23 @@ export class Menu {
   updatedAt: Date;
 
   @ManyToMany(() => Dish, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   @JoinTable()
   dishes: Dish[];
 
   @ManyToOne(() => User, (user) => user.menus, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   user: User;
 
   @ManyToOne(() => Group, (group) => group.menus, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   group: Group;
 
   @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public dishToMenus!: DishToMenu[];
 }

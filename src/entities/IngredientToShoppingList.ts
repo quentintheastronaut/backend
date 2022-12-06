@@ -37,7 +37,7 @@ export class IngredientToShoppingList {
     () => ShoppingList,
     (shoppingList) => shoppingList.ingredientsToShoppingList,
     {
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
     },
   )
   public shoppingList!: ShoppingList;
@@ -46,7 +46,7 @@ export class IngredientToShoppingList {
     () => Ingredient,
     (ingredient) => ingredient.ingredientsToShoppingList,
     {
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
     },
   )
   public ingredient!: Ingredient;

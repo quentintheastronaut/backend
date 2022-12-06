@@ -18,12 +18,12 @@ export class UserToGroup {
   public role!: GroupRole;
 
   @ManyToOne(() => User, (user) => user.userToGroups, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public user!: User;
 
   @ManyToOne(() => Group, (group) => group.userToGroups, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   public group!: Group;
 }

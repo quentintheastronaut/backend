@@ -400,7 +400,7 @@ export class UserService {
       }, 0);
 
     console.log(individualDishes);
-    console.log(group);
+    console.log(groupDishes);
 
     return group + individual;
   }

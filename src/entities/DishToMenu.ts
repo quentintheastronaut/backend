@@ -29,9 +29,13 @@ export class DishToMenu {
   })
   public tracked!: boolean;
 
-  @ManyToOne(() => Dish, (dish) => dish.dishToMenus)
+  @ManyToOne(() => Dish, (dish) => dish.dishToMenus, {
+    onDelete: 'SET NULL',
+  })
   public dish!: Dish;
 
-  @ManyToOne(() => Menu, (menu) => menu.dishToMenus)
+  @ManyToOne(() => Menu, (menu) => menu.dishToMenus, {
+    onDelete: 'SET NULL',
+  })
   public menu!: Menu;
 }

@@ -47,13 +47,19 @@ export class Group {
   // @JoinTable()
   // users: User[];
 
-  @ManyToMany(() => ShoppingList)
+  @ManyToMany(() => ShoppingList, {
+    onDelete: 'SET NULL',
+  })
   @JoinTable()
   shoppingLists: ShoppingList[];
 
-  @OneToMany(() => Menu, (menu) => menu.group)
+  @OneToMany(() => Menu, (menu) => menu.group, {
+    onDelete: 'SET NULL',
+  })
   menus: Menu[];
 
-  @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.group)
+  @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.group, {
+    onDelete: 'SET NULL',
+  })
   public userToGroups!: UserToGroup[];
 }

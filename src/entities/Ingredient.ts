@@ -61,12 +61,18 @@ export class Ingredient {
   @OneToMany(
     () => IngredientToShoppingList,
     (ingredientToShoppingList) => ingredientToShoppingList.ingredient,
+    {
+      onDelete: 'SET NULL',
+    },
   )
   public ingredientsToShoppingList!: IngredientToShoppingList[];
 
   @OneToMany(
     () => IngredientToDish,
     (ingredientToDish) => ingredientToDish.ingredient,
+    {
+      onDelete: 'SET NULL',
+    },
   )
   public ingredientsToDish!: IngredientToDish[];
 }

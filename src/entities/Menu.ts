@@ -57,6 +57,8 @@ export class Menu {
   })
   group: Group;
 
-  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu)
+  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu, {
+    onDelete: 'SET NULL',
+  })
   public dishToMenus!: DishToMenu[];
 }

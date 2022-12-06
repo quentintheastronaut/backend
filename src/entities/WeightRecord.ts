@@ -23,7 +23,9 @@ export class WeightRecord {
   @IsNumber()
   value: number;
 
-  @ManyToOne(() => User, (user) => user.weightRecords)
+  @ManyToOne(() => User, (user) => user.weightRecords, {
+    onDelete: 'SET NULL',
+  })
   user: User;
 
   @CreateDateColumn()

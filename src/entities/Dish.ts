@@ -79,12 +79,17 @@ export class Dish {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.dish)
+  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.dish, {
+    onDelete: 'SET NULL',
+  })
   public dishToMenus!: DishToMenu[];
 
   @OneToMany(
     () => IngredientToDish,
     (ingredientToDish) => ingredientToDish.dish,
+    {
+      onDelete: 'SET NULL',
+    },
   )
   public ingredientsToDish!: IngredientToDish[];
 }

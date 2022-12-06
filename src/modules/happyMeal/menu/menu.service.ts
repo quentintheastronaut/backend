@@ -522,6 +522,7 @@ export class MenuService {
         ...condition,
       },
     });
+
     try {
       if (!list) {
         const inserted = !addDisDto.groupId
@@ -562,8 +563,7 @@ export class MenuService {
           .getRawAndEntities();
 
         const ingredientToList = entities.map((ingredient) => ({
-          // clear-code
-          ingredientId: ingredient.ingredient.id,
+          ingredientId: ingredient.ingredientId,
           shoppingListId: listId,
           quantity: ingredient.quantity,
           measurementType: ingredient.measurementType,
@@ -642,7 +642,7 @@ export class MenuService {
     });
 
     const values = ingredients.map((ingredient) => ({
-      ingredientId: ingredient.ingredient.id,
+      ingredientId: ingredient.ingredientId,
       shoppingListId: list.id,
     }));
 

@@ -92,12 +92,13 @@ export class DishService {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(IngredientToDish)
-        .where('id = :id', {
+        .where('ingredientToDishId = :id', {
           id: id.toString(),
         })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

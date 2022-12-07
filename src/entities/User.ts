@@ -100,7 +100,7 @@ export class User {
 
   @Column({
     nullable: false,
-    default: '',
+    default: 'happymeal',
   })
   password: string;
 

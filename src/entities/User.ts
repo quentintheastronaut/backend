@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Menu } from './Menu';
 import { UserToGroup } from './UserToGroup';
+import { AccountRole } from 'src/constants/accountRole';
 
 enum Sex {
   MALE = 'male',
@@ -113,6 +114,11 @@ export class User {
     default: true,
   })
   active: boolean;
+
+  @Column({
+    default: AccountRole.USER,
+  })
+  role: string;
 
   @OneToMany(() => Menu, (menu) => menu.user)
   menus: Menu[];

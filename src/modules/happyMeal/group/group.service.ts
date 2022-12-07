@@ -118,41 +118,46 @@ export class GroupService {
   }
 
   public async deleteGroup(id: number): Promise<PageDto<Group>> {
-    const group = await AppDataSource.getRepository(Group).findOne({
-      where: {
-        id: id.toString(),
-      },
-    });
-
-    const shoppingList = await AppDataSource.getRepository(
-      ShoppingList,
-    ).findOne({
-      where: {
-        groupId: id.toString(),
-      },
-    });
-
-    const menu = await AppDataSource.getRepository(Menu).findOne({
-      where: {
-        group,
-      },
-    });
-
-    if (!group) {
-      throw new NotFoundException('Not found');
-    }
     try {
-      await AppDataSource.createQueryBuilder()
-        .delete()
-        .from(DishToMenu)
-        .where('menuId = :id', { id: menu.id })
-        .execute();
+      const group = await AppDataSource.getRepository(Group).findOne({
+        where: {
+          id: id.toString(),
+        },
+      });
 
-      await AppDataSource.createQueryBuilder()
-        .delete()
-        .from(IngredientToShoppingList)
-        .where('shoppingId = :id', { id: shoppingList.id })
-        .execute();
+      const shoppingLists = await AppDataSource.getRepository(
+        ShoppingList,
+      ).find({
+        where: {
+          groupId: id.toString(),
+        },
+      });
+
+      const menus = await AppDataSource.getRepository(Menu).find({
+        where: {
+          group: group,
+        },
+      });
+
+      if (menus) {
+        menus.forEach(async (menu) => {
+          await AppDataSource.createQueryBuilder()
+            .delete()
+            .from(DishToMenu)
+            .where('menuId = :id', { id: menu.id })
+            .execute();
+        });
+      }
+
+      if (shoppingLists) {
+        shoppingLists.forEach(async (shoppingList) => {
+          await AppDataSource.createQueryBuilder()
+            .delete()
+            .from(IngredientToShoppingList)
+            .where('shoppingId = :id', { id: shoppingList.id })
+            .execute();
+        });
+      }
 
       await AppDataSource.createQueryBuilder()
         .delete()

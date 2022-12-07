@@ -61,7 +61,7 @@ export class UserDto {
   healthGoal?: string;
 
   @ApiProperty({
-    example: 'happymeal',
+    default: 'happymeal',
   })
   @IsOptional()
   password: string;

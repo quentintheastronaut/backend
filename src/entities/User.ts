@@ -1,16 +1,22 @@
+import { IndividualShoppingList } from './IngredientShoppingList';
 import { WeightRecord } from './WeightRecord';
 import { ShoppingList } from './ShoppingList';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Menu } from './Menu';
 import { UserToGroup } from './UserToGroup';
 import { AccountRole } from 'src/constants/accountRole';
+import { Account } from './Account';
+import { IndividualMenu } from './IndividualMenu';
+import { Allergic } from './Allergic';
 
 enum Sex {
   MALE = 'male',
@@ -137,4 +143,24 @@ export class User {
     onDelete: 'CASCADE',
   })
   public userToGroups!: UserToGroup[];
+
+  //new
+  @OneToOne(() => Account)
+  @JoinColumn()
+  account: Account;
+
+  // new
+  @OneToMany(() => IndividualMenu, (individualMenu) => individualMenu.user)
+  individualMenus: IndividualMenu[];
+
+  // new
+  @OneToMany(
+    () => IndividualShoppingList,
+    (individualShoppingList) => individualShoppingList.user,
+  )
+  individualShoppingLists: IndividualShoppingList[];
+
+  // new
+  @OneToMany(() => Allergic, (allergic) => allergic.user)
+  isAllergic: Allergic[];
 }

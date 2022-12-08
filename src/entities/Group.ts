@@ -1,3 +1,4 @@
+import { GroupShoppingList } from './GroupShoppingList';
 import { Menu } from './Menu';
 import { ShoppingList } from './ShoppingList';
 import { IsString } from 'class-validator';
@@ -13,6 +14,7 @@ import {
 } from 'typeorm';
 import { User } from './User';
 import { UserToGroup } from './UserToGroup';
+import { GroupMenu } from './GroupMenu';
 
 @Entity()
 export class Group {
@@ -64,4 +66,15 @@ export class Group {
     onDelete: 'CASCADE',
   })
   public userToGroups!: UserToGroup[];
+
+  // new
+  @OneToMany(() => GroupMenu, (groupMenu) => groupMenu.group)
+  groupMenus: GroupMenu[];
+
+  // new
+  @OneToMany(
+    () => GroupShoppingList,
+    (groupShoppingList) => groupShoppingList.group,
+  )
+  groupShoppingLists: GroupShoppingList[];
 }

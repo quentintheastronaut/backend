@@ -15,6 +15,18 @@ import { Dish } from 'src/entities/Dish';
 
 @Injectable({})
 export class DishService {
+  // COMMON SERVICES
+  public async find(id: string) {
+    try {
+      return await AppDataSource.getRepository(Dish).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
   // CONTROLLER SERVICES
   public async getIngredient(dishId) {
     try {

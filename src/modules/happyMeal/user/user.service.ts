@@ -331,21 +331,17 @@ export class UserService {
     }
   }
 
+  // done
   public async getMenuByDate(jwtUser: JwtUser, date: string) {
     const { sub } = jwtUser;
     const user = await this.findByAccountId(sub.toString());
 
-    const menu = await AppDataSource.getRepository(Menu).findOne({
-      relations: {
-        user: true,
-      },
-      where: {
-        date,
-        user: user,
-      },
-    });
+    const individualMenu = await this._menuService.findIndividualMenu(
+      date,
+      user,
+    );
 
-    if (!menu) {
+    if (!individualMenu) {
       return [];
     }
 
@@ -354,7 +350,7 @@ export class UserService {
       'dish_to_menu',
     )
       .leftJoinAndSelect('dish_to_menu.dish', 'dish')
-      .where('menuId = :menuId', { menuId: menu.id })
+      .where('menuId = :menuId', { menuId: individualMenu.menu.id })
       .getMany();
 
     return dishes;

@@ -1,5 +1,3 @@
-import { Menu } from 'src/entities/Menu';
-import { ShoppingList } from 'src/entities/ShoppingList';
 import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
 import { RemoveMemberDto } from './dto/request/removeMember.dto';
 import { AddMemberDto } from './dto/request/addMember.dto';
@@ -25,12 +23,20 @@ import { DishToMenu } from 'src/entities/DishToMenu';
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
 import { forwardRef } from '@nestjs/common';
+import { ShoppingListService } from '../shoppingList/shoppingList.service';
+import { MenuService } from '../menu/menu.service';
+import { GroupShoppingList } from 'src/entities/GroupShoppingList';
+import { GroupMenu } from 'src/entities/GroupMenu';
 
 @Injectable({})
 export class GroupService {
   constructor(
     @Inject(forwardRef(() => UserService)) private _userService: UserService,
-    private _authService: AuthService,
+    @Inject(forwardRef(() => ShoppingListService))
+    private _shoppingListService: ShoppingListService,
+    @Inject(forwardRef(() => MenuService))
+    private _MenuService: MenuService,
+    @Inject(forwardRef(() => AuthService)) private _authService: AuthService,
   ) {}
 
   // COMMON SERVICE
@@ -160,36 +166,42 @@ export class GroupService {
         },
       });
 
-      const shoppingLists = await AppDataSource.getRepository(
-        ShoppingList,
+      const groupShoppingLists = await AppDataSource.getRepository(
+        GroupShoppingList,
       ).find({
         where: {
-          groupId: id.toString(),
+          group: {
+            id: group.id,
+          },
         },
       });
 
-      const menus = await AppDataSource.getRepository(Menu).find({
+      const groupMenus = await AppDataSource.getRepository(GroupMenu).find({
         where: {
-          group: group,
+          group: {
+            id: group.id,
+          },
         },
       });
 
-      if (menus) {
-        menus.forEach(async (menu) => {
+      if (groupMenus) {
+        groupMenus.forEach(async (groupMenu) => {
           await AppDataSource.createQueryBuilder()
             .delete()
             .from(DishToMenu)
-            .where('menuId = :id', { id: menu.id })
+            .where('menuId = :id', { id: groupMenu.menu.id })
             .execute();
         });
       }
 
-      if (shoppingLists) {
-        shoppingLists.forEach(async (shoppingList) => {
+      if (groupShoppingLists) {
+        groupShoppingLists.forEach(async (groupShoppingList) => {
           await AppDataSource.createQueryBuilder()
             .delete()
             .from(IngredientToShoppingList)
-            .where('shoppingId = :id', { id: shoppingList.id })
+            .where('shoppingId = :id', {
+              id: groupShoppingList.shoppingList.id,
+            })
             .execute();
         });
       }

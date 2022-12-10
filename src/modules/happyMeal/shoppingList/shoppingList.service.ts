@@ -5,7 +5,6 @@ import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredien
 import { RemoveIngredientDto } from './dto/request/removeIngredient.dto';
 import { AddIngredientDto } from './dto/request/addIngredient.dto';
 import { ShoppingListStatus } from './../../../constants/shoppingListStatus';
-import { ShoppingListType } from './../../../constants/shoppingListType';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { ShoppingListDto } from './dto/request/shoppingList.dto';
 import { AppDataSource } from './../../../data-source';
@@ -16,26 +15,29 @@ import {
   HttpStatus,
   NotFoundException,
   BadRequestException,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
 import { ShoppingList } from 'src/entities/ShoppingList';
 import { IngredientToShoppingList } from 'src/entities/IngredientToShoppingList';
 import { User } from 'src/entities';
-import { AuthService } from '../auth/auth.service';
 import { GroupShoppingList } from 'src/entities/GroupShoppingList';
 import { IndividualShoppingList } from 'src/entities/IndividualShoppingList';
 import { UserService } from '../user/user.service';
-import { GroupShoppingListDto } from './dto/request/groupShoppingList';
 import { Group } from 'src/entities/Group';
 import { Ingredient } from 'src/entities/Ingredient';
 import { IngredientService } from '../ingredient/ingredient.service';
+import { GroupService } from '../group/group.service';
 
 @Injectable({})
 export class ShoppingListService {
   constructor(
-    private _userService: UserService,
+    @Inject(forwardRef(() => UserService)) private _userService: UserService,
+    @Inject(forwardRef(() => IngredientService))
     private _ingredientService: IngredientService,
+    @Inject(forwardRef(() => GroupService)) private _groupService: GroupService,
   ) {}
 
   // COMMON SERVICES
@@ -58,6 +60,20 @@ export class ShoppingListService {
       throw new NotFoundException('User not found');
     }
   }
+
+  async findGroupShoppingListById(id: string) {
+    try {
+      return await AppDataSource.getRepository(GroupShoppingList).findOne({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
   async findIndividualShoppingList(date: string, userId: string) {
     try {
       return await AppDataSource.getRepository(IndividualShoppingList).findOne({
@@ -301,33 +317,18 @@ export class ShoppingListService {
     date: string,
     groupId: string,
   ): Promise<PageDto<IngredientToShoppingList[]>> {
-    let list = await AppDataSource.getRepository(ShoppingList).findOne({
-      where: {
-        date,
-        groupId,
-      },
-    });
+    const group = await this._groupService.find(groupId);
+    let groupShoppingList = await this.findGroupShoppingList(date, groupId);
 
-    if (!list) {
-      await AppDataSource.createQueryBuilder()
-        .insert()
-        .into(ShoppingList)
-        .values([
-          {
-            date,
-            groupId,
-            status: ShoppingListStatus.PENDING,
-          },
-        ])
-        .execute();
+    if (!groupShoppingList) {
+      const newList = await this.insertShoppingList({
+        status: ShoppingListStatus.PENDING,
+      });
+
+      await this.insertGroup(date, newList.raw, group);
     }
 
-    list = await AppDataSource.getRepository(ShoppingList).findOne({
-      where: {
-        date,
-        groupId,
-      },
-    });
+    groupShoppingList = await this.findGroupShoppingList(date, groupId);
 
     try {
       const result = await AppDataSource.createQueryBuilder(
@@ -338,7 +339,9 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.ingredient',
           'ingredient',
         )
-        .where('shoppingListId = :listId', { listId: list.id })
+        .where('shoppingListId = :listId', {
+          listId: groupShoppingList.shoppingList.id,
+        })
         .getMany();
 
       return new PageDto('OK', HttpStatus.OK, result);
@@ -352,41 +355,33 @@ export class ShoppingListService {
     addGroupIngredientDto: AddGroupIngredientDto,
   ): Promise<PageDto<ShoppingList>> {
     try {
-      const list = await AppDataSource.getRepository(ShoppingList).findOne({
-        where: {
-          date: addGroupIngredientDto.date,
-          groupId: addGroupIngredientDto.groupId,
-        },
-      });
+      const { date, groupId } = addGroupIngredientDto;
+      const list = await this.findGroupShoppingList(date, groupId);
+
+      const group = await this._groupService.find(groupId);
+
+      const ingredient = await this._ingredientService.findOne(
+        addGroupIngredientDto.ingredientId,
+      );
 
       if (!list) {
-        const newMenuId = await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(ShoppingList)
-          .values({
-            date: addGroupIngredientDto.date,
-            groupId: addGroupIngredientDto.groupId,
-            status: ShoppingListStatus.PENDING,
-          })
-          .execute();
+        const newList = await this.insertShoppingList({
+          status: ShoppingListStatus.PENDING,
+        });
 
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(IngredientToShoppingList)
-          .values({
-            shoppingListId: newMenuId.identifiers[0].id,
-            ...addGroupIngredientDto,
-          })
-          .execute();
+        await this.insertGroup(date, newList.raw, group);
+
+        await this.insertIngredientToList(
+          newList.raw,
+          ingredient,
+          addGroupIngredientDto,
+        );
       } else {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(IngredientToShoppingList)
-          .values({
-            shoppingListId: list.id,
-            ...addGroupIngredientDto,
-          })
-          .execute();
+        await this.insertIngredientToList(
+          list.shoppingList,
+          ingredient,
+          addGroupIngredientDto,
+        );
       }
 
       return new PageDto('OK', HttpStatus.OK);

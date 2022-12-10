@@ -132,6 +132,7 @@ export class GroupService {
           groupId: id.toString(),
         },
       });
+      console.log(shoppingLists);
 
       const menus = await AppDataSource.getRepository(Menu).find({
         where: {

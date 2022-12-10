@@ -1,3 +1,6 @@
+import { AuthService } from './../auth/auth.service';
+import { MenuService } from './../menu/menu.service';
+import { GroupService } from './../group/group.service';
 import { UserToGroup } from './../../../entities/UserToGroup';
 import { DishToMenu } from './../../../entities/DishToMenu';
 import { Menu } from 'src/entities/Menu';
@@ -16,12 +19,22 @@ import {
   HttpStatus,
   InternalServerErrorException,
   NotFoundException,
-  ForbiddenException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { UserDto } from './dto/request/user.dto';
+import { AccountDto } from '../auth/dto/account.dto';
+import { AccountRole } from 'src/constants/accountRole';
+import { Account } from 'src/entities/Account';
 
 @Injectable({})
 export class UserService {
+  constructor(
+    @Inject(forwardRef(() => AuthService)) private _authService: AuthService,
+    @Inject(forwardRef(() => GroupService)) private _groupService: GroupService,
+    @Inject(forwardRef(() => MenuService)) private _menuService: MenuService,
+  ) {}
+
   convertKilogramsToPounds(kilograms: number): number {
     return kilograms * 2.2;
   }
@@ -83,9 +96,101 @@ export class UserService {
     }
   }
 
+  async find(id: string) {
+    try {
+      return await AppDataSource.getRepository(User).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async findByAccountId(accountId: string) {
+    try {
+      return await AppDataSource.getRepository(User).findOne({
+        where: { account: { id: accountId } },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async update(id: string, updateProfileDto: UpdateProfileDto) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set(updateProfileDto)
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async updateByAccountId(
+    accountId: string,
+    updateProfileDto: UpdateProfileDto,
+  ) {
+    try {
+      const user = await this.findByAccountId(accountId);
+
+      await this.update(user.id, updateProfileDto);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async insert(userDto: UserDto) {
+    try {
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(User)
+        .values([userDto])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  async bindAccount(id: string, account: Account) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          account: account,
+        })
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async unbindAccount(id: string) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(User)
+        .set({
+          account: null,
+        })
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
   async getProfile(jwtUser: JwtUser) {
     try {
-      const { email } = jwtUser;
+      const { sub } = jwtUser;
       const user = await AppDataSource.createQueryBuilder(User, 'user')
         .leftJoinAndMapOne(
           'user.group',
@@ -93,9 +198,8 @@ export class UserService {
           'group',
           'user.groupId = group.id',
         )
-        .where('email = :email', { email })
+        .where('accountId = :accountId', { accountId: sub.toString() })
         .getOneOrFail();
-      delete user.password;
       return new PageDto('OK', HttpStatus.OK, user);
     } catch (error) {
       console.log(error);
@@ -105,12 +209,8 @@ export class UserService {
 
   async updateProfile(jwtUser: JwtUser, updateProfileDto: UpdateProfileDto) {
     try {
-      const { email } = jwtUser;
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set(updateProfileDto)
-        .where('email = :email', { email: email })
-        .execute();
+      const { sub } = jwtUser;
+      await this.updateByAccountId(sub.toString(), updateProfileDto);
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -120,12 +220,8 @@ export class UserService {
 
   async getBodyMassIndex(jwtUser: JwtUser) {
     try {
-      const { email } = jwtUser;
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
-        },
-      });
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
 
       const currentBMI = this.bmi(user.weight, user.height);
 
@@ -142,12 +238,8 @@ export class UserService {
 
   async getBasalMetabolicRate(jwtUser: JwtUser) {
     try {
-      const { email } = jwtUser;
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
-        },
-      });
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
 
       const currentBMR = this.bmr(user.weight, user.height, user.age, user.sex);
 
@@ -185,30 +277,22 @@ export class UserService {
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
   }
 
-  public async isValidEmail(email: string) {
-    try {
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
-        },
-      });
-      return user ? true : false;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
   public async createUser(userDto: UserDto): Promise<PageDto<User>> {
-    if (await this.isValidEmail(userDto.email)) {
-      throw new ForbiddenException('Credentials taken');
-    }
+    const newAccount: AccountDto = {
+      email: userDto.email,
+      password: userDto.password,
+      role: AccountRole.USER,
+    };
+    await this._authService.insert(newAccount);
+
+    const account = await this._authService.findOneByEmail(userDto.email);
 
     try {
-      await AppDataSource.createQueryBuilder()
-        .insert()
-        .into(User)
-        .values([userDto])
-        .execute();
+      const user = await this.insert(userDto);
+      // const user = await this.find();
+
+      console.log(user);
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -218,12 +302,7 @@ export class UserService {
 
   public async updateUser(id: number, updateProfileDto: UpdateProfileDto) {
     try {
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set(updateProfileDto)
-        .where('id = :id', { id: id.toString() })
-        .execute();
-
+      await this.update(id.toString(), updateProfileDto);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new BadRequestException();
@@ -231,23 +310,10 @@ export class UserService {
   }
 
   public async deactivateUser(id: number): Promise<PageDto<User>> {
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        id: id.toString(),
-      },
-    });
+    await this.find(id.toString());
 
-    if (!user) {
-      throw new NotFoundException('Not found');
-    }
     try {
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          active: false,
-        })
-        .where('id = :id', { id })
-        .execute();
+      await this.update(id.toString(), { status: false });
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
@@ -255,23 +321,10 @@ export class UserService {
   }
 
   public async activateUser(id: number): Promise<PageDto<User>> {
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        id: id.toString(),
-      },
-    });
+    await this.find(id.toString());
 
-    if (!user) {
-      throw new NotFoundException('Not found');
-    }
     try {
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          active: true,
-        })
-        .where('id = :id', { id })
-        .execute();
+      await this.update(id.toString(), { status: true });
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
@@ -279,16 +332,16 @@ export class UserService {
   }
 
   public async getMenuByDate(jwtUser: JwtUser, date: string) {
-    const { email } = jwtUser;
+    const { sub } = jwtUser;
+    const user = await this.findByAccountId(sub.toString());
+
     const menu = await AppDataSource.getRepository(Menu).findOne({
       relations: {
         user: true,
       },
       where: {
         date,
-        user: {
-          email: email,
-        },
+        user: user,
       },
     });
 
@@ -308,37 +361,18 @@ export class UserService {
   }
 
   public async getGroupMenuByDate(jwtUser: JwtUser, date: string) {
-    const { email } = jwtUser;
+    const { sub } = jwtUser;
+    const user = await this.findByAccountId(sub.toString());
 
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
-
-    const group = await AppDataSource.getRepository(Group).findOne({
-      where: {
-        id: user.groupId,
-      },
-    });
+    const group = await this._groupService.findByUser(user);
 
     if (!group) {
       return [];
     }
 
-    const menu = await AppDataSource.getRepository(Menu).findOne({
-      relations: {
-        group: true,
-      },
-      where: {
-        date,
-        group: {
-          id: group.id,
-        },
-      },
-    });
+    const groupMenu = await this._menuService.findGroupMenu(date, group);
 
-    if (!menu) {
+    if (!groupMenu) {
       return [];
     }
 
@@ -347,26 +381,17 @@ export class UserService {
       'dish_to_menu',
     )
       .leftJoinAndSelect('dish_to_menu.dish', 'dish')
-      .where('menuId = :menuId', { menuId: menu.id })
+      .where('menuId = :menuId', { menuId: groupMenu.menu.id })
       .getMany();
 
     return dishes;
   }
 
   public async countMember(jwtUser: JwtUser) {
-    const { email } = jwtUser;
+    const { sub } = jwtUser;
+    const user = await this.findByAccountId(sub.toString());
 
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
-
-    const group = await AppDataSource.getRepository(Group).findOne({
-      where: {
-        id: user.groupId,
-      },
-    });
+    const group = await this._groupService.findByUser(user);
 
     if (!group) {
       return 1;
@@ -482,12 +507,8 @@ export class UserService {
 
   public async getOverview(jwtUser: JwtUser, date: string) {
     try {
-      const { email } = jwtUser;
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
-        },
-      });
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
 
       const currentBMR = this.bmr(user.weight, user.height, user.age, user.sex);
 

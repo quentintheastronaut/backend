@@ -1,4 +1,5 @@
-import { map } from 'rxjs';
+import { IndividualMenu } from './../../../entities/IndividualMenu';
+import { GroupMenu } from './../../../entities/GroupMenu';
 import { UserToGroup } from './../../../entities/UserToGroup';
 import { AddGroupDishDto } from './dto/request/addGroupDish';
 import { Group } from 'src/entities/Group';
@@ -18,6 +19,8 @@ import {
   HttpStatus,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
@@ -26,28 +29,63 @@ import { User } from 'src/entities';
 import { RemoveDishDto } from './dto/request/removeDish.dto';
 import { UpdateDishToMenuDto } from './dto/request/updateDishToMenu.dto';
 import { ShoppingListStatus, ShoppingListType } from 'src/constants';
+import { UserService } from '../user/user.service';
+import { GroupService } from '../group/group.service';
 
 @Injectable({})
 export class MenuService {
-  async getUser(email: string) {
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
-    delete user.password;
-    return user;
+  constructor(
+    @Inject(forwardRef(() => UserService)) private _userService: UserService,
+    private _groupService: GroupService,
+  ) {}
+
+  // COMMON SERVICE
+  async find(id: string) {
+    try {
+      return await AppDataSource.getRepository(User).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
   }
+
+  async findGroupMenu(date: string, group: Group) {
+    try {
+      return await AppDataSource.getRepository(GroupMenu).findOne({
+        relations: {
+          group: true,
+        },
+        where: { date, group },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async findIndividualMenu(date: string, user: User) {
+    try {
+      return await AppDataSource.getRepository(IndividualMenu).findOne({
+        relations: {
+          user: true,
+        },
+        where: { date, user },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  // CONTROLLER SERVICES
 
   public async updateMenu(
     id: number,
     menuDto: MenuDto,
   ): Promise<PageDto<Menu>> {
-    const menu = await AppDataSource.getRepository(Menu).findOne({
-      where: {
-        id: id.toString(),
-      },
-    });
+    const menu = await this.find(id.toString());
 
     if (!menu) {
       throw new NotFoundException('Not found');
@@ -184,22 +222,16 @@ export class MenuService {
     jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
     try {
-      const { email } = jwtUser;
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
+
       const menu = await AppDataSource.getRepository(Menu).findOne({
         relations: {
           user: true,
         },
         where: {
           date: addDishDto.date,
-          user: {
-            email: email,
-          },
-        },
-      });
-
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
+          user: user,
         },
       });
 
@@ -300,19 +332,11 @@ export class MenuService {
   }
 
   public async countMember(jwtUser: JwtUser) {
-    const { email } = jwtUser;
+    const { sub } = jwtUser;
 
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
+    const user = await this._userService.findByAccountId(sub.toString());
 
-    const group = await AppDataSource.getRepository(Group).findOne({
-      where: {
-        id: user.groupId,
-      },
-    });
+    const group = await this._groupService.findByUser(user);
 
     return await AppDataSource.createQueryBuilder(UserToGroup, 'user_to_group')
       .select()
@@ -392,21 +416,20 @@ export class MenuService {
     date: string,
     jwtUser: JwtUser,
   ): Promise<PageDto<DishToMenu[]>> {
-    const { email } = jwtUser;
+    const { sub } = jwtUser;
+    const user = await this._userService.findByAccountId(sub.toString());
+
     let menu = await AppDataSource.getRepository(Menu).findOne({
       relations: {
         user: true,
       },
       where: {
         date,
-        user: {
-          email: email,
-        },
+        user: user,
       },
     });
 
     if (!menu) {
-      const user = await this.getUser(email);
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(Menu)
@@ -426,9 +449,7 @@ export class MenuService {
       },
       where: {
         date,
-        user: {
-          email: email,
-        },
+        user: user,
       },
     });
 
@@ -591,7 +612,6 @@ export class MenuService {
           {
             date: addDisDto.date,
             userId: jwtUser.sub.toString(),
-            type: ShoppingListType.INDIVIDUAL,
             status: ShoppingListStatus.PENDING,
           },
         ])
@@ -610,8 +630,6 @@ export class MenuService {
           {
             date: addDisDto.date,
             groupId,
-
-            type: ShoppingListType.INDIVIDUAL,
             status: ShoppingListStatus.PENDING,
           },
         ])

@@ -1,4 +1,4 @@
-import { IndividualShoppingList } from './IngredientShoppingList';
+import { IndividualShoppingList } from './IndividualShoppingList';
 import { WeightRecord } from './WeightRecord';
 import { ShoppingList } from './ShoppingList';
 import {
@@ -83,11 +83,6 @@ export class User {
   healthGoal: string;
 
   @Column({
-    default: '',
-  })
-  groupId: string;
-
-  @Column({
     default: 0,
   })
   desiredWeight: number;
@@ -96,19 +91,6 @@ export class User {
     default: '',
   })
   activityIntensity: string;
-
-  @Column({
-    nullable: false,
-    default: '',
-    unique: true,
-  })
-  email: string;
-
-  @Column({
-    nullable: false,
-    default: 'happymeal',
-  })
-  password: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -126,18 +108,10 @@ export class User {
   })
   role: string;
 
-  @OneToMany(() => Menu, (menu) => menu.user)
-  menus: Menu[];
-
   @OneToMany(() => WeightRecord, (weightRecord) => weightRecord.user, {
     onDelete: 'CASCADE',
   })
   weightRecords: WeightRecord[];
-
-  @OneToMany(() => ShoppingList, (shoppingList) => shoppingList.user, {
-    onDelete: 'CASCADE',
-  })
-  shoppingLists: ShoppingList[];
 
   @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.user, {
     onDelete: 'CASCADE',

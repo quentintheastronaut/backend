@@ -9,6 +9,7 @@ import {
 import { Ingredient } from './Ingredient';
 import { User } from './User';
 
+// REFACTOR
 @Entity()
 export class Allergic {
   @PrimaryGeneratedColumn({

@@ -15,6 +15,7 @@ import { Dish } from 'src/entities/Dish';
 
 @Injectable({})
 export class DishService {
+  // CONTROLLER SERVICES
   public async getIngredient(dishId) {
     try {
       const result = await AppDataSource.createQueryBuilder(

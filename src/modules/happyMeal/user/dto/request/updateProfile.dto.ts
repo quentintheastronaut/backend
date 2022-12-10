@@ -67,6 +67,12 @@ export class UpdateProfileDto {
   desiredWeight?: number;
 
   @ApiProperty({
+    example: true,
+  })
+  @IsOptional()
+  status?: boolean;
+
+  @ApiProperty({
     example: '',
   })
   @IsOptional()

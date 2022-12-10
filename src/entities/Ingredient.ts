@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Allergic } from './Allergic';
 
+// REFACTOR
 @Entity()
 export class Ingredient {
   @PrimaryGeneratedColumn({

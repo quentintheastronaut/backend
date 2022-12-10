@@ -15,6 +15,7 @@ enum Sex {
   OTHER = 'other',
 }
 
+// REFACTOR
 @Entity()
 export class Admin {
   @PrimaryGeneratedColumn({

@@ -1,4 +1,3 @@
-import { Menu } from './Menu';
 import { User } from './User';
 import {
   Column,
@@ -10,10 +9,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ShoppingList } from './ShoppingList';
 import { IsString } from 'class-validator';
 
+// REFACTOR
 @Entity()
-export class IndividualMenu {
+export class IndividualShoppingList {
   @PrimaryGeneratedColumn({
     name: 'id',
   })
@@ -23,12 +24,12 @@ export class IndividualMenu {
   @IsString()
   date: string;
 
-  @ManyToOne(() => User, (user) => user.individualMenus)
+  @ManyToOne(() => User, (user) => user.individualShoppingLists)
   user: User;
 
-  @OneToOne(() => Menu)
+  @OneToOne(() => ShoppingList)
   @JoinColumn()
-  menu: Menu;
+  shoppingList: ShoppingList;
 
   @CreateDateColumn()
   createdAt: Date;

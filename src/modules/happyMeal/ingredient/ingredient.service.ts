@@ -12,6 +12,17 @@ import { PageMetaDto, PageOptionsDto } from 'src/dtos';
 
 @Injectable({})
 export class IngredientService {
+  public async findOne(id: string) {
+    try {
+      return await AppDataSource.getRepository(Ingredient).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('Ingredient not found');
+    }
+  }
+
   public async createIngredient(
     ingredientDto: IngredientDto,
   ): Promise<PageDto<Ingredient>> {

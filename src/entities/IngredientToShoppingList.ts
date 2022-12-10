@@ -1,17 +1,18 @@
 import { Ingredient } from './Ingredient';
 import { ShoppingList } from './ShoppingList';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class IngredientToShoppingList {
   @PrimaryGeneratedColumn()
   public ingredientToShoppingListId!: string;
-
-  @Column()
-  public ingredientId!: string;
-
-  @Column()
-  public shoppingListId!: string;
 
   @Column({
     default: 1,
@@ -50,4 +51,10 @@ export class IngredientToShoppingList {
     },
   )
   public ingredient!: Ingredient;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

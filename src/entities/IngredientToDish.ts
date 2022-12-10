@@ -1,17 +1,18 @@
 import { Ingredient } from './Ingredient';
 import { Dish } from './Dish';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class IngredientToDish {
   @PrimaryGeneratedColumn()
   public ingredientToDishId!: string;
-
-  @Column()
-  public ingredientId!: string;
-
-  @Column()
-  public dishId!: string;
 
   @Column({
     default: 1,
@@ -37,4 +38,10 @@ export class IngredientToDish {
     onDelete: 'CASCADE',
   })
   public ingredient!: Ingredient;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

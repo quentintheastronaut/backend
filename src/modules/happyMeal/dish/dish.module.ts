@@ -6,5 +6,6 @@ import { Module } from '@nestjs/common';
 @Module({
   controllers: [DishController],
   providers: [DishService, DishRepository],
+  exports: [DishService],
 })
 export class DishModule {}

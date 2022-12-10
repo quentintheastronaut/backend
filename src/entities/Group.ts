@@ -1,21 +1,17 @@
 import { GroupShoppingList } from './GroupShoppingList';
-import { Menu } from './Menu';
-import { ShoppingList } from './ShoppingList';
 import { IsString } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './User';
 import { UserToGroup } from './UserToGroup';
 import { GroupMenu } from './GroupMenu';
 
+// REFACTOR
 @Entity()
 export class Group {
   @PrimaryGeneratedColumn({
@@ -39,29 +35,6 @@ export class Group {
   })
   imageUrl: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @ManyToMany(() => User, {
-    onDelete: 'CASCADE',
-  })
-  @JoinTable()
-  users: User[];
-
-  @ManyToMany(() => ShoppingList, {
-    onDelete: 'CASCADE',
-  })
-  @JoinTable()
-  shoppingLists: ShoppingList[];
-
-  @OneToMany(() => Menu, (menu) => menu.group, {
-    onDelete: 'CASCADE',
-  })
-  menus: Menu[];
-
   @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.group, {
     onDelete: 'CASCADE',
   })
@@ -77,4 +50,10 @@ export class Group {
     (groupShoppingList) => groupShoppingList.group,
   )
   groupShoppingLists: GroupShoppingList[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

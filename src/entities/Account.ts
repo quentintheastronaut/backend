@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+// REFACTORED
 @Entity()
 export class Account {
   @PrimaryGeneratedColumn({

@@ -14,6 +14,7 @@ import {
   ForbiddenException,
   BadRequestException,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { Group } from 'src/entities/Group';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/dtos';
@@ -21,9 +22,53 @@ import { GroupDto } from './dto/request/group.dto';
 import { User } from 'src/entities';
 import { GroupRole } from 'src/constants/groupRole';
 import { DishToMenu } from 'src/entities/DishToMenu';
+import { UserService } from '../user/user.service';
+import { AuthService } from '../auth/auth.service';
+import { forwardRef } from '@nestjs/common';
 
 @Injectable({})
 export class GroupService {
+  constructor(
+    @Inject(forwardRef(() => UserService)) private _userService: UserService,
+    private _authService: AuthService,
+  ) {}
+
+  // COMMON SERVICE
+  public async find(id: string) {
+    try {
+      return await AppDataSource.getRepository(Group).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  public async findByUser(user: User) {
+    try {
+      const userToGroup = await AppDataSource.getRepository(
+        UserToGroup,
+      ).findOne({
+        relations: {
+          user: true,
+        },
+        where: { user },
+      });
+
+      return await AppDataSource.getRepository(Group).findOne({
+        where: {
+          id: userToGroup.groupId,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  // CONTROLLER SERVICE
+  // done
   public async updateGroup(
     id: number,
     groupDto: GroupDto,
@@ -49,6 +94,7 @@ export class GroupService {
     }
   }
 
+  // done
   public async createGroup(
     groupDto: GroupDto,
     jwtUser: JwtUser,
@@ -63,12 +109,8 @@ export class GroupService {
       throw new ForbiddenException('Credentials taken');
     }
 
-    const { email } = jwtUser;
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
+    const { sub } = jwtUser;
+    const user = await this._userService.findByAccountId(sub.toString());
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -103,20 +145,13 @@ export class GroupService {
         ])
         .execute();
 
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: newGroup.id.toString(),
-        })
-        .where('id = :id', { id: user.id.toString() })
-        .execute();
-
       return new PageDto('OK', HttpStatus.OK, newGroup);
     } catch (error) {
       throw new InternalServerErrorException();
     }
   }
 
+  // done
   public async deleteGroup(id: number): Promise<PageDto<Group>> {
     try {
       const group = await AppDataSource.getRepository(Group).findOne({
@@ -162,14 +197,6 @@ export class GroupService {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(UserToGroup)
-        .where('groupId = :id', { id })
-        .execute();
-
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: null,
-        })
         .where('groupId = :id', { id })
         .execute();
 
@@ -267,19 +294,6 @@ export class GroupService {
     }
   }
 
-  public async isValidEmail(email: string) {
-    try {
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
-        },
-      });
-      return user ? true : false;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
   public async addMember(
     jwtUser: JwtUser,
     addMemberDto: AddMemberDto,
@@ -292,19 +306,16 @@ export class GroupService {
       );
     }
 
-    if (!(await this.isValidEmail(addMemberDto.email))) {
+    if (!(await this._authService.isExistedEmail(addMemberDto.email))) {
       throw new BadRequestException('This user is not existed !');
     }
 
-    const newUser = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email: addMemberDto.email,
-      },
-    });
+    const newUser = await this._userService.find(sub.toString());
 
     if (await this.hasGroup(newUser.id)) {
       throw new BadRequestException('This user is already in another group !');
     }
+
     try {
       await AppDataSource.createQueryBuilder()
         .insert()
@@ -316,13 +327,6 @@ export class GroupService {
         })
         .execute();
 
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: addMemberDto.groupId,
-        })
-        .where('id = :id', { id: newUser.id })
-        .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
@@ -374,14 +378,6 @@ export class GroupService {
         .where('userId = :userId and groupId = :groupId', {
           ...removeMemberDto,
         })
-        .execute();
-
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: '',
-        })
-        .where('id = :id', { id: removeMemberDto.userId })
         .execute();
 
       return new PageDto('OK', HttpStatus.OK);

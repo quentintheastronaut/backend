@@ -155,7 +155,7 @@ export class GroupService {
           await AppDataSource.createQueryBuilder()
             .delete()
             .from(IngredientToShoppingList)
-            .where('shoppingId = :id', { id: shoppingList.id })
+            .where('shoppingListId = :id', { id: shoppingList.id })
             .execute();
         });
       }

@@ -70,7 +70,7 @@ export class UpdateProfileDto {
     example: true,
   })
   @IsOptional()
-  status?: boolean;
+  active?: boolean;
 
   @ApiProperty({
     example: '',
@@ -78,9 +78,9 @@ export class UpdateProfileDto {
   @IsOptional()
   activityIntensity?: string;
 
-  @ApiProperty({
-    example: 'user_1@gmail.com',
-  })
-  @IsOptional()
-  email?: string;
+  // @ApiProperty({
+  //   example: 'user_1@gmail.com',
+  // })
+  // @IsOptional()
+  // email?: string;
 }

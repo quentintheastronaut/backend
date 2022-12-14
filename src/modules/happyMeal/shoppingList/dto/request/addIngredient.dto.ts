@@ -22,21 +22,8 @@ export class AddIngredientDto {
   quantity: number;
 
   @ApiProperty({
-    example: 0,
-  })
-  @IsNumber()
-  weight: number;
-
-  @ApiProperty({
     example: 'GRAMME',
   })
   @IsString()
   measurementType: string;
-
-  @ApiProperty({
-    example: ShoppingListType.INDIVIDUAL,
-    default: ShoppingListType.INDIVIDUAL,
-  })
-  @IsString()
-  type: ShoppingListType;
 }

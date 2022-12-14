@@ -1,6 +1,5 @@
 import { IndividualShoppingList } from './IndividualShoppingList';
 import { WeightRecord } from './WeightRecord';
-import { ShoppingList } from './ShoppingList';
 import {
   Column,
   CreateDateColumn,
@@ -11,7 +10,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Menu } from './Menu';
 import { UserToGroup } from './UserToGroup';
 import { AccountRole } from 'src/constants/accountRole';
 import { Account } from './Account';

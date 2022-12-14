@@ -22,7 +22,6 @@ export class Menu {
     nullable: false,
     default: ShoppingListType.INDIVIDUAL,
   })
-  @IsString()
   type: ShoppingListType;
 
   @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu, {

@@ -27,7 +27,9 @@ export class GroupMenu {
   @ManyToOne(() => Group, (group) => group.groupMenus)
   group: Group;
 
-  @OneToOne(() => Menu)
+  @OneToOne(() => Menu, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   menu: Menu;
 

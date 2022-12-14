@@ -55,12 +55,6 @@ export class UserDto {
   healthGoal?: string;
 
   @ApiProperty({
-    default: 'happymeal',
-  })
-  @IsOptional()
-  password?: string;
-
-  @ApiProperty({
     example: '65',
   })
   @IsOptional()
@@ -77,4 +71,10 @@ export class UserDto {
   })
   @IsOptional()
   email?: string;
+
+  @ApiProperty({
+    default: 'happymeal',
+  })
+  @IsOptional()
+  password?: string;
 }

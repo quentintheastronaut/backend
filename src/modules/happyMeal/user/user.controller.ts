@@ -37,6 +37,7 @@ export class UserController {
   }
 
   @Patch('/:id')
+  @ApiOperation({ summary: 'Update user' })
   async updateUser(
     @Param('id') id: number,
     @Body() updateProfileDto: UpdateProfileDto,
@@ -46,13 +47,15 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @Get('/profile')
+  @ApiOperation({ summary: "Get user's profile" })
   async getProfile(@Req() req: { user: JwtUser }) {
     const { user } = req;
     return this.userService.getProfile(user);
   }
 
   @UseGuards(JwtGuard)
-  @Post('/profile')
+  @Patch('/profile')
+  @ApiOperation({ summary: `Update user\'s profile` })
   async updateProfile(
     @Req() req: { user: JwtUser },
     @Body() updateProfileDto: UpdateProfileDto,

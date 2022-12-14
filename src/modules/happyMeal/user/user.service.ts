@@ -3,8 +3,6 @@ import { MenuService } from './../menu/menu.service';
 import { GroupService } from './../group/group.service';
 import { UserToGroup } from './../../../entities/UserToGroup';
 import { DishToMenu } from './../../../entities/DishToMenu';
-import { Menu } from 'src/entities/Menu';
-import { Group } from 'src/entities/Group';
 import { PhysicalActivityFactor } from './../../../constants/physicalAbilityFactor';
 import { PageDto, PageOptionsDto, PageMetaDto } from 'src/dtos';
 import { BodyMassIndex } from './../../../constants/bodyMassIndex';
@@ -191,16 +189,15 @@ export class UserService {
   async getProfile(jwtUser: JwtUser) {
     try {
       const { sub } = jwtUser;
-      const user = await AppDataSource.createQueryBuilder(User, 'user')
-        .leftJoinAndMapOne(
-          'user.group',
-          Group,
-          'group',
-          'user.groupId = group.id',
-        )
+      const user = await this.findByAccountId(sub.toString());
+      const group = await this._groupService.findByUser(user);
+      const profile = await AppDataSource.createQueryBuilder(User, 'user')
         .where('accountId = :accountId', { accountId: sub.toString() })
         .getOneOrFail();
-      return new PageDto('OK', HttpStatus.OK, user);
+      return new PageDto('OK', HttpStatus.OK, {
+        ...profile,
+        group: group,
+      });
     } catch (error) {
       console.log(error);
       throw new BadRequestException();
@@ -291,8 +288,6 @@ export class UserService {
       const user = await this.insert(userDto);
       // const user = await this.find();
 
-      console.log(user);
-
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -313,7 +308,7 @@ export class UserService {
     await this.find(id.toString());
 
     try {
-      await this.update(id.toString(), { status: false });
+      await this.update(id.toString(), { active: false });
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
@@ -324,7 +319,7 @@ export class UserService {
     await this.find(id.toString());
 
     try {
-      await this.update(id.toString(), { status: true });
+      await this.update(id.toString(), { active: true });
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();

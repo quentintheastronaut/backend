@@ -26,7 +26,9 @@ export class IndividualMenu {
   @ManyToOne(() => User, (user) => user.individualMenus)
   user: User;
 
-  @OneToOne(() => Menu)
+  @OneToOne(() => Menu, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   menu: Menu;
 

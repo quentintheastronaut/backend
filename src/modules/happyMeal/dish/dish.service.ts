@@ -1,3 +1,6 @@
+import { Ingredient } from 'src/entities/Ingredient';
+import { AddIngredientDto } from './../shoppingList/dto/request/addIngredient.dto';
+import { IngredientService } from './../ingredient/ingredient.service';
 import { IngredientToDish } from './../../../entities/IngredientToDish';
 import { AddIngredientToDishDto } from './dto/request/addIngredient.dto';
 import { DishDto } from './dto/request/dish.dto';
@@ -8,13 +11,18 @@ import {
   InternalServerErrorException,
   HttpStatus,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
 import { Dish } from 'src/entities/Dish';
+import { Inject } from '@nestjs/common';
 
 @Injectable({})
 export class DishService {
+  @Inject(forwardRef(() => IngredientService))
+  private _ingredientService: IngredientService;
+
   // COMMON SERVICES
   public async find(id: string) {
     try {
@@ -24,6 +32,28 @@ export class DishService {
     } catch (error) {
       console.log(error);
       throw new NotFoundException('User not found');
+    }
+  }
+
+  public async insertIngredientToDish(
+    addIngredientToDishDto: AddIngredientToDishDto,
+    dish: Dish,
+    ingredient: Ingredient,
+  ) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(IngredientToDish)
+        .values([
+          {
+            ...addIngredientToDishDto,
+            dish,
+            ingredient,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      throw new InternalServerErrorException();
     }
   }
 
@@ -70,32 +100,38 @@ export class DishService {
 
   public async addIngredient(addIngredientDto: AddIngredientToDishDto) {
     try {
-      await AppDataSource.createQueryBuilder()
-        .insert()
-        .into(IngredientToDish)
-        .values([addIngredientDto])
-        .execute();
+      const dish = await this.find(addIngredientDto.dishId);
+      const ingredient = await this._ingredientService.findOne(
+        addIngredientDto.ingredientId,
+      );
+
+      await this.insertIngredientToDish(addIngredientDto, dish, ingredient);
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
     }
   }
 
-  public async updateIngredient(addIngredientDto: AddIngredientToDishDto) {
+  public async updateIngredient(
+    addIngredientToDishDto: AddIngredientToDishDto,
+  ) {
     try {
       await AppDataSource.createQueryBuilder()
         .update(IngredientToDish)
         .set({
-          quantity: addIngredientDto.quantity,
-          measurementType: addIngredientDto.measurementType,
+          quantity: addIngredientToDishDto.quantity,
+          measurementType: addIngredientToDishDto.measurementType,
         })
         .where('dishId = :dishId AND ingredientId = :ingredientId', {
-          dishId: addIngredientDto.dishId,
-          ingredientId: addIngredientDto.ingredientId,
+          dishId: addIngredientToDishDto.dishId,
+          ingredientId: addIngredientToDishDto.ingredientId,
         })
         .execute();
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

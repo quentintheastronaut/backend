@@ -35,7 +35,7 @@ export class GroupService {
     @Inject(forwardRef(() => ShoppingListService))
     private _shoppingListService: ShoppingListService,
     @Inject(forwardRef(() => MenuService))
-    private _MenuService: MenuService,
+    private _menuService: MenuService,
     @Inject(forwardRef(() => AuthService)) private _authService: AuthService,
   ) {}
 
@@ -58,13 +58,18 @@ export class GroupService {
       ).findOne({
         relations: {
           user: true,
+          group: true,
         },
-        where: { user },
+        where: {
+          user: {
+            id: user.id,
+          },
+        },
       });
 
       return await AppDataSource.getRepository(Group).findOne({
         where: {
-          id: userToGroup.groupId,
+          id: userToGroup?.groupId,
         },
       });
     } catch (error) {
@@ -322,9 +327,15 @@ export class GroupService {
       throw new BadRequestException('This user is not existed !');
     }
 
-    const newUser = await this._userService.find(sub.toString());
+    const newMemberAccount = await this._authService.findOneByEmail(
+      addMemberDto.email,
+    );
 
-    if (await this.hasGroup(newUser.id)) {
+    const newMember = await this._userService.findByAccountId(
+      newMemberAccount.id,
+    );
+
+    if (await this.hasGroup(newMember.id)) {
       throw new BadRequestException('This user is already in another group !');
     }
 
@@ -334,7 +345,7 @@ export class GroupService {
         .into(UserToGroup)
         .values({
           groupId: addMemberDto.groupId,
-          userId: newUser.id,
+          userId: newMember.id,
           role: GroupRole.MEMBER,
         })
         .execute();

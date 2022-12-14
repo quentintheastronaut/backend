@@ -28,21 +28,8 @@ export class AddGroupIngredientDto {
   quantity: number;
 
   @ApiProperty({
-    example: 0,
-  })
-  @IsNumber()
-  weight: number;
-
-  @ApiProperty({
     example: 'GRAMME',
   })
   @IsString()
   measurementType: string;
-
-  @ApiProperty({
-    example: ShoppingListType.GROUP,
-    default: ShoppingListType.GROUP,
-  })
-  @IsString()
-  type: ShoppingListType;
 }

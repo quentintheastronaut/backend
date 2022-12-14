@@ -33,6 +33,8 @@ import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { DishService } from '../dish/dish.service';
 import { ShoppingListService } from '../shoppingList/shoppingList.service';
+import { Dish } from 'src/entities/Dish';
+import { group } from 'console';
 
 @Injectable({})
 export class MenuService {
@@ -40,7 +42,6 @@ export class MenuService {
     @Inject(forwardRef(() => UserService)) private _userService: UserService,
     @Inject(forwardRef(() => DishService)) private _dishService: DishService,
     @Inject(forwardRef(() => GroupService)) private _groupService: GroupService,
-    @Inject(forwardRef(() => MenuService)) private _menuService: MenuService,
     @Inject(forwardRef(() => ShoppingListService))
     private _shoppingListService: ShoppingListService,
   ) {}
@@ -48,7 +49,7 @@ export class MenuService {
   // COMMON SERVICE
   async find(id: string) {
     try {
-      return await AppDataSource.getRepository(User).findOne({
+      return await AppDataSource.getRepository(Menu).findOne({
         where: { id },
       });
     } catch (error) {
@@ -62,8 +63,14 @@ export class MenuService {
       return await AppDataSource.getRepository(GroupMenu).findOne({
         relations: {
           group: true,
+          menu: true,
         },
-        where: { date, group },
+        where: {
+          date,
+          group: {
+            id: group.id,
+          },
+        },
       });
     } catch (error) {
       console.log(error);
@@ -76,8 +83,14 @@ export class MenuService {
       return await AppDataSource.getRepository(IndividualMenu).findOne({
         relations: {
           user: true,
+          menu: true,
         },
-        where: { date, user },
+        where: {
+          date,
+          user: {
+            id: user.id,
+          },
+        },
       });
     } catch (error) {
       console.log(error);
@@ -85,58 +98,175 @@ export class MenuService {
     }
   }
 
-  // CONTROLLER SERVICES
-
-  public async updateMenu(
-    id: number,
-    menuDto: MenuDto,
-  ): Promise<PageDto<Menu>> {
-    const menu = await this.find(id.toString());
-
-    if (!menu) {
-      throw new NotFoundException('Not found');
-    }
+  async findIndividualMenuByMenu(menu: Menu) {
     try {
-      await AppDataSource.createQueryBuilder()
-        .update(Menu)
-        .set(menuDto)
-        .where('id = :id', { id })
-        .execute();
-      return new PageDto('OK', HttpStatus.OK);
+      return await AppDataSource.getRepository(IndividualMenu).findOne({
+        relations: {
+          user: true,
+          menu: true,
+        },
+        where: {
+          menu: {
+            id: menu.id,
+          },
+        },
+      });
     } catch (error) {
-      throw new InternalServerErrorException();
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+  async findGroupMenuByMenu(menu: Menu) {
+    try {
+      return await AppDataSource.getRepository(GroupMenu).findOne({
+        relations: {
+          group: true,
+          menu: true,
+        },
+        where: {
+          menu: {
+            id: menu.id,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
     }
   }
 
-  public async createMenu(menuDto: MenuDto): Promise<PageDto<Menu>> {
+  async findMenu(id: string) {
     try {
-      await AppDataSource.createQueryBuilder()
+      return await AppDataSource.getRepository(Menu).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async findDishToMenu(id: string) {
+    try {
+      return await AppDataSource.getRepository(DishToMenu).findOne({
+        relations: {
+          menu: true,
+          dish: true,
+        },
+        where: {
+          dishToMenuId: id,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async insertGroup(date: string, menu: Menu, group: Group) {
+    try {
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(GroupMenu)
+        .values([
+          {
+            date,
+            menu,
+            group,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+  async insertIndividual(date: string, menu: Menu, user: User) {
+    try {
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(IndividualMenu)
+        .values([
+          {
+            date,
+            menu,
+            user,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  async insertMenu(type: ShoppingListType) {
+    try {
+      return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Menu)
-        .values([menuDto])
+        .values([
+          {
+            type,
+          },
+        ])
         .execute();
-      return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
-      throw new InternalServerErrorException();
+      console.log(error);
+      throw new InternalServerErrorException('');
     }
   }
 
-  public async deleteMenu(id: number): Promise<PageDto<Menu>> {
-    const menu = await AppDataSource.getRepository(Menu).findOne({
-      where: {
-        id: id.toString(),
-      },
-    });
-
-    if (!menu) {
-      throw new NotFoundException('Not found');
+  async insertDishToMenu(dish: Dish, menu: Menu, addDishDto: AddDishDto) {
+    try {
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(DishToMenu)
+        .values([
+          {
+            ...addDishDto,
+            menu,
+            dish,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
     }
+  }
+
+  async deleteDishToMenu(id: string) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(DishToMenu)
+        .where('dishToMenuId = :id', { id })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  async delete(id: string) {
     try {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(Menu)
         .where('id = :id', { id })
         .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  // CONTROLLER SERVICES
+
+  public async deleteMenu(id: number): Promise<PageDto<Menu>> {
+    try {
+      await this.delete(id.toString());
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
@@ -172,38 +302,21 @@ export class MenuService {
 
       const group = await this._groupService.find(groupId);
 
-      const groupMenu = this._menuService.findGroupMenu(date, group);
+      const groupMenu = await this.findGroupMenu(date, group);
 
       if (!groupMenu) {
-        const newMenuId = await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(Menu)
-          .values({
-            date: addGroupDishDto.date,
-            group: group,
-          })
-          .execute();
+        const newMenuId = await this.insertMenu(ShoppingListType.GROUP);
 
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(DishToMenu)
-          .values({
-            menuId: newMenuId.identifiers[0].id,
-            ...addGroupDishDto,
-          })
-          .execute();
+        const newMenu = await this.find(newMenuId.raw.insertId);
+
+        await this.insertGroup(date, newMenu, group);
+
+        await this.insertDishToMenu(dish, newMenu, addGroupDishDto);
       } else {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(DishToMenu)
-          .values({
-            menuId: menu.id,
-            ...addGroupDishDto,
-          })
-          .execute();
+        await this.insertDishToMenu(dish, groupMenu.menu, addGroupDishDto);
       }
 
-      await this.addIngredientToList(addGroupDishDto, null);
+      await this.addIngredientToGroupList(addGroupDishDto, group);
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -218,47 +331,25 @@ export class MenuService {
   ): Promise<PageDto<Menu>> {
     try {
       const { sub } = jwtUser;
+      const { dishId, date } = addDishDto;
       const user = await this._userService.findByAccountId(sub.toString());
 
-      const menu = await AppDataSource.getRepository(Menu).findOne({
-        relations: {
-          user: true,
-        },
-        where: {
-          date: addDishDto.date,
-          user: user,
-        },
-      });
+      const dish = await this._dishService.find(dishId);
 
-      if (!menu) {
-        const newMenuId = await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(Menu)
-          .values({
-            date: addDishDto.date,
-            user: user,
-          })
-          .execute();
+      const individualMenu = await this.findIndividualMenu(date, user);
 
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(DishToMenu)
-          .values({
-            menuId: newMenuId.identifiers[0].id,
-            ...addDishDto,
-          })
-          .execute();
+      if (!individualMenu) {
+        const newMenuId = await this.insertMenu(ShoppingListType.INDIVIDUAL);
+
+        const newMenu = await this.find(newMenuId.raw.insertId);
+
+        await this.insertIndividual(date, newMenu, user);
+
+        await this.insertDishToMenu(dish, newMenu, addDishDto);
       } else {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(DishToMenu)
-          .values({
-            menuId: menu.id,
-            ...addDishDto,
-          })
-          .execute();
+        await this.insertDishToMenu(dish, individualMenu.menu, addDishDto);
       }
-      await this.addIngredientToList(addDishDto, jwtUser);
+      await this.addIngredientToIndividualList(addDishDto, jwtUser);
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -270,55 +361,17 @@ export class MenuService {
     removeDishDto: RemoveDishDto,
     jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
-    const dishToMenu = await AppDataSource.getRepository(DishToMenu).findOne({
-      where: {
-        dishToMenuId: removeDishDto.dishToMenuId,
-      },
-    });
-
-    if (!dishToMenu) {
-      throw new BadRequestException('This dish is not existed in this menu !');
-    }
-
-    const menu = await AppDataSource.getRepository(Menu).findOne({
-      relations: {
-        group: true,
-        user: true,
-      },
-      where: {
-        id: dishToMenu.menuId,
-      },
-    });
-
-    if (!menu) {
-      throw new BadRequestException('This menu is not existed !');
-    }
-
-    const date = menu.date;
-
     try {
-      await AppDataSource.createQueryBuilder()
-        .delete()
-        .from(DishToMenu)
-        .where('dishToMenuId = :dishToMenuId', {
-          ...removeDishDto,
-        })
-        .execute();
+      const dishToMenu = await this.findDishToMenu(removeDishDto.dishToMenuId);
+      const { menu } = dishToMenu;
 
       if (menu.type === ShoppingListType.GROUP) {
-        await this.removeGroupIngredient(
-          date,
-          menu.group.id,
-          dishToMenu.dishId,
-        );
+        await this.removeGroupIngredient(removeDishDto);
       } else {
-        await this.removeIngredient(
-          date,
-          jwtUser.sub.toString(),
-          dishToMenu.dishId,
-        );
+        await this.removeIngredient(removeDishDto, jwtUser);
       }
 
+      await this.deleteDishToMenu(removeDishDto.dishToMenuId);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -344,60 +397,30 @@ export class MenuService {
     groupId: string,
   ): Promise<PageDto<DishToMenu[]>> {
     try {
-      const group = await AppDataSource.getRepository(Group).findOne({
-        where: {
-          id: groupId,
-        },
-      });
+      const group = await this._groupService.find(groupId);
 
       if (!group) {
         throw new NotFoundException('This group is not existed !');
       }
 
-      let menu = await AppDataSource.getRepository(Menu).findOne({
-        relations: {
-          group: true,
-        },
-        where: {
-          date,
-          group: {
-            id: groupId,
-          },
-        },
-      });
+      const groupMenu = await this.findGroupMenu(date, group);
 
-      if (!menu) {
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(Menu)
-          .values([
-            {
-              date,
-              group: group,
-              type: ShoppingListType.GROUP,
-            },
-          ])
-          .execute();
+      if (!groupMenu) {
+        const newMenuId = await this.insertMenu(ShoppingListType.GROUP);
+
+        const newMenu = await this.find(newMenuId.raw.insertId);
+
+        await this.insertGroup(date, newMenu, group);
       }
 
-      menu = await AppDataSource.getRepository(Menu).findOne({
-        relations: {
-          user: true,
-        },
-        where: {
-          date,
-          group: {
-            id: groupId,
-          },
-        },
-      });
+      const newGroupMenu = await this.findGroupMenu(date, group);
 
       const result = await AppDataSource.createQueryBuilder(
         DishToMenu,
         'dish_to_menu',
       )
         .leftJoinAndSelect('dish_to_menu.dish', 'dish')
-        .where('menuId = :menuId', { menuId: menu.id })
+        .where('menuId = :menuId', { menuId: newGroupMenu.menu.id })
         .getMany();
 
       return new PageDto('OK', HttpStatus.OK, result);
@@ -414,51 +437,29 @@ export class MenuService {
     const { sub } = jwtUser;
     const user = await this._userService.findByAccountId(sub.toString());
 
-    let menu = await AppDataSource.getRepository(Menu).findOne({
-      relations: {
-        user: true,
-      },
-      where: {
-        date,
-        user: user,
-      },
-    });
+    const individualMenu = await this.findIndividualMenu(date, user);
 
-    if (!menu) {
-      await AppDataSource.createQueryBuilder()
-        .insert()
-        .into(Menu)
-        .values([
-          {
-            date,
-            user: user,
-            type: ShoppingListType.INDIVIDUAL,
-          },
-        ])
-        .execute();
+    if (!individualMenu) {
+      const newMenuId = await this.insertMenu(ShoppingListType.INDIVIDUAL);
+
+      const newMenu = await this.findMenu(newMenuId.raw.insertId);
+
+      await this.insertIndividual(date, newMenu, user);
     }
 
-    menu = await AppDataSource.getRepository(Menu).findOne({
-      relations: {
-        user: true,
-      },
-      where: {
-        date,
-        user: user,
-      },
-    });
-
+    const newIndividualMenu = await this.findIndividualMenu(date, user);
     try {
       const result = await AppDataSource.createQueryBuilder(
         DishToMenu,
         'dish_to_menu',
       )
         .leftJoinAndSelect('dish_to_menu.dish', 'dish')
-        .where('menuId = :menuId', { menuId: menu.id })
+        .where('menuId = :menuId', { menuId: newIndividualMenu.menu.id })
         .getMany();
 
       return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }
@@ -525,72 +526,32 @@ export class MenuService {
     }
   }
 
-  public async addIngredientToList(addDisDto: any, jwtUser: JwtUser) {
-    const condition = !addDisDto.groupId
-      ? { userId: jwtUser.sub.toString() }
-      : {
-          groupId: addDisDto.groupId,
-        };
-
-    const list = await AppDataSource.getRepository(ShoppingList).findOne({
-      where: {
-        date: addDisDto.date,
-        ...condition,
-      },
-    });
-
+  public async addIngredientToGroupList(addDishDto: AddDishDto, group: Group) {
     try {
-      if (!list) {
-        const inserted = !addDisDto.groupId
-          ? await this.createList(addDisDto, jwtUser)
-          : await this.createGroupList(addDisDto, addDisDto.groupId);
-        const listId = inserted.identifiers[0].id;
+      const { entities } = await AppDataSource.createQueryBuilder(
+        IngredientToDish,
+        'ingredient_to_dish',
+      )
+        .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
+        .where('dishId = :dishId', {
+          dishId: addDishDto.dishId,
+        })
+        .getRawAndEntities();
 
-        const { entities } = await AppDataSource.createQueryBuilder()
-          .select('ingredientToDish')
-          .from(IngredientToDish, 'ingredientToDish')
-          .where('dishId = :dishId', {
-            dishId: addDisDto.dishId,
-          })
-          .getRawAndEntities();
+      const ingredientToList = entities.map((ingredient) => ({
+        ingredientId: ingredient.ingredient.id,
+        quantity: ingredient.quantity,
+        measurementType: ingredient.measurementType,
+      }));
 
-        const ingredientToList = entities.map((ingredient) => ({
+      for (const ingredient of ingredientToList) {
+        await this._shoppingListService.addGroupIngredient({
+          groupId: group.id,
           ingredientId: ingredient.ingredientId,
-          shoppingListId: listId,
           quantity: ingredient.quantity,
           measurementType: ingredient.measurementType,
-          weight: ingredient.weight,
-        }));
-
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(IngredientToShoppingList)
-          .values(ingredientToList)
-          .execute();
-      } else {
-        const listId = list.id;
-
-        const { entities } = await AppDataSource.createQueryBuilder()
-          .select('ingredientToDish')
-          .from(IngredientToDish, 'ingredientToDish')
-          .where('dishId = :dishId', {
-            dishId: addDisDto.dishId,
-          })
-          .getRawAndEntities();
-
-        const ingredientToList = entities.map((ingredient) => ({
-          ingredientId: ingredient.ingredientId,
-          shoppingListId: listId,
-          quantity: ingredient.quantity,
-          measurementType: ingredient.measurementType,
-          weight: ingredient.weight,
-        }));
-
-        await AppDataSource.createQueryBuilder()
-          .insert()
-          .into(IngredientToShoppingList)
-          .values(ingredientToList)
-          .execute();
+          date: addDishDto.date,
+        });
       }
     } catch (error) {
       console.log(error);
@@ -598,59 +559,76 @@ export class MenuService {
     }
   }
 
-  public async createList(addDisDto: AddDishDto, jwtUser: JwtUser) {
+  public async addIngredientToIndividualList(
+    addDishDto: AddDishDto,
+    jwtUser: JwtUser,
+  ) {
     try {
-      return await AppDataSource.createQueryBuilder()
-        .insert()
-        .into(ShoppingList)
-        .values([
+      const { entities } = await AppDataSource.createQueryBuilder(
+        IngredientToDish,
+        'ingredient_to_dish',
+      )
+        .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
+        .where('dishId = :dishId', {
+          dishId: addDishDto.dishId,
+        })
+        .getRawAndEntities();
+
+      const ingredientToList = entities.map((ingredient) => ({
+        ingredientId: ingredient.ingredient.id,
+        quantity: ingredient.quantity,
+        measurementType: ingredient.measurementType,
+      }));
+
+      for (const ingredient of ingredientToList) {
+        await this._shoppingListService.addIngredient(
           {
-            date: addDisDto.date,
-            userId: jwtUser.sub.toString(),
-            status: ShoppingListStatus.PENDING,
+            ingredientId: ingredient.ingredientId,
+            quantity: ingredient.quantity,
+            measurementType: ingredient.measurementType,
+            date: addDishDto.date,
           },
-        ])
-        .execute();
+          jwtUser,
+        );
+      }
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException();
-    }
-  }
-  public async createGroupList(addDisDto: AddDishDto, groupId: string) {
-    try {
-      return await AppDataSource.createQueryBuilder()
-        .insert()
-        .into(ShoppingList)
-        .values([
-          {
-            date: addDisDto.date,
-            groupId,
-            status: ShoppingListStatus.PENDING,
-          },
-        ])
-        .execute();
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(error);
     }
   }
 
-  public async removeIngredient(date: string, userId: string, dishId: string) {
-    const user = await this._userService.find(userId);
+  public async removeIngredient(
+    removeDishDto: RemoveDishDto,
+    jwtUser: JwtUser,
+  ) {
+    const { sub } = jwtUser;
+    const { dishToMenuId } = removeDishDto;
+
+    const dishToMenu = await this.findDishToMenu(dishToMenuId);
+    const menu = await this.find(dishToMenu.menu.id);
+    const individualMenu = await this.findIndividualMenuByMenu(menu);
+
+    const user = await this._userService.findByAccountId(sub.toString());
 
     const individualList =
-      await this._shoppingListService.findIndividualShoppingList(date, user.id);
+      await this._shoppingListService.findIndividualShoppingList(
+        individualMenu.date,
+        user.id,
+      );
 
-    const dish = await this._dishService.find(dishId);
+    const dish = await this._dishService.find(dishToMenu.dish.id);
 
     const ingredients = await AppDataSource.getRepository(
       IngredientToDish,
     ).find({
       relations: {
         dish: true,
+        ingredient: true,
       },
       where: {
-        dish: dish,
+        dish: {
+          id: dish.id,
+        },
       },
     });
 
@@ -678,32 +656,40 @@ export class MenuService {
     }
   }
 
-  public async removeGroupIngredient(
-    date: string,
-    groupId: string,
-    dishId: string,
-  ) {
-    const groupList = await this._shoppingListService.findGroupShoppingList(
-      date,
-      groupId,
-    );
+  public async removeGroupIngredient(removeDishDto: RemoveDishDto) {
+    const { dishToMenuId } = removeDishDto;
+
+    const dishToMenu = await this.findDishToMenu(dishToMenuId);
+    const menu = await this.find(dishToMenu.menu.id);
+    const groupMenu = await this.findGroupMenuByMenu(menu);
+
+    const group = await this._groupService.find(groupMenu.group.id);
+
+    const individualList =
+      await this._shoppingListService.findGroupShoppingList(
+        groupMenu.date,
+        group,
+      );
+
+    const dish = await this._dishService.find(dishToMenu.dish.id);
 
     const ingredients = await AppDataSource.getRepository(
       IngredientToDish,
     ).find({
       relations: {
         dish: true,
+        ingredient: true,
       },
       where: {
         dish: {
-          id: dishId,
+          id: dish.id,
         },
       },
     });
 
     const values = ingredients.map((ingredient) => ({
       ingredientId: ingredient.ingredient.id,
-      shoppingListId: groupList.shoppingList.id,
+      shoppingListId: individualList.shoppingList.id,
     }));
 
     try {

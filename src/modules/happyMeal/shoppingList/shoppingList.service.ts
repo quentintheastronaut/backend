@@ -30,6 +30,7 @@ import { Group } from 'src/entities/Group';
 import { Ingredient } from 'src/entities/Ingredient';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { GroupService } from '../group/group.service';
+import { ShoppingListType } from 'src/constants';
 
 @Injectable({})
 export class ShoppingListService {
@@ -41,7 +42,7 @@ export class ShoppingListService {
   ) {}
 
   // COMMON SERVICES
-  async findGroupShoppingList(date: string, groupId: string) {
+  async findGroupShoppingList(date: string, group: Group) {
     try {
       return await AppDataSource.getRepository(GroupShoppingList).findOne({
         relations: {
@@ -51,7 +52,7 @@ export class ShoppingListService {
         where: {
           date,
           group: {
-            id: groupId,
+            id: group.id,
           },
         },
       });
@@ -122,8 +123,6 @@ export class ShoppingListService {
     }
   }
   async insertIndividual(date: string, shoppingList: ShoppingList, user: User) {
-    console.log(user);
-    console.log(shoppingList);
     try {
       return await AppDataSource.createQueryBuilder()
         .insert()
@@ -176,6 +175,18 @@ export class ShoppingListService {
     }
   }
 
+  async deleteIngredientToShoppingList(id: string) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(IngredientToShoppingList)
+        .where('ingredientToShoppingListId = :id', { id })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
   // CONTROLLER'S SERVICES
 
   public async updateShoppingList(
@@ -201,6 +212,7 @@ export class ShoppingListService {
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }
@@ -278,7 +290,7 @@ export class ShoppingListService {
     if (!individualList) {
       // create shopping list if it's doesn't exist
       const newListId = await this.insertShoppingList({
-        date,
+        type: ShoppingListType.GROUP,
         status: ShoppingListStatus.PENDING,
       });
 
@@ -318,17 +330,20 @@ export class ShoppingListService {
     groupId: string,
   ): Promise<PageDto<IngredientToShoppingList[]>> {
     const group = await this._groupService.find(groupId);
-    let groupShoppingList = await this.findGroupShoppingList(date, groupId);
+    let groupShoppingList = await this.findGroupShoppingList(date, group);
 
     if (!groupShoppingList) {
-      const newList = await this.insertShoppingList({
+      const newListId = await this.insertShoppingList({
+        type: ShoppingListType.GROUP,
         status: ShoppingListStatus.PENDING,
       });
 
-      await this.insertGroup(date, newList.raw, group);
+      const newList = await this.findShoppingList(newListId.raw.insertId);
+
+      await this.insertGroup(date, newList, group);
     }
 
-    groupShoppingList = await this.findGroupShoppingList(date, groupId);
+    groupShoppingList = await this.findGroupShoppingList(date, group);
 
     try {
       const result = await AppDataSource.createQueryBuilder(
@@ -356,23 +371,27 @@ export class ShoppingListService {
   ): Promise<PageDto<ShoppingList>> {
     try {
       const { date, groupId } = addGroupIngredientDto;
-      const list = await this.findGroupShoppingList(date, groupId);
 
       const group = await this._groupService.find(groupId);
+
+      const list = await this.findGroupShoppingList(date, group);
 
       const ingredient = await this._ingredientService.findOne(
         addGroupIngredientDto.ingredientId,
       );
 
       if (!list) {
-        const newList = await this.insertShoppingList({
+        const newListId = await this.insertShoppingList({
+          type: ShoppingListType.GROUP,
           status: ShoppingListStatus.PENDING,
         });
 
-        await this.insertGroup(date, newList.raw, group);
+        const newList = await this.findShoppingList(newListId.raw.insertId);
+
+        await this.insertGroup(date, newList, group);
 
         await this.insertIngredientToList(
-          newList.raw,
+          newList,
           ingredient,
           addGroupIngredientDto,
         );
@@ -396,10 +415,11 @@ export class ShoppingListService {
   ): Promise<PageDto<ShoppingList>> {
     try {
       const { sub } = jwtUser;
+      const { date } = addIngredientDto;
       const user = await this._userService.findByAccountId(sub.toString());
 
       const individualShoppingList = await this.findIndividualShoppingList(
-        addIngredientDto.date,
+        date,
         user.id,
       );
 
@@ -408,14 +428,16 @@ export class ShoppingListService {
       );
 
       if (!individualShoppingList) {
-        const newList = await this.insertShoppingList({
+        const newListId = await this.insertShoppingList({
           status: ShoppingListStatus.PENDING,
         });
 
-        await this.insertIndividual(addIngredientDto.date, newList.raw, user);
+        const newList = await this.findShoppingList(newListId.raw.insertId);
+
+        await this.insertIndividual(date, newList, user);
 
         await this.insertIngredientToList(
-          newList.raw,
+          newList,
           ingredient,
           addIngredientDto,
         );
@@ -435,29 +457,11 @@ export class ShoppingListService {
 
   public async removeIngredient(
     removeIngredientDto: RemoveIngredientDto,
-    jwtUser: JwtUser,
   ): Promise<PageDto<ShoppingList>> {
-    const { sub } = jwtUser;
-
-    const user = await this._userService.findByAccountId(sub.toString());
-    const list = await this.findIndividualShoppingList(
-      removeIngredientDto.date,
-      user.id,
-    );
-
-    if (!list) {
-      throw new BadRequestException('This shopping list is not existed !');
-    }
-
     try {
-      await AppDataSource.createQueryBuilder()
-        .delete()
-        .from(IngredientToShoppingList)
-        .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
-          ...removeIngredientDto,
-        })
-        .execute();
-
+      await this.deleteIngredientToShoppingList(
+        removeIngredientDto.ingredientToShoppingListId,
+      );
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException(error);

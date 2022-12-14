@@ -30,12 +30,6 @@ import { AddDishDto } from './dto/request/addDish.dto';
 export class MenuController {
   constructor(private readonly _menuService: MenuService) {}
 
-  @ApiOperation({ summary: 'Create menu' })
-  @Post()
-  async createMenu(@Body() menuDto: MenuDto): Promise<PageDto<Menu>> {
-    return this._menuService.createMenu(menuDto);
-  }
-
   @ApiOperation({ summary: 'Get list of menus' })
   @Get()
   @ApiPaginatedResponse(Menu)
@@ -49,15 +43,6 @@ export class MenuController {
   @Patch('/update-dish')
   async updateDish(@Body() updateDishDto: UpdateDishToMenuDto) {
     return this._menuService.updateMenuDetail(updateDishDto);
-  }
-
-  @ApiOperation({ summary: 'Update menu information' })
-  @Patch(':id')
-  async updateMenu(
-    @Param('id') id: number,
-    @Body() menuDto: MenuDto,
-  ): Promise<PageDto<Menu>> {
-    return this._menuService.updateMenu(id, menuDto);
   }
 
   @ApiOperation({ summary: 'Delete menu' })

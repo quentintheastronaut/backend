@@ -4,16 +4,11 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Dish } from './Dish';
 import { Menu } from './Menu';
 
+// REFACTOR
 @Entity()
 export class DishToMenu {
   @PrimaryGeneratedColumn()
   public dishToMenuId!: string;
-
-  @Column()
-  public dishId!: string;
-
-  @Column()
-  public menuId!: string;
 
   @Column()
   public meal!: MealType;

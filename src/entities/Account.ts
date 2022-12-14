@@ -1,17 +1,16 @@
-import { ShoppingListType } from 'src/constants';
-import { DishToMenu } from './DishToMenu';
 import { IsString } from 'class-validator';
+import { AccountRole } from 'src/constants/accountRole';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+// REFACTORED
 @Entity()
-export class Menu {
+export class Account {
   @PrimaryGeneratedColumn({
     name: 'id',
   })
@@ -20,14 +19,22 @@ export class Menu {
 
   @Column({
     nullable: false,
-    default: ShoppingListType.INDIVIDUAL,
+    default: '',
+    unique: true,
   })
-  type: ShoppingListType;
+  email: string;
 
-  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.menu, {
-    onDelete: 'CASCADE',
+  @Column({
+    nullable: false,
+    default: 'happymeal',
   })
-  public dishToMenus!: DishToMenu[];
+  password: string;
+
+  @Column({
+    nullable: false,
+    default: AccountRole.USER,
+  })
+  role: string;
 
   @CreateDateColumn()
   createdAt: Date;

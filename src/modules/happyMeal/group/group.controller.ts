@@ -13,7 +13,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PageDto, PageOptionsDto } from 'src/dtos';
 import { Group } from 'src/entities/Group';
 import { GroupDto } from './dto/request/group.dto';
@@ -28,6 +28,7 @@ import { RemoveMemberDto } from './dto/request/removeMember.dto';
 export class GroupController {
   constructor(private readonly _groupService: GroupService) {}
 
+  @ApiOperation({ summary: 'Get all groups of a user' })
   @UseGuards(JwtGuard)
   @Get('/by-user')
   async getGroupByUserId(@Req() req: { user: JwtUser }) {
@@ -35,6 +36,7 @@ export class GroupController {
     return this._groupService.getGroupByUserId(user);
   }
 
+  @ApiOperation({ summary: 'Add new member' })
   @UseGuards(JwtGuard)
   @Post('add-member')
   async addMember(
@@ -45,6 +47,7 @@ export class GroupController {
     return this._groupService.addMember(user, addMemberDto);
   }
 
+  @ApiOperation({ summary: 'Create new group' })
   @UseGuards(JwtGuard)
   @Post()
   async createGroup(
@@ -55,6 +58,7 @@ export class GroupController {
     return this._groupService.createGroup(groupDto, user);
   }
 
+  @ApiOperation({ summary: 'Remove a member' })
   @UseGuards(JwtGuard)
   @Post('/remove-member')
   async removeDish(
@@ -65,6 +69,7 @@ export class GroupController {
     return this._groupService.removeMember(removeMemberDto, user);
   }
 
+  @ApiOperation({ summary: "Update group's info" })
   @Patch(':id')
   async updateGroup(
     @Param('id') id: number,
@@ -73,11 +78,13 @@ export class GroupController {
     return this._groupService.updateGroup(id, groupDto);
   }
 
+  @ApiOperation({ summary: 'Delete group' })
   @Delete(':id')
   async deleteGroup(@Param('id') id: number): Promise<PageDto<Group>> {
     return this._groupService.deleteGroup(id);
   }
 
+  @ApiOperation({ summary: 'Get all groups' })
   @Get()
   @ApiPaginatedResponse(Group)
   async getAllGroups(
@@ -86,11 +93,13 @@ export class GroupController {
     return this._groupService.getAllGroups(pageOptionsDto);
   }
 
+  @ApiOperation({ summary: "Get group's detail" })
   @Get(':id')
   async getGroupDetail(@Param('id') id: string): Promise<PageDto<Group>> {
     return this._groupService.getGroupDetail(id);
   }
 
+  @ApiOperation({ summary: "Get group's member" })
   @Get('/member/:id')
   async getAllMembers(
     @Param('id') id: string,

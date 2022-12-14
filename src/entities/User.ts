@@ -1,16 +1,20 @@
+import { IndividualShoppingList } from './IndividualShoppingList';
 import { WeightRecord } from './WeightRecord';
-import { ShoppingList } from './ShoppingList';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Menu } from './Menu';
 import { UserToGroup } from './UserToGroup';
 import { AccountRole } from 'src/constants/accountRole';
+import { Account } from './Account';
+import { IndividualMenu } from './IndividualMenu';
+import { Allergic } from './Allergic';
 
 enum Sex {
   MALE = 'male',
@@ -77,11 +81,6 @@ export class User {
   healthGoal: string;
 
   @Column({
-    default: '',
-  })
-  groupId: string;
-
-  @Column({
     default: 0,
   })
   desiredWeight: number;
@@ -90,19 +89,6 @@ export class User {
     default: '',
   })
   activityIntensity: string;
-
-  @Column({
-    nullable: false,
-    default: '',
-    unique: true,
-  })
-  email: string;
-
-  @Column({
-    nullable: false,
-    default: 'happymeal',
-  })
-  password: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -120,21 +106,33 @@ export class User {
   })
   role: string;
 
-  @OneToMany(() => Menu, (menu) => menu.user)
-  menus: Menu[];
-
   @OneToMany(() => WeightRecord, (weightRecord) => weightRecord.user, {
     onDelete: 'CASCADE',
   })
   weightRecords: WeightRecord[];
 
-  @OneToMany(() => ShoppingList, (shoppingList) => shoppingList.user, {
-    onDelete: 'CASCADE',
-  })
-  shoppingLists: ShoppingList[];
-
   @OneToMany(() => UserToGroup, (userToGroup) => userToGroup.user, {
     onDelete: 'CASCADE',
   })
   public userToGroups!: UserToGroup[];
+
+  //new
+  @OneToOne(() => Account)
+  @JoinColumn()
+  account: Account;
+
+  // new
+  @OneToMany(() => IndividualMenu, (individualMenu) => individualMenu.user)
+  individualMenus: IndividualMenu[];
+
+  // new
+  @OneToMany(
+    () => IndividualShoppingList,
+    (individualShoppingList) => individualShoppingList.user,
+  )
+  individualShoppingLists: IndividualShoppingList[];
+
+  // new
+  @OneToMany(() => Allergic, (allergic) => allergic.user)
+  isAllergic: Allergic[];
 }

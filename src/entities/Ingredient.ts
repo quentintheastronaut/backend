@@ -9,7 +9,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Allergic } from './Allergic';
 
+// REFACTOR
 @Entity()
 export class Ingredient {
   @PrimaryGeneratedColumn({
@@ -75,4 +77,8 @@ export class Ingredient {
     },
   )
   public ingredientsToDish!: IngredientToDish[];
+
+  // new
+  @OneToMany(() => Allergic, (allergic) => allergic.ingredient)
+  isAllergicBy: Allergic[];
 }

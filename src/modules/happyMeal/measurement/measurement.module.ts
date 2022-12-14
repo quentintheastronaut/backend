@@ -5,5 +5,6 @@ import { Module } from '@nestjs/common';
 @Module({
   controllers: [MeasurementController],
   providers: [MeasurementService],
+  exports: [MeasurementService],
 })
 export class MeasurementModule {}

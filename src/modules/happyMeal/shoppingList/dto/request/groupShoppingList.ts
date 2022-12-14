@@ -3,25 +3,24 @@ import { ShoppingListType } from './../../../../../constants/shoppingListType';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class ShoppingListDto {
+export class GroupShoppingListDto {
   @ApiProperty({
-    example: '18:00',
+    example: '30/10/2022',
   })
-  @IsOptional()
   @IsString()
-  marketTime?: string;
+  date: string;
 
   @ApiProperty({
-    example: ShoppingListType.INDIVIDUAL,
+    example: 12,
   })
   @IsOptional()
   @IsString()
-  type?: ShoppingListType;
+  groupId: string;
 
   @ApiProperty({
-    example: ShoppingListStatus.PENDING,
+    example: 12,
   })
   @IsOptional()
   @IsString()
-  status?: ShoppingListStatus;
+  shoppingListId: string;
 }

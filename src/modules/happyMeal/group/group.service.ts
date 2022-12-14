@@ -1,5 +1,3 @@
-import { Menu } from 'src/entities/Menu';
-import { ShoppingList } from 'src/entities/ShoppingList';
 import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
 import { RemoveMemberDto } from './dto/request/removeMember.dto';
 import { AddMemberDto } from './dto/request/addMember.dto';
@@ -14,6 +12,7 @@ import {
   ForbiddenException,
   BadRequestException,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { Group } from 'src/entities/Group';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/dtos';
@@ -21,9 +20,66 @@ import { GroupDto } from './dto/request/group.dto';
 import { User } from 'src/entities';
 import { GroupRole } from 'src/constants/groupRole';
 import { DishToMenu } from 'src/entities/DishToMenu';
+import { UserService } from '../user/user.service';
+import { AuthService } from '../auth/auth.service';
+import { forwardRef } from '@nestjs/common';
+import { ShoppingListService } from '../shoppingList/shoppingList.service';
+import { MenuService } from '../menu/menu.service';
+import { GroupShoppingList } from 'src/entities/GroupShoppingList';
+import { GroupMenu } from 'src/entities/GroupMenu';
 
 @Injectable({})
 export class GroupService {
+  constructor(
+    @Inject(forwardRef(() => UserService)) private _userService: UserService,
+    @Inject(forwardRef(() => ShoppingListService))
+    private _shoppingListService: ShoppingListService,
+    @Inject(forwardRef(() => MenuService))
+    private _menuService: MenuService,
+    @Inject(forwardRef(() => AuthService)) private _authService: AuthService,
+  ) {}
+
+  // COMMON SERVICE
+  public async find(id: string) {
+    try {
+      return await AppDataSource.getRepository(Group).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  public async findByUser(user: User) {
+    try {
+      const userToGroup = await AppDataSource.getRepository(
+        UserToGroup,
+      ).findOne({
+        relations: {
+          user: true,
+          group: true,
+        },
+        where: {
+          user: {
+            id: user.id,
+          },
+        },
+      });
+
+      return await AppDataSource.getRepository(Group).findOne({
+        where: {
+          id: userToGroup?.groupId,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  // CONTROLLER SERVICE
+  // done
   public async updateGroup(
     id: number,
     groupDto: GroupDto,
@@ -49,6 +105,7 @@ export class GroupService {
     }
   }
 
+  // done
   public async createGroup(
     groupDto: GroupDto,
     jwtUser: JwtUser,
@@ -63,12 +120,8 @@ export class GroupService {
       throw new ForbiddenException('Credentials taken');
     }
 
-    const { email } = jwtUser;
-    const user = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email,
-      },
-    });
+    const { sub } = jwtUser;
+    const user = await this._userService.findByAccountId(sub.toString());
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -103,20 +156,13 @@ export class GroupService {
         ])
         .execute();
 
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: newGroup.id.toString(),
-        })
-        .where('id = :id', { id: user.id.toString() })
-        .execute();
-
       return new PageDto('OK', HttpStatus.OK, newGroup);
     } catch (error) {
       throw new InternalServerErrorException();
     }
   }
 
+  // done
   public async deleteGroup(id: number): Promise<PageDto<Group>> {
     try {
       const group = await AppDataSource.getRepository(Group).findOne({
@@ -125,37 +171,42 @@ export class GroupService {
         },
       });
 
-      const shoppingLists = await AppDataSource.getRepository(
-        ShoppingList,
+      const groupShoppingLists = await AppDataSource.getRepository(
+        GroupShoppingList,
       ).find({
         where: {
-          groupId: id.toString(),
+          group: {
+            id: group.id,
+          },
         },
       });
-      console.log(shoppingLists);
 
-      const menus = await AppDataSource.getRepository(Menu).find({
+      const groupMenus = await AppDataSource.getRepository(GroupMenu).find({
         where: {
-          group: group,
+          group: {
+            id: group.id,
+          },
         },
       });
 
-      if (menus) {
-        menus.forEach(async (menu) => {
+      if (groupMenus) {
+        groupMenus.forEach(async (groupMenu) => {
           await AppDataSource.createQueryBuilder()
             .delete()
             .from(DishToMenu)
-            .where('menuId = :id', { id: menu.id })
+            .where('menuId = :id', { id: groupMenu.menu.id })
             .execute();
         });
       }
 
-      if (shoppingLists) {
-        shoppingLists.forEach(async (shoppingList) => {
+      if (groupShoppingLists) {
+        groupShoppingLists.forEach(async (groupShoppingList) => {
           await AppDataSource.createQueryBuilder()
             .delete()
             .from(IngredientToShoppingList)
-            .where('shoppingListId = :id', { id: shoppingList.id })
+            .where('shoppingId = :id', {
+              id: groupShoppingList.shoppingList.id,
+            })
             .execute();
         });
       }
@@ -163,14 +214,6 @@ export class GroupService {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(UserToGroup)
-        .where('groupId = :id', { id })
-        .execute();
-
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: null,
-        })
         .where('groupId = :id', { id })
         .execute();
 
@@ -268,19 +311,6 @@ export class GroupService {
     }
   }
 
-  public async isValidEmail(email: string) {
-    try {
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          email,
-        },
-      });
-      return user ? true : false;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
   public async addMember(
     jwtUser: JwtUser,
     addMemberDto: AddMemberDto,
@@ -293,37 +323,33 @@ export class GroupService {
       );
     }
 
-    if (!(await this.isValidEmail(addMemberDto.email))) {
+    if (!(await this._authService.isExistedEmail(addMemberDto.email))) {
       throw new BadRequestException('This user is not existed !');
     }
 
-    const newUser = await AppDataSource.getRepository(User).findOne({
-      where: {
-        email: addMemberDto.email,
-      },
-    });
+    const newMemberAccount = await this._authService.findOneByEmail(
+      addMemberDto.email,
+    );
 
-    if (await this.hasGroup(newUser.id)) {
+    const newMember = await this._userService.findByAccountId(
+      newMemberAccount.id,
+    );
+
+    if (await this.hasGroup(newMember.id)) {
       throw new BadRequestException('This user is already in another group !');
     }
+
     try {
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(UserToGroup)
         .values({
           groupId: addMemberDto.groupId,
-          userId: newUser.id,
+          userId: newMember.id,
           role: GroupRole.MEMBER,
         })
         .execute();
 
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: addMemberDto.groupId,
-        })
-        .where('id = :id', { id: newUser.id })
-        .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
@@ -375,14 +401,6 @@ export class GroupService {
         .where('userId = :userId and groupId = :groupId', {
           ...removeMemberDto,
         })
-        .execute();
-
-      await AppDataSource.createQueryBuilder()
-        .update(User)
-        .set({
-          groupId: '',
-        })
-        .where('id = :id', { id: removeMemberDto.userId })
         .execute();
 
       return new PageDto('OK', HttpStatus.OK);

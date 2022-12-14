@@ -7,7 +7,7 @@ export class MenuDto {
     example: '01/12/2022',
   })
   @IsString()
-  date: string;
+  status: string;
 
   @ApiProperty({
     example: ShoppingListType.INDIVIDUAL,

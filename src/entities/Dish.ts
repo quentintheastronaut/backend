@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { DishToMenu } from './DishToMenu';
 
+// REFACTOR
 @Entity()
 export class Dish {
   @PrimaryGeneratedColumn({

@@ -1,3 +1,6 @@
+import { GroupShoppingList } from './GroupShoppingList';
+import { GroupMenu } from './GroupMenu';
+import { Account } from './Account';
 import { WeightRecord } from './WeightRecord';
 import { Measurement } from './Measurement';
 import { IngredientToDish } from './IngredientToDish';
@@ -10,6 +13,10 @@ import { Menu } from './Menu';
 import { User } from './User';
 import { UserToGroup } from './UserToGroup';
 import { DishToMenu } from './DishToMenu';
+import { Admin } from './Admin';
+import { IndividualMenu } from './IndividualMenu';
+import { Allergic } from './Allergic';
+import { IndividualShoppingList } from './IndividualShoppingList';
 
 export { User };
 
@@ -26,6 +33,13 @@ const entities = [
   IngredientToDish,
   Measurement,
   WeightRecord,
+  Account,
+  Admin,
+  GroupMenu,
+  IndividualMenu,
+  GroupShoppingList,
+  Allergic,
+  IndividualShoppingList,
 ];
 
 export default entities;

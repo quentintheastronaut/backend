@@ -21,13 +21,6 @@ export class AddIngredientToDishDto {
   quantity: number;
 
   @ApiProperty({
-    example: 0,
-  })
-  @IsNumber()
-  @IsOptional()
-  weight?: number;
-
-  @ApiProperty({
     example: 'GRAMME',
   })
   @IsString()

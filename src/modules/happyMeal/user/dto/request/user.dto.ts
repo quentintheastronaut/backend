@@ -42,12 +42,6 @@ export class UserDto {
   weight?: number;
 
   @ApiProperty({
-    example: '22',
-  })
-  @IsOptional()
-  age?: number;
-
-  @ApiProperty({
     example:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/OOjs_UI_icon_userAvatar-progressive.svg/1200px-OOjs_UI_icon_userAvatar-progressive.svg.png',
   })
@@ -59,12 +53,6 @@ export class UserDto {
   })
   @IsOptional()
   healthGoal?: string;
-
-  @ApiProperty({
-    default: 'happymeal',
-  })
-  @IsOptional()
-  password: string;
 
   @ApiProperty({
     example: '65',
@@ -83,4 +71,10 @@ export class UserDto {
   })
   @IsOptional()
   email?: string;
+
+  @ApiProperty({
+    default: 'happymeal',
+  })
+  @IsOptional()
+  password?: string;
 }

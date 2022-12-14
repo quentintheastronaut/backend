@@ -67,14 +67,20 @@ export class UpdateProfileDto {
   desiredWeight?: number;
 
   @ApiProperty({
+    example: true,
+  })
+  @IsOptional()
+  active?: boolean;
+
+  @ApiProperty({
     example: '',
   })
   @IsOptional()
   activityIntensity?: string;
 
-  @ApiProperty({
-    example: 'user_1@gmail.com',
-  })
-  @IsOptional()
-  email?: string;
+  // @ApiProperty({
+  //   example: 'user_1@gmail.com',
+  // })
+  // @IsOptional()
+  // email?: string;
 }

@@ -1,21 +1,14 @@
-import { User } from './User';
+import { ShoppingListType } from './../constants/shoppingListType';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { ShoppingListStatus } from './../constants/shoppingListStatus';
-import { ShoppingListType } from '../constants/shoppingListType';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Ingredient } from './Ingredient';
 import { IsString } from 'class-validator';
 
 @Entity()
@@ -26,22 +19,6 @@ export class ShoppingList {
   id: string;
 
   @Column({
-    nullable: false,
-  })
-  @IsString()
-  date: string;
-
-  @Column({
-    nullable: true,
-  })
-  groupId: string;
-
-  @Column({
-    nullable: true,
-  })
-  userId: string;
-
-  @Column({
     default: '',
   })
   marketTime: string;
@@ -49,33 +26,19 @@ export class ShoppingList {
   @Column({
     nullable: false,
   })
-  type: ShoppingListType;
+  status: ShoppingListStatus;
 
   @Column({
     nullable: false,
+    default: ShoppingListType.INDIVIDUAL,
   })
-  status: ShoppingListStatus;
+  type: ShoppingListType;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToMany(() => Ingredient)
-  @JoinTable()
-  ingredients: Ingredient[];
-
-  @ManyToOne(() => User, (user) => user.shoppingLists, {
-    onDelete: 'CASCADE',
-  })
-  user: User;
-
-  @OneToOne(() => User, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn()
-  marketer: User;
 
   @OneToMany(
     () => IngredientToShoppingList,

@@ -236,6 +236,22 @@ export class MenuService {
     }
   }
 
+  async updateDishToMenu(id: string, addDishDto: AddDishDto) {
+    try {
+      const { dishId, date, ...payload } = addDishDto;
+      await AppDataSource.createQueryBuilder()
+        .update(DishToMenu)
+        .set(payload)
+        .where('dishToMenuId = :id', {
+          id,
+        })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
   async deleteDishToMenu(id: string) {
     try {
       await AppDataSource.createQueryBuilder()
@@ -325,6 +341,14 @@ export class MenuService {
     }
   }
 
+  public async recommend(jwtUser: JwtUser, date: string) {
+    try {
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
   public async addDish(
     addDishDto: AddDishDto,
     jwtUser: JwtUser,
@@ -338,6 +362,13 @@ export class MenuService {
 
       const individualMenu = await this.findIndividualMenu(date, user);
 
+      // Case 1: dish is not already in menu
+
+      // Case 2: dish is already in menu
+      // a. insert new dish if not same meal
+
+      // a. update dish if same meal
+
       if (!individualMenu) {
         const newMenuId = await this.insertMenu(ShoppingListType.INDIVIDUAL);
 
@@ -347,8 +378,37 @@ export class MenuService {
 
         await this.insertDishToMenu(dish, newMenu, addDishDto);
       } else {
-        await this.insertDishToMenu(dish, individualMenu.menu, addDishDto);
+        const { entities } = await AppDataSource.createQueryBuilder(
+          DishToMenu,
+          'dish_to_menu',
+        )
+          .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+          .where('menuId = :menuId', {
+            menuId: individualMenu.menu.id,
+          })
+          .getRawAndEntities();
+
+        const filteredDish = await AppDataSource.getRepository(
+          DishToMenu,
+        ).findOne({
+          where: {
+            dish: {
+              id: dish.id,
+            },
+            meal: addDishDto.meal,
+          },
+        });
+
+        if (filteredDish) {
+          await this.updateDishToMenu(filteredDish.dishToMenuId, {
+            ...addDishDto,
+            quantity: filteredDish.quantity + addDishDto.quantity,
+          });
+        } else {
+          await this.insertDishToMenu(dish, individualMenu.menu, addDishDto);
+        }
       }
+
       await this.addIngredientToIndividualList(addDishDto, jwtUser);
 
       return new PageDto('OK', HttpStatus.OK);

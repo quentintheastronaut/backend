@@ -26,6 +26,17 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @UseGuards(JwtGuard)
+  @Patch('/profile')
+  @ApiOperation({ summary: `Update user\'s profile` })
+  async updateProfile(
+    @Req() req: { user: JwtUser },
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    const { user } = req;
+    return this.userService.updateProfile(user, updateProfileDto);
+  }
+
+  @UseGuards(JwtGuard)
   @ApiOperation({ summary: `Get user\'s health overview` })
   @Get('/overview')
   async getOverview(
@@ -50,18 +61,8 @@ export class UserController {
   @ApiOperation({ summary: "Get user's profile" })
   async getProfile(@Req() req: { user: JwtUser }) {
     const { user } = req;
+    console.log('user', user);
     return this.userService.getProfile(user);
-  }
-
-  @UseGuards(JwtGuard)
-  @Patch('/profile')
-  @ApiOperation({ summary: `Update user\'s profile` })
-  async updateProfile(
-    @Req() req: { user: JwtUser },
-    @Body() updateProfileDto: UpdateProfileDto,
-  ) {
-    const { user } = req;
-    return this.userService.updateProfile(user, updateProfileDto);
   }
 
   @UseGuards(JwtGuard)

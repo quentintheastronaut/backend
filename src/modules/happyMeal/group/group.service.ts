@@ -62,7 +62,7 @@ export class GroupService {
         },
         where: {
           user: {
-            id: user.id,
+            id: user?.id,
           },
         },
       });

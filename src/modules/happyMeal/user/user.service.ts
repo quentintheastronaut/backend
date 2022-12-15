@@ -24,6 +24,9 @@ import { UserDto } from './dto/request/user.dto';
 import { AccountDto } from '../auth/dto/account.dto';
 import { AccountRole } from 'src/constants/accountRole';
 import { Account } from 'src/entities/Account';
+import * as moment from 'moment';
+import { DateFormat } from 'src/constants/dateFormat';
+import * as argon from 'argon2';
 
 @Injectable({})
 export class UserService {
@@ -161,7 +164,9 @@ export class UserService {
       await AppDataSource.createQueryBuilder()
         .update(User)
         .set({
-          account: account,
+          account: {
+            id: account.id,
+          },
         })
         .where('id = :id', { id })
         .execute();
@@ -207,6 +212,7 @@ export class UserService {
   async updateProfile(jwtUser: JwtUser, updateProfileDto: UpdateProfileDto) {
     try {
       const { sub } = jwtUser;
+      console.log('sub', sub);
       await this.updateByAccountId(sub.toString(), updateProfileDto);
 
       return new PageDto('OK', HttpStatus.OK);
@@ -238,7 +244,12 @@ export class UserService {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
 
-      const currentBMR = this.bmr(user.weight, user.height, user.age, user.sex);
+      const age = moment().diff(
+        moment(user.dob, DateFormat.FULL_DATE),
+        'years',
+      );
+
+      const currentBMR = this.bmr(user.weight, user.height, age, user.sex);
 
       const result = {
         currentBMR,
@@ -275,9 +286,10 @@ export class UserService {
   }
 
   public async createUser(userDto: UserDto): Promise<PageDto<User>> {
+    const hash = await argon.hash(userDto.password);
     const newAccount: AccountDto = {
       email: userDto.email,
-      password: userDto.password,
+      password: hash,
       role: AccountRole.USER,
     };
     await this._authService.insert(newAccount);
@@ -285,8 +297,9 @@ export class UserService {
     const account = await this._authService.findOneByEmail(userDto.email);
 
     try {
-      const user = await this.insert(userDto);
-      // const user = await this.find();
+      const newUserId = await this.insert(userDto);
+      const user = await this.find(newUserId.raw.insertId);
+      await this.bindAccount(user.id, account);
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -500,8 +513,11 @@ export class UserService {
     try {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
-
-      const currentBMR = this.bmr(user.weight, user.height, user.age, user.sex);
+      const age = moment().diff(
+        moment(user.dob, DateFormat.FULL_DATE),
+        'years',
+      );
+      const currentBMR = this.bmr(user.weight, user.height, age, user.sex);
 
       const currentCalories = await this.getCurrentCalories(jwtUser, date);
       const totalCalories = await this.getTotalCalories(jwtUser, date);

@@ -66,11 +66,6 @@ export class User {
   weight: number;
 
   @Column({
-    default: 0,
-  })
-  age: number;
-
-  @Column({
     default: '',
   })
   imageUrl: string;

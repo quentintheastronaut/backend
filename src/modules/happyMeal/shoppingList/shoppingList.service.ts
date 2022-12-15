@@ -52,7 +52,7 @@ export class ShoppingListService {
         where: {
           date,
           group: {
-            id: group.id,
+            id: group?.id,
           },
         },
       });

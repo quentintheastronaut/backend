@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { UpdateWeightDto } from './dto/request/updateWeight.dto';
 import * as moment from 'moment';
+import { DateFormat } from 'src/constants/dateFormat';
 
 @Injectable({})
 export class WeightRecordService {
@@ -62,8 +63,8 @@ export class WeightRecordService {
         .where(
           'userId = :userId AND createdAt >= :startDate AND createdAt <= :endDate',
           {
-            startDate: moment(startDate, 'DD/MM/YYYY').toISOString(),
-            endDate: moment(endDate, 'DD/MM/YYYY').toISOString(),
+            startDate: moment(startDate, DateFormat.FULL_DATE).toISOString(),
+            endDate: moment(endDate, DateFormat.FULL_DATE).toISOString(),
             userId: jwtUser.sub.toString(),
           },
         )

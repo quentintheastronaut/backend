@@ -73,6 +73,12 @@ export class UserDto {
   email?: string;
 
   @ApiProperty({
+    example: true,
+  })
+  @IsOptional()
+  active?: boolean;
+
+  @ApiProperty({
     default: 'happymeal',
   })
   @IsOptional()

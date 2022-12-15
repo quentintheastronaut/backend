@@ -119,13 +119,16 @@ export class UserService {
     }
   }
 
-  async update(id: string, updateProfileDto: UpdateProfileDto) {
+  async update(id: string, userDto: UserDto) {
     try {
-      await AppDataSource.createQueryBuilder()
+      const query = await AppDataSource.createQueryBuilder()
         .update(User)
-        .set(updateProfileDto)
+        .set(userDto)
         .where('id = :id', { id })
-        .execute();
+        .getQuery();
+
+      console.log(query);
+      // .execute();
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Something went wrong');
@@ -270,6 +273,7 @@ export class UserService {
     queryBuilder
       .select('user')
       .from(User, 'user')
+      .leftJoinAndSelect('user.account', 'account')
       .where('user.firstName like :name or user.lastName like :name', {
         name: `%${pageOptionsDto.search}%`,
       })
@@ -308,9 +312,16 @@ export class UserService {
     }
   }
 
-  public async updateUser(id: number, updateProfileDto: UpdateProfileDto) {
+  public async updateUser(id: number, userDto: UserDto) {
     try {
-      await this.update(id.toString(), updateProfileDto);
+      const user = await this.find(id.toString());
+      const { email, password, ...profile } = userDto;
+      const hash = await argon.hash(password);
+      await this._authService.updateById(user.account.id, {
+        email,
+        password: hash,
+      });
+      await this.update(id.toString(), profile);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new BadRequestException();

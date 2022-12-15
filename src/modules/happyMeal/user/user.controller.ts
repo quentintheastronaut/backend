@@ -49,11 +49,8 @@ export class UserController {
 
   @Patch('/:id')
   @ApiOperation({ summary: 'Update user' })
-  async updateUser(
-    @Param('id') id: number,
-    @Body() updateProfileDto: UpdateProfileDto,
-  ) {
-    return this.userService.updateUser(id, updateProfileDto);
+  async updateUser(@Param('id') id: number, @Body() userDto: UserDto) {
+    return this.userService.updateUser(id, userDto);
   }
 
   @UseGuards(JwtGuard)

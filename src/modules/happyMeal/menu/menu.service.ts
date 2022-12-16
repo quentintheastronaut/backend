@@ -426,7 +426,7 @@ export class MenuService {
       const dinnerCalories = (base * 20) / 100;
       const snackCalories = (base * 15) / 100;
 
-      const morningDish = await AppDataSource.createQueryBuilder()
+      const breakfastDishQuery = await AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -435,12 +435,13 @@ export class MenuService {
             breakfastCalories: (breakfastCalories * 110) / 100,
             miniumBreakfastCalories: (breakfastCalories * 70) / 100,
           },
-        )
-        .andWhere('dish.id IN (:breakfast)', { breakfast })
-        .orderBy('RAND()')
-        .getOne();
+        );
 
-      const lunchDish = await AppDataSource.createQueryBuilder()
+      if (breakfast.length != 0) {
+        breakfastDishQuery.andWhere('dish.id IN (:breakfast)', { breakfast });
+      }
+
+      const lunchDishQuery = await AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -449,11 +450,13 @@ export class MenuService {
             lunchCalories: (lunchCalories * 110) / 100,
             miniumLunchCalories: (lunchCalories * 90) / 100,
           },
-        )
-        .orderBy('RAND()')
-        .getOne();
+        );
 
-      const dinnerDish = await AppDataSource.createQueryBuilder()
+      if (lunch.length != 0) {
+        lunchDishQuery.andWhere('dish.id IN (:lunch)', { lunch });
+      }
+
+      const dinnerDishQuery = await AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -462,12 +465,13 @@ export class MenuService {
             dinnerCalories: (dinnerCalories * 110) / 100,
             miniumDinnerCalories: (dinnerCalories * 70) / 100,
           },
-        )
-        .andWhere('dish.id IN (:dinner)', { dinner })
-        .orderBy('RAND()')
-        .getOne();
+        );
 
-      const snackDish = await AppDataSource.createQueryBuilder()
+      if (dinner.length != 0) {
+        dinnerDishQuery.andWhere('dish.id IN (:dinner)', { dinner });
+      }
+
+      const snackDishQuery = await AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -476,14 +480,21 @@ export class MenuService {
             snackCalories: (snackCalories * 110) / 100,
             snackMorningCalories: (snackCalories * 70) / 100,
           },
-        )
-        .orderBy('RAND()')
-        .getOne();
+        );
+
+      if (snack.length != 0) {
+        snackDishQuery.andWhere('dish.id IN (:snack)', { snack });
+      }
+
+      const breakfastDish = await breakfastDishQuery.orderBy('RAND()').getOne();
+      const lunchDish = await lunchDishQuery.orderBy('RAND()').getOne();
+      const dinnerDish = await dinnerDishQuery.orderBy('RAND()').getOne();
+      const snackDish = await snackDishQuery.orderBy('RAND()').getOne();
 
       await this.addDish(
         {
           date,
-          dishId: morningDish.id,
+          dishId: breakfastDish.id,
           type: ShoppingListType.INDIVIDUAL,
           meal: MealType.BREAKFAST,
           quantity: 1,

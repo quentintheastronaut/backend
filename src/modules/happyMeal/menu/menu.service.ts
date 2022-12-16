@@ -34,7 +34,9 @@ import { GroupService } from '../group/group.service';
 import { DishService } from '../dish/dish.service';
 import { ShoppingListService } from '../shoppingList/shoppingList.service';
 import { Dish } from 'src/entities/Dish';
-import { group } from 'console';
+import { DateFormat } from 'src/constants/dateFormat';
+import * as moment from 'moment';
+import { MealType } from 'src/constants/mealType';
 
 @Injectable({})
 export class MenuService {
@@ -364,6 +366,123 @@ export class MenuService {
 
   public async recommend(jwtUser: JwtUser, date: string) {
     try {
+      const dateMoment = moment(date, DateFormat.FULL_DATE);
+
+      const base = await this._userService.getBase(jwtUser);
+
+      console.log('base: ', base);
+
+      const breakfastCalories = (base * 15) / 100;
+      const lunchCalories = (base * 50) / 100;
+      const dinnerCalories = (base * 20) / 100;
+      const snackCalories = (base * 15) / 100;
+
+      const morningDish = await AppDataSource.createQueryBuilder()
+        .select('dish')
+        .from(Dish, 'dish')
+        .where(
+          'calories <= :breakfastCalories AND calories >= :miniumBreakfastCalories',
+          {
+            breakfastCalories: (breakfastCalories * 110) / 100,
+            miniumBreakfastCalories: (breakfastCalories * 70) / 100,
+          },
+        )
+        .orderBy('RAND()')
+        .getOne();
+
+      const lunchDish = await AppDataSource.createQueryBuilder()
+        .select('dish')
+        .from(Dish, 'dish')
+        .where(
+          'calories <= :lunchCalories AND calories >= :miniumLunchCalories',
+          {
+            lunchCalories: (lunchCalories * 110) / 100,
+            miniumLunchCalories: (lunchCalories * 90) / 100,
+          },
+        )
+        .orderBy('RAND()')
+        .getOne();
+
+      const dinnerDish = await AppDataSource.createQueryBuilder()
+        .select('dish')
+        .from(Dish, 'dish')
+        .where(
+          'calories <= :dinnerCalories AND calories >= :miniumDinnerCalories',
+          {
+            dinnerCalories: (dinnerCalories * 110) / 100,
+            miniumDinnerCalories: (dinnerCalories * 70) / 100,
+          },
+        )
+        .orderBy('RAND()')
+        .getOne();
+
+      const snackDish = await AppDataSource.createQueryBuilder()
+        .select('dish')
+        .from(Dish, 'dish')
+        .where(
+          'calories <= :snackCalories AND calories >= :snackMorningCalories',
+          {
+            snackCalories: (snackCalories * 110) / 100,
+            snackMorningCalories: (snackCalories * 70) / 100,
+          },
+        )
+        .orderBy('RAND()')
+        .getOne();
+
+      await this.addDish(
+        {
+          date,
+          dishId: morningDish.id,
+          type: ShoppingListType.INDIVIDUAL,
+          meal: MealType.BREAKFAST,
+          quantity: 1,
+        },
+        jwtUser,
+      );
+
+      await this.addDish(
+        {
+          date,
+          dishId: lunchDish.id,
+          type: ShoppingListType.INDIVIDUAL,
+          meal: MealType.LUNCH,
+          quantity: 1,
+        },
+        jwtUser,
+      );
+
+      await this.addDish(
+        {
+          date,
+          dishId: dinnerDish.id,
+          type: ShoppingListType.INDIVIDUAL,
+          meal: MealType.DINNER,
+          quantity: 1,
+        },
+        jwtUser,
+      );
+
+      await this.addDish(
+        {
+          date,
+          dishId: snackDish.id,
+          type: ShoppingListType.INDIVIDUAL,
+          meal: MealType.SNACKS,
+          quantity: 1,
+        },
+        jwtUser,
+      );
+
+      // Rule 1: Không bị dị ứng với nguyên liệu
+
+      // Rule 2: Không năm trong menu 3 ngày gần nhất
+
+      // Rule 3: Không vượt quá số calo của từng buổi (so với Base Calories)
+      //  Sáng: 15%
+      //  Trưa: 50%
+      //  Tối: 20%
+      //  Xế: 15%
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -533,15 +652,14 @@ export class MenuService {
 
   public async updateMenuDetail(
     updateDishDto: UpdateDishToMenuDto,
+    jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
-    const dish = await AppDataSource.getRepository(DishToMenu).findOne({
-      where: {
-        dishToMenuId: updateDishDto.dishToMenuId,
-      },
-    });
+    const { dishToMenuId } = updateDishDto;
+    const dishToMenu = await this.findDishToMenu(updateDishDto.dishToMenuId);
+    const { menu } = dishToMenu;
 
-    if (!dish) {
-      throw new NotFoundException('This dish is not existed in any menu !');
+    if (menu.type === ShoppingListType.GROUP) {
+    } else {
     }
 
     try {
@@ -643,8 +761,6 @@ export class MenuService {
           dishId: addDishDto.dishId,
         })
         .getRawAndEntities();
-
-      console.log(entities);
 
       const ingredientToList = entities.map((ingredient) => ({
         ingredientId: ingredient.ingredient.id,

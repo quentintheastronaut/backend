@@ -41,8 +41,12 @@ export class MenuController {
 
   @ApiOperation({ summary: 'Update a dish in the menu' })
   @Patch('/update-dish')
-  async updateDish(@Body() updateDishDto: UpdateDishToMenuDto) {
-    return this._menuService.updateMenuDetail(updateDishDto);
+  async updateDish(
+    @Req() req: { user: JwtUser },
+    @Body() updateDishDto: UpdateDishToMenuDto,
+  ) {
+    const { user } = req;
+    return this._menuService.updateMenuDetail(updateDishDto, user);
   }
 
   @ApiOperation({ summary: 'Delete menu' })
@@ -64,6 +68,14 @@ export class MenuController {
   async addDish(@Req() req: { user: JwtUser }, @Body() addDishDto: AddDishDto) {
     const { user } = req;
     return this._menuService.addDish(addDishDto, user);
+  }
+
+  @ApiOperation({ summary: 'Menu recommendation' })
+  @UseGuards(JwtGuard)
+  @Post('/recommend')
+  async recommand(@Req() req: { user: JwtUser }, @Query('date') date: string) {
+    const { user } = req;
+    return this._menuService.recommend(user, date);
   }
 
   @ApiOperation({ summary: 'Remove dish into menu' })

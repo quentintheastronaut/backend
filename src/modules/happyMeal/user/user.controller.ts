@@ -58,7 +58,6 @@ export class UserController {
   @ApiOperation({ summary: "Get user's profile" })
   async getProfile(@Req() req: { user: JwtUser }) {
     const { user } = req;
-    console.log('user', user);
     return this.userService.getProfile(user);
   }
 

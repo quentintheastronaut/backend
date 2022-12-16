@@ -215,7 +215,6 @@ export class UserService {
   async updateProfile(jwtUser: JwtUser, updateProfileDto: UpdateProfileDto) {
     try {
       const { sub } = jwtUser;
-      console.log('sub', sub);
       await this.updateByAccountId(sub.toString(), updateProfileDto);
 
       return new PageDto('OK', HttpStatus.OK);
@@ -518,6 +517,16 @@ export class UserService {
     }, 0);
 
     return group + individual;
+  }
+
+  public async getBase(jwtUser: JwtUser) {
+    const { sub } = jwtUser;
+    const user = await this.findByAccountId(sub.toString());
+    const age = moment().diff(moment(user.dob, DateFormat.FULL_DATE), 'years');
+    const currentBMR = this.bmr(user.weight, user.height, age, user.sex);
+    const baseCalories = this.dailyCalories(currentBMR, user.activityIntensity);
+
+    return baseCalories;
   }
 
   public async getOverview(jwtUser: JwtUser, date: string) {

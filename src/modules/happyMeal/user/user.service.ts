@@ -121,14 +121,11 @@ export class UserService {
 
   async update(id: string, userDto: UserDto) {
     try {
-      const query = await AppDataSource.createQueryBuilder()
+      await AppDataSource.createQueryBuilder()
         .update(User)
         .set(userDto)
         .where('id = :id', { id })
-        .getQuery();
-
-      console.log(query);
-      // .execute();
+        .execute();
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Something went wrong');

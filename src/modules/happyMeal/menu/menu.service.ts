@@ -414,11 +414,6 @@ export class MenuService {
         }
       }
 
-      console.log('breakfast', breakfast);
-      console.log('lunch', lunch);
-      console.log('dinner', dinner);
-      console.log('snack', snack);
-
       const base = await this._userService.getBase(jwtUser);
 
       const breakfastCalories = (base * 15) / 100;

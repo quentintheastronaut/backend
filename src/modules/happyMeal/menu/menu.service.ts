@@ -329,7 +329,25 @@ export class MenuService {
 
         await this.insertDishToMenu(dish, newMenu, addGroupDishDto);
       } else {
-        await this.insertDishToMenu(dish, groupMenu.menu, addGroupDishDto);
+        const filteredDish = await AppDataSource.getRepository(
+          DishToMenu,
+        ).findOne({
+          where: {
+            dish: {
+              id: dish.id,
+            },
+            meal: addGroupDishDto.meal,
+          },
+        });
+
+        if (filteredDish) {
+          await this.updateDishToMenu(filteredDish.dishToMenuId, {
+            ...addGroupDishDto,
+            quantity: filteredDish.quantity + addGroupDishDto.quantity,
+          });
+        } else {
+          await this.insertDishToMenu(dish, groupMenu.menu, addGroupDishDto);
+        }
       }
 
       await this.addIngredientToGroupList(addGroupDishDto, group);
@@ -362,13 +380,6 @@ export class MenuService {
 
       const individualMenu = await this.findIndividualMenu(date, user);
 
-      // Case 1: dish is not already in menu
-
-      // Case 2: dish is already in menu
-      // a. insert new dish if not same meal
-
-      // a. update dish if same meal
-
       if (!individualMenu) {
         const newMenuId = await this.insertMenu(ShoppingListType.INDIVIDUAL);
 
@@ -378,16 +389,6 @@ export class MenuService {
 
         await this.insertDishToMenu(dish, newMenu, addDishDto);
       } else {
-        const { entities } = await AppDataSource.createQueryBuilder(
-          DishToMenu,
-          'dish_to_menu',
-        )
-          .leftJoinAndSelect('dish_to_menu.dish', 'dish')
-          .where('menuId = :menuId', {
-            menuId: individualMenu.menu.id,
-          })
-          .getRawAndEntities();
-
         const filteredDish = await AppDataSource.getRepository(
           DishToMenu,
         ).findOne({
@@ -586,7 +587,10 @@ export class MenuService {
     }
   }
 
-  public async addIngredientToGroupList(addDishDto: AddDishDto, group: Group) {
+  public async addIngredientToGroupList(
+    addGroupDishDto: AddGroupDishDto,
+    group: Group,
+  ) {
     try {
       const { entities } = await AppDataSource.createQueryBuilder(
         IngredientToDish,
@@ -594,13 +598,13 @@ export class MenuService {
       )
         .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
         .where('dishId = :dishId', {
-          dishId: addDishDto.dishId,
+          dishId: addGroupDishDto.dishId,
         })
         .getRawAndEntities();
 
       const ingredientToList = entities.map((ingredient) => ({
         ingredientId: ingredient.ingredient.id,
-        quantity: ingredient.quantity,
+        quantity: addGroupDishDto.quantity * ingredient.quantity,
         measurementType: ingredient.measurementType,
       }));
 
@@ -610,7 +614,7 @@ export class MenuService {
           ingredientId: ingredient.ingredientId,
           quantity: ingredient.quantity,
           measurementType: ingredient.measurementType,
-          date: addDishDto.date,
+          date: addGroupDishDto.date,
         });
       }
     } catch (error) {
@@ -636,7 +640,7 @@ export class MenuService {
 
       const ingredientToList = entities.map((ingredient) => ({
         ingredientId: ingredient.ingredient.id,
-        quantity: ingredient.quantity,
+        quantity: addDishDto.quantity * ingredient.quantity,
         measurementType: ingredient.measurementType,
       }));
 

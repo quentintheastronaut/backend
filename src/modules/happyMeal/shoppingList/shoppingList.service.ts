@@ -187,6 +187,25 @@ export class ShoppingListService {
       throw new InternalServerErrorException('');
     }
   }
+
+  async updateIngredientToShoppingList(
+    id: string,
+    addIngredientDro: AddIngredientDto,
+  ) {
+    try {
+      const { ingredientId, date, ...payload } = addIngredientDro;
+      await AppDataSource.createQueryBuilder()
+        .update(IngredientToShoppingList)
+        .set(payload)
+        .where('ingredientToShoppingListId = :id', {
+          id,
+        })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
   // CONTROLLER'S SERVICES
 
   public async updateShoppingList(
@@ -316,6 +335,8 @@ export class ShoppingListService {
         .where('shoppingListId = :listId', {
           listId: newIndividualList.shoppingList.id,
         })
+        .addSelect('SUM(ingredient_to_shopping_list.quantity)', 'quantity')
+        .groupBy('ingredient_to_shopping_list.ingredientId')
         .getMany();
 
       return new PageDto('OK', HttpStatus.OK, result);
@@ -396,11 +417,32 @@ export class ShoppingListService {
           addGroupIngredientDto,
         );
       } else {
-        await this.insertIngredientToList(
-          list.shoppingList,
-          ingredient,
-          addGroupIngredientDto,
-        );
+        const filteredIngredient = await AppDataSource.getRepository(
+          IngredientToShoppingList,
+        ).findOne({
+          where: {
+            ingredient: {
+              id: ingredient.id,
+            },
+          },
+        });
+
+        if (filteredIngredient) {
+          await this.updateIngredientToShoppingList(
+            filteredIngredient.ingredientToShoppingListId,
+            {
+              ...addGroupIngredientDto,
+              quantity:
+                filteredIngredient.quantity + addGroupIngredientDto.quantity,
+            },
+          );
+        } else {
+          await this.insertIngredientToList(
+            list.shoppingList,
+            ingredient,
+            addGroupIngredientDto,
+          );
+        }
       }
 
       return new PageDto('OK', HttpStatus.OK);
@@ -442,11 +484,31 @@ export class ShoppingListService {
           addIngredientDto,
         );
       } else {
-        await this.insertIngredientToList(
-          individualShoppingList.shoppingList,
-          ingredient,
-          addIngredientDto,
-        );
+        const filteredIngredient = await AppDataSource.getRepository(
+          IngredientToShoppingList,
+        ).findOne({
+          where: {
+            ingredient: {
+              id: ingredient.id,
+            },
+          },
+        });
+
+        if (filteredIngredient) {
+          await this.updateIngredientToShoppingList(
+            filteredIngredient.ingredientToShoppingListId,
+            {
+              ...addIngredientDto,
+              quantity: filteredIngredient.quantity + addIngredientDto.quantity,
+            },
+          );
+        } else {
+          await this.insertIngredientToList(
+            individualShoppingList.shoppingList,
+            ingredient,
+            addIngredientDto,
+          );
+        }
       }
 
       return new PageDto('OK', HttpStatus.OK);

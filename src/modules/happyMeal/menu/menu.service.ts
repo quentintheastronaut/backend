@@ -366,11 +366,60 @@ export class MenuService {
 
   public async recommend(jwtUser: JwtUser, date: string) {
     try {
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
+
       const dateMoment = moment(date, DateFormat.FULL_DATE);
+      const breakfast = [];
+      const lunch = [];
+      const dinner = [];
+      const snack = [];
+
+      for (let i = 1; i <= 3; i++) {
+        const current = dateMoment
+          .clone()
+          .subtract(i, 'day')
+          .format(DateFormat.FULL_DATE);
+        const user = await this._userService.findByAccountId(sub.toString());
+
+        const individualMenu = await this.findIndividualMenu(current, user);
+
+        if (individualMenu) {
+          const dishesToMenu = await AppDataSource.createQueryBuilder(
+            DishToMenu,
+            'dish_to_menu',
+          )
+            .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+            .where('menuId = :menuId', { menuId: individualMenu.menu.id })
+            .getMany();
+
+          dishesToMenu.forEach((dishToMenu) => {
+            switch (dishToMenu.meal) {
+              case MealType.BREAKFAST:
+                breakfast.push(dishToMenu.dish.id);
+                break;
+              case MealType.LUNCH:
+                lunch.push(dishToMenu.dish.id);
+                break;
+              case MealType.DINNER:
+                dinner.push(dishToMenu.dish.id);
+                break;
+              case MealType.SNACKS:
+                snack.push(dishToMenu.dish.id);
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      }
+
+      console.log('breakfast', breakfast);
+      console.log('lunch', lunch);
+      console.log('dinner', dinner);
+      console.log('snack', snack);
 
       const base = await this._userService.getBase(jwtUser);
-
-      console.log('base: ', base);
 
       const breakfastCalories = (base * 15) / 100;
       const lunchCalories = (base * 50) / 100;
@@ -387,6 +436,7 @@ export class MenuService {
             miniumBreakfastCalories: (breakfastCalories * 70) / 100,
           },
         )
+        .andWhere('dish.id IN (:breakfast)', { breakfast })
         .orderBy('RAND()')
         .getOne();
 
@@ -413,6 +463,7 @@ export class MenuService {
             miniumDinnerCalories: (dinnerCalories * 70) / 100,
           },
         )
+        .andWhere('dish.id IN (:dinner)', { dinner })
         .orderBy('RAND()')
         .getOne();
 
@@ -485,6 +536,7 @@ export class MenuService {
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }

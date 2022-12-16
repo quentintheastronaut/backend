@@ -190,10 +190,10 @@ export class ShoppingListService {
 
   async updateIngredientToShoppingList(
     id: string,
-    addIngredientDro: AddIngredientDto,
+    addIngredientDto: AddIngredientDto,
   ) {
     try {
-      const { ingredientId, date, ...payload } = addIngredientDro;
+      const { ingredientId, date, ...payload } = addIngredientDto;
       await AppDataSource.createQueryBuilder()
         .update(IngredientToShoppingList)
         .set(payload)
@@ -424,6 +424,9 @@ export class ShoppingListService {
             ingredient: {
               id: ingredient.id,
             },
+            shoppingList: {
+              id: list.shoppingList.id,
+            },
           },
         });
 
@@ -490,6 +493,9 @@ export class ShoppingListService {
           where: {
             ingredient: {
               id: ingredient.id,
+            },
+            shoppingList: {
+              id: individualShoppingList.shoppingList.id,
             },
           },
         });

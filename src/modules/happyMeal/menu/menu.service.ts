@@ -337,6 +337,9 @@ export class MenuService {
               id: dish.id,
             },
             meal: addGroupDishDto.meal,
+            menu: {
+              id: groupMenu.menu.id,
+            },
           },
         });
 
@@ -397,6 +400,9 @@ export class MenuService {
               id: dish.id,
             },
             meal: addDishDto.meal,
+            menu: {
+              id: individualMenu.menu.id,
+            },
           },
         });
 
@@ -638,6 +644,8 @@ export class MenuService {
         })
         .getRawAndEntities();
 
+      console.log(entities);
+
       const ingredientToList = entities.map((ingredient) => ({
         ingredientId: ingredient.ingredient.id,
         quantity: addDishDto.quantity * ingredient.quantity,
@@ -697,23 +705,56 @@ export class MenuService {
     });
 
     const values = ingredients.map((ingredient) => ({
+      ...ingredient,
       ingredientId: ingredient.ingredient.id,
       shoppingListId: individualList.shoppingList.id,
     }));
 
     try {
-      values.forEach(async (value) => {
-        await AppDataSource.createQueryBuilder()
-          .delete()
-          .from(IngredientToShoppingList)
-          .where(
-            'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
-            {
-              ...value,
+      for (const value of values) {
+        const ingredientToShoppingList = await AppDataSource.getRepository(
+          IngredientToShoppingList,
+        ).findOne({
+          where: {
+            ingredient: {
+              id: value.ingredientId,
             },
-          )
-          .execute();
-      });
+            shoppingList: {
+              id: value.shoppingListId,
+            },
+          },
+        });
+
+        if (
+          ingredientToShoppingList.quantity <=
+          dishToMenu.quantity * value.quantity
+        ) {
+          // Case 1:
+          await AppDataSource.createQueryBuilder()
+            .delete()
+            .from(IngredientToShoppingList)
+            .where(
+              'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
+              {
+                ...value,
+              },
+            )
+            .execute();
+        } else {
+          // Case 2:
+          await AppDataSource.createQueryBuilder()
+            .update(IngredientToShoppingList)
+            .set({
+              quantity:
+                ingredientToShoppingList.quantity -
+                dishToMenu.quantity * value.quantity,
+            })
+            .where('ingredientToShoppingListId = :id', {
+              id: ingredientToShoppingList.ingredientToShoppingListId,
+            })
+            .execute();
+        }
+      }
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(error);
@@ -752,23 +793,56 @@ export class MenuService {
     });
 
     const values = ingredients.map((ingredient) => ({
+      ...ingredient,
       ingredientId: ingredient.ingredient.id,
       shoppingListId: individualList.shoppingList.id,
     }));
 
     try {
-      values.forEach(async (value) => {
-        await AppDataSource.createQueryBuilder()
-          .delete()
-          .from(IngredientToShoppingList)
-          .where(
-            'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
-            {
-              ...value,
+      for (const value of values) {
+        const ingredientToShoppingList = await AppDataSource.getRepository(
+          IngredientToShoppingList,
+        ).findOne({
+          where: {
+            ingredient: {
+              id: value.ingredientId,
             },
-          )
-          .execute();
-      });
+            shoppingList: {
+              id: value.shoppingListId,
+            },
+          },
+        });
+
+        if (
+          ingredientToShoppingList.quantity <=
+          dishToMenu.quantity * value.quantity
+        ) {
+          // Case 1:
+          await AppDataSource.createQueryBuilder()
+            .delete()
+            .from(IngredientToShoppingList)
+            .where(
+              'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
+              {
+                ...value,
+              },
+            )
+            .execute();
+        } else {
+          // Case 2:
+          await AppDataSource.createQueryBuilder()
+            .update(IngredientToShoppingList)
+            .set({
+              quantity:
+                ingredientToShoppingList.quantity -
+                dishToMenu.quantity * value.quantity,
+            })
+            .where('ingredientToShoppingListId = :id', {
+              id: ingredientToShoppingList.ingredientToShoppingListId,
+            })
+            .execute();
+        }
+      }
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(error);

@@ -58,6 +58,9 @@ export class DishService {
             ...addIngredientToDishDto,
             measurementType,
             ingredient,
+            dish: {
+              id: addIngredientToDishDto.dishId,
+            },
           },
         ])
         .execute();

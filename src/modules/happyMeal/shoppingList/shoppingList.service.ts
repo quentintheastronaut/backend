@@ -196,10 +196,16 @@ export class ShoppingListService {
     addIngredientDto: AddIngredientDto,
   ) {
     try {
-      const { ingredientId, date, ...payload } = addIngredientDto;
+      const { ingredientId, date, measurementTypeId, ...payload } =
+        addIngredientDto;
       await AppDataSource.createQueryBuilder()
         .update(IngredientToShoppingList)
-        .set(payload)
+        .set({
+          ...payload,
+          measurementType: {
+            id: measurementTypeId,
+          },
+        })
         .where('ingredientToShoppingListId = :id', {
           id,
         })

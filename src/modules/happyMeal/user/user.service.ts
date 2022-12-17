@@ -1,3 +1,4 @@
+import { UpdateUserDto } from './dto/request/updateUser.dto';
 import { AuthService } from './../auth/auth.service';
 import { MenuService } from './../menu/menu.service';
 import { GroupService } from './../group/group.service';
@@ -100,6 +101,9 @@ export class UserService {
   async find(id: string) {
     try {
       return await AppDataSource.getRepository(User).findOne({
+        relations: {
+          account: true,
+        },
         where: { id },
       });
     } catch (error) {
@@ -196,6 +200,7 @@ export class UserService {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
       const group = await this._groupService.findByUser(user);
+
       const profile = await AppDataSource.createQueryBuilder(User, 'user')
         .leftJoinAndSelect('user.account', 'account')
         .where('accountId = :accountId', { accountId: sub.toString() })
@@ -205,7 +210,6 @@ export class UserService {
         group: group,
       });
     } catch (error) {
-      console.log(error);
       throw new BadRequestException();
     }
   }
@@ -282,7 +286,7 @@ export class UserService {
       .select('user')
       .from(User, 'user')
       .leftJoinAndSelect('user.account', 'account')
-      .where('user.firstName like :name or user.lastName like :name', {
+      .where('account.firstName like :name or account.lastName like :name', {
         name: `%${pageOptionsDto.search}%`,
       })
       .orderBy('user.createdAt', pageOptionsDto.order)
@@ -297,19 +301,26 @@ export class UserService {
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
   }
 
-  public async createUser(userDto: UserDto): Promise<PageDto<User>> {
-    const hash = await argon.hash(userDto.password);
+  public async createUser(
+    updateUserDto: UpdateUserDto,
+  ): Promise<PageDto<User>> {
+    const hash = await argon.hash(updateUserDto?.password || 'happymeal');
     const newAccount: AccountDto = {
-      email: userDto.email,
+      email: updateUserDto.email,
       password: hash,
       role: AccountRole.USER,
+      firstName: updateUserDto.firstName,
+      lastName: updateUserDto.lastName,
+      imageUrl: updateUserDto.imageUrl,
+      sex: updateUserDto.sex,
+      dob: updateUserDto.dob,
     };
     await this._authService.insert(newAccount);
 
-    const account = await this._authService.findOneByEmail(userDto.email);
+    const account = await this._authService.findOneByEmail(updateUserDto.email);
 
     try {
-      const newUserId = await this.insert(userDto);
+      const newUserId = await this.insert(updateUserDto);
       const user = await this.find(newUserId.raw.insertId);
       await this.bindAccount(user.id, account);
 
@@ -320,18 +331,25 @@ export class UserService {
     }
   }
 
-  public async updateUser(id: number, userDto: UserDto) {
+  public async updateUser(id: number, updateUserDto: UpdateUserDto) {
     try {
+      const { email, firstName, lastName, sex, dob, imageUrl, ...profile } =
+        updateUserDto;
+
       const user = await this.find(id.toString());
-      const { email, password, ...profile } = userDto;
-      const hash = await argon.hash(password);
+
       await this._authService.updateById(user.account.id, {
         email,
-        password: hash,
+        firstName,
+        lastName,
+        sex,
+        dob,
+        imageUrl,
       });
       await this.update(id.toString(), profile);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new BadRequestException();
     }
   }

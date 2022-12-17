@@ -18,6 +18,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/decorators';
+import { UpdateUserDto } from './dto/request/updateUser.dto';
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -49,8 +50,11 @@ export class UserController {
 
   @Patch('/:id')
   @ApiOperation({ summary: 'Update user' })
-  async updateUser(@Param('id') id: number, @Body() userDto: UserDto) {
-    return this.userService.updateUser(id, userDto);
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.updateUser(id, updateUserDto);
   }
 
   @UseGuards(JwtGuard)
@@ -79,8 +83,10 @@ export class UserController {
 
   @Post()
   @ApiOperation({ summary: 'Create new user' })
-  async createUser(@Body() userDto: UserDto): Promise<PageDto<User>> {
-    return this.userService.createUser(userDto);
+  async createUser(
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<PageDto<User>> {
+    return this.userService.createUser(updateUserDto);
   }
 
   @Get()

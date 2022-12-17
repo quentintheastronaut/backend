@@ -42,6 +42,14 @@ export class DishDto {
   calories: number;
 
   @ApiProperty({
+    example: 0,
+    default: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  cookingTime: number;
+
+  @ApiProperty({
     example: '',
   })
   @IsOptional()

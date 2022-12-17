@@ -17,6 +17,7 @@ import entities from './entities';
 import * as dotenv from 'dotenv';
 import { MenuModule } from './modules/happyMeal/menu/menu.module';
 import moment from 'moment';
+import { MealModule } from './modules/happyMeal/meal/meal.module';
 
 dotenv.config({
   path: `.env`,
@@ -34,6 +35,7 @@ dotenv.config({
     ClassificationModule,
     MeasurementModule,
     WeightRecordModule,
+    MealModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       entities: entities,

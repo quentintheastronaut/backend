@@ -7,4 +7,4 @@ import { MealService } from './meal.service';
   providers: [MealService],
   exports: [MealService],
 })
-export class MeasurementModule {}
+export class MealModule {}

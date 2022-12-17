@@ -197,6 +197,7 @@ export class UserService {
       const user = await this.findByAccountId(sub.toString());
       const group = await this._groupService.findByUser(user);
       const profile = await AppDataSource.createQueryBuilder(User, 'user')
+        .leftJoinAndSelect('user.account', 'account')
         .where('accountId = :accountId', { accountId: sub.toString() })
         .getOneOrFail();
       return new PageDto('OK', HttpStatus.OK, {

@@ -40,8 +40,8 @@ export class AuthService {
         .values([accountDto])
         .execute();
     } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException('');
+      if (error.code === 'ER_DUP_ENTRY')
+        throw new ForbiddenException('Credentials taken');
     }
   }
 

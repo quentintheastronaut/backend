@@ -434,7 +434,7 @@ export class MenuService {
       const dinnerCalories = (base * 20) / 100;
       const snackCalories = (base * 15) / 100;
 
-      const breakfastDishQuery = await AppDataSource.createQueryBuilder()
+      const breakfastDishQuery = AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -451,7 +451,7 @@ export class MenuService {
         });
       }
 
-      const lunchDishQuery = await AppDataSource.createQueryBuilder()
+      const lunchDishQuery = AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -466,7 +466,7 @@ export class MenuService {
         lunchDishQuery.andWhere('dish.id NOT IN (:lunch)', { lunch });
       }
 
-      const dinnerDishQuery = await AppDataSource.createQueryBuilder()
+      const dinnerDishQuery = AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -481,7 +481,7 @@ export class MenuService {
         dinnerDishQuery.andWhere('dish.id NOT IN (:dinner)', { dinner });
       }
 
-      const snackDishQuery = await AppDataSource.createQueryBuilder()
+      const snackDishQuery = AppDataSource.createQueryBuilder()
         .select('dish')
         .from(Dish, 'dish')
         .where(
@@ -501,49 +501,53 @@ export class MenuService {
       const dinnerDish = await dinnerDishQuery.orderBy('RAND()').getOne();
       const snackDish = await snackDishQuery.orderBy('RAND()').getOne();
 
-      this.addDish(
-        {
-          date,
-          dishId: breakfastDish.id,
-          type: ShoppingListType.INDIVIDUAL,
-          mealId: MealType.BREAKFAST,
-          quantity: 1,
-        },
-        jwtUser,
-      );
+      console.log(breakfastDish.id);
+      console.log(lunchDish.id);
+      console.log(dinnerDish.id);
+      console.log(snackDish.id);
 
-      this.addDish(
-        {
-          date,
-          dishId: lunchDish.id,
-          type: ShoppingListType.INDIVIDUAL,
-          mealId: MealType.LUNCH,
-          quantity: 1,
-        },
-        jwtUser,
-      );
-
-      this.addDish(
-        {
-          date,
-          dishId: dinnerDish.id,
-          type: ShoppingListType.INDIVIDUAL,
-          mealId: MealType.DINNER,
-          quantity: 1,
-        },
-        jwtUser,
-      );
-
-      this.addDish(
-        {
-          date,
-          dishId: snackDish.id,
-          type: ShoppingListType.INDIVIDUAL,
-          mealId: MealType.SNACKS,
-          quantity: 1,
-        },
-        jwtUser,
-      );
+      await Promise.all([
+        await this.addDish(
+          {
+            date,
+            dishId: breakfastDish.id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.BREAKFAST,
+            quantity: 1,
+          },
+          jwtUser,
+        ),
+        await this.addDish(
+          {
+            date,
+            dishId: lunchDish.id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.LUNCH,
+            quantity: 1,
+          },
+          jwtUser,
+        ),
+        await this.addDish(
+          {
+            date,
+            dishId: dinnerDish.id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.DINNER,
+            quantity: 1,
+          },
+          jwtUser,
+        ),
+        await this.addDish(
+          {
+            date,
+            dishId: snackDish.id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.SNACKS,
+            quantity: 1,
+          },
+          jwtUser,
+        ),
+      ]);
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {

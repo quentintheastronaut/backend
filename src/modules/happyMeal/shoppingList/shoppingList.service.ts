@@ -166,6 +166,9 @@ export class ShoppingListService {
             ...addIngredientDto,
             shoppingList,
             ingredient,
+            measurementType: {
+              id: addIngredientDto.measurementTypeId,
+            },
           },
         ])
         .execute();
@@ -527,6 +530,7 @@ export class ShoppingListService {
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }

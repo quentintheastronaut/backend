@@ -244,14 +244,15 @@ export class MenuService {
 
   async updateDishToMenu(id: string, addDishDto: AddDishDto) {
     try {
-      const { dishId, date, mealId, ...payload } = addDishDto;
+      const { dishId, date, mealId, quantity, type } = addDishDto;
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
         .set({
           meal: {
             id: mealId,
           },
-          ...payload,
+          quantity,
+          type,
         })
         .where('dishToMenuId = :id', {
           id,
@@ -404,8 +405,6 @@ export class MenuService {
             .leftJoinAndSelect('dish_to_menu.meal', 'meal')
             .where('menuId = :menuId', { menuId: individualMenu.menu.id })
             .getMany();
-
-          console.log(dishesToMenu);
 
           dishesToMenu.forEach((dishToMenu) => {
             switch (dishToMenu.meal.id) {
@@ -789,7 +788,7 @@ export class MenuService {
         'ingredient_to_dish',
       )
         .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
-        .leftJoinAndSelect('ingredient_to_dish.measurement', 'measurement')
+        .leftJoinAndSelect('ingredient_to_dish.measurementType', 'measurement')
         .where('dishId = :dishId', {
           dishId: addGroupDishDto.dishId,
         })

@@ -196,12 +196,11 @@ export class ShoppingListService {
     addIngredientDto: AddIngredientDto,
   ) {
     try {
-      const { ingredientId, date, measurementTypeId, ...payload } =
-        addIngredientDto;
+      const { measurementTypeId, quantity } = addIngredientDto;
       await AppDataSource.createQueryBuilder()
         .update(IngredientToShoppingList)
         .set({
-          ...payload,
+          quantity,
           measurementType: {
             id: measurementTypeId,
           },
@@ -571,9 +570,16 @@ export class ShoppingListService {
     }
 
     try {
+      const { measurementTypeId, ...payload } =
+        updateIngredientToShoppingListDto;
       await AppDataSource.createQueryBuilder()
         .update(IngredientToShoppingList)
-        .set(updateIngredientToShoppingListDto)
+        .set({
+          measurementType: {
+            id: measurementTypeId,
+          },
+          ...payload,
+        })
         .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
           ingredientToShoppingListId:
             updateIngredientToShoppingListDto.ingredientToShoppingListId,
@@ -581,6 +587,7 @@ export class ShoppingListService {
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

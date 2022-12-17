@@ -725,7 +725,6 @@ export class MenuService {
     updateDishDto: UpdateDishToMenuDto,
     jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
-    const { dishToMenuId } = updateDishDto;
     const dishToMenu = await this.findDishToMenu(updateDishDto.dishToMenuId);
     const { menu } = dishToMenu;
 
@@ -736,7 +735,12 @@ export class MenuService {
     try {
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
-        .set(updateDishDto)
+        .set({
+          quantity: updateDishDto.quantity,
+          meal: {
+            id: updateDishDto.mealId,
+          },
+        })
         .where('dishToMenuId = :dishToMenuId', {
           dishToMenuId: updateDishDto.dishToMenuId,
         })

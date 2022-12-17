@@ -130,15 +130,13 @@ export class DishService {
     addIngredientToDishDto: AddIngredientToDishDto,
   ) {
     try {
-      const measurementType = await this._measurementService.find(
-        addIngredientToDishDto.measurementTypeId,
-      );
-
       await AppDataSource.createQueryBuilder()
         .update(IngredientToDish)
         .set({
           quantity: addIngredientToDishDto.quantity,
-          measurementType,
+          measurementType: {
+            id: addIngredientToDishDto.measurementTypeId,
+          },
         })
         .where('dishId = :dishId AND ingredientId = :ingredientId', {
           dishId: addIngredientToDishDto.dishId,

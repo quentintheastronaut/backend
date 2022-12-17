@@ -401,8 +401,11 @@ export class MenuService {
             'dish_to_menu',
           )
             .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+            .leftJoinAndSelect('dish_to_menu.meal', 'meal')
             .where('menuId = :menuId', { menuId: individualMenu.menu.id })
             .getMany();
+
+          console.log(dishesToMenu);
 
           dishesToMenu.forEach((dishToMenu) => {
             switch (dishToMenu.meal.id) {
@@ -444,7 +447,9 @@ export class MenuService {
         );
 
       if (breakfast.length != 0) {
-        breakfastDishQuery.andWhere('dish.id IN (:breakfast)', { breakfast });
+        breakfastDishQuery.andWhere('dish.id NOT IN (:breakfast)', {
+          breakfast,
+        });
       }
 
       const lunchDishQuery = await AppDataSource.createQueryBuilder()
@@ -459,7 +464,7 @@ export class MenuService {
         );
 
       if (lunch.length != 0) {
-        lunchDishQuery.andWhere('dish.id IN (:lunch)', { lunch });
+        lunchDishQuery.andWhere('dish.id NOT IN (:lunch)', { lunch });
       }
 
       const dinnerDishQuery = await AppDataSource.createQueryBuilder()
@@ -474,7 +479,7 @@ export class MenuService {
         );
 
       if (dinner.length != 0) {
-        dinnerDishQuery.andWhere('dish.id IN (:dinner)', { dinner });
+        dinnerDishQuery.andWhere('dish.id NOT IN (:dinner)', { dinner });
       }
 
       const snackDishQuery = await AppDataSource.createQueryBuilder()
@@ -489,7 +494,7 @@ export class MenuService {
         );
 
       if (snack.length != 0) {
-        snackDishQuery.andWhere('dish.id IN (:snack)', { snack });
+        snackDishQuery.andWhere('dish.id NOT IN (:snack)', { snack });
       }
 
       const breakfastDish = await breakfastDishQuery.orderBy('RAND()').getOne();
@@ -667,6 +672,7 @@ export class MenuService {
         'dish_to_menu',
       )
         .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+        .leftJoinAndSelect('dish_to_menu.meal', 'meal')
         .where('menuId = :menuId', { menuId: newGroupMenu.menu.id })
         .getMany();
 
@@ -701,6 +707,7 @@ export class MenuService {
         'dish_to_menu',
       )
         .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+        .leftJoinAndSelect('dish_to_menu.meal', 'meal')
         .where('menuId = :menuId', { menuId: newIndividualMenu.menu.id })
         .getMany();
 
@@ -832,7 +839,6 @@ export class MenuService {
       }));
 
       for (const ingredient of ingredientToList) {
-        console.log(ingredient);
         await this._shoppingListService.addIngredient(
           {
             ingredientId: ingredient.ingredientId,

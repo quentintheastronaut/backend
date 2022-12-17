@@ -377,6 +377,7 @@ export class UserService {
       'dish_to_menu',
     )
       .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+      .leftJoinAndSelect('dish_to_menu.meal', 'meal')
       .where('menuId = :menuId', { menuId: individualMenu.menu.id })
       .getMany();
 
@@ -404,6 +405,7 @@ export class UserService {
       'dish_to_menu',
     )
       .leftJoinAndSelect('dish_to_menu.dish', 'dish')
+      .leftJoinAndSelect('dish_to_menu.meal', 'meal')
       .where('menuId = :menuId', { menuId: groupMenu.menu.id })
       .getMany();
 

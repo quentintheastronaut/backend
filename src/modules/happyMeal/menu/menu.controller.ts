@@ -73,7 +73,7 @@ export class MenuController {
   @ApiOperation({ summary: 'Menu recommendation' })
   @UseGuards(JwtGuard)
   @Post('/recommend')
-  async recommand(@Req() req: { user: JwtUser }, @Query('date') date: string) {
+  async recommend(@Req() req: { user: JwtUser }, @Query('date') date: string) {
     const { user } = req;
     return this._menuService.recommend(user, date);
   }

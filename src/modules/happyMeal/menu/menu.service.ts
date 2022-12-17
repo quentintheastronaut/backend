@@ -244,7 +244,7 @@ export class MenuService {
 
   async updateDishToMenu(id: string, addDishDto: AddDishDto) {
     try {
-      const { dishId, date, mealId, quantity, type } = addDishDto;
+      const { mealId, quantity, type } = addDishDto;
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
         .set({

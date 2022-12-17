@@ -501,7 +501,7 @@ export class MenuService {
       const dinnerDish = await dinnerDishQuery.orderBy('RAND()').getOne();
       const snackDish = await snackDishQuery.orderBy('RAND()').getOne();
 
-      await this.addDish(
+      this.addDish(
         {
           date,
           dishId: breakfastDish.id,
@@ -512,7 +512,7 @@ export class MenuService {
         jwtUser,
       );
 
-      await this.addDish(
+      this.addDish(
         {
           date,
           dishId: lunchDish.id,
@@ -523,7 +523,7 @@ export class MenuService {
         jwtUser,
       );
 
-      await this.addDish(
+      this.addDish(
         {
           date,
           dishId: dinnerDish.id,
@@ -534,7 +534,7 @@ export class MenuService {
         jwtUser,
       );
 
-      await this.addDish(
+      this.addDish(
         {
           date,
           dishId: snackDish.id,

@@ -1,4 +1,5 @@
 import { IsString } from 'class-validator';
+import { SexType } from 'src/constants';
 import { AccountRole } from 'src/constants/accountRole';
 import {
   Column,
@@ -29,6 +30,37 @@ export class Account {
     default: 'happymeal',
   })
   password: string;
+
+  @Column({
+    nullable: false,
+    default: '',
+  })
+  firstName: string;
+
+  @Column({
+    nullable: false,
+    default: '',
+  })
+  lastName: string;
+
+  @Column({
+    nullable: true,
+    default: '',
+  })
+  dob: string;
+
+  @Column({
+    nullable: false,
+    type: 'enum',
+    enum: SexType,
+    default: SexType.MALE,
+  })
+  sex: string;
+
+  @Column({
+    default: '',
+  })
+  imageUrl: string;
 
   @Column({
     nullable: false,

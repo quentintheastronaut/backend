@@ -30,32 +30,6 @@ export class User {
   id: string;
 
   @Column({
-    nullable: false,
-    default: '',
-  })
-  firstName: string;
-
-  @Column({
-    nullable: false,
-    default: '',
-  })
-  lastName: string;
-
-  @Column({
-    nullable: true,
-    default: '',
-  })
-  dob: string;
-
-  @Column({
-    nullable: false,
-    type: 'enum',
-    enum: Sex,
-    default: Sex.MALE,
-  })
-  sex: string;
-
-  @Column({
     default: 0,
   })
   height: number;
@@ -64,11 +38,6 @@ export class User {
     default: 0,
   })
   weight: number;
-
-  @Column({
-    default: '',
-  })
-  imageUrl: string;
 
   @Column({
     default: '',

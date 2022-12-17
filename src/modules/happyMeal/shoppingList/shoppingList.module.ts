@@ -8,6 +8,7 @@ import { IngredientService } from '../ingredient/ingredient.service';
 import { AuthService } from '../auth/auth.service';
 import { GroupService } from '../group/group.service';
 import { DishService } from '../dish/dish.service';
+import { MeasurementService } from '../measurement/measurement.service';
 
 @Module({
   controllers: [ShoppingListController],
@@ -20,6 +21,7 @@ import { DishService } from '../dish/dish.service';
     GroupService,
     DishService,
     MenuService,
+    MeasurementService,
   ],
   exports: [ShoppingListService],
 })

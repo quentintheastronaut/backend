@@ -11,6 +11,12 @@ export class AddDishDto {
   dishId: string;
 
   @ApiProperty({
+    example: '1',
+  })
+  @IsString()
+  mealId: string;
+
+  @ApiProperty({
     example: ShoppingListType.INDIVIDUAL,
   })
   @IsString()
@@ -21,12 +27,6 @@ export class AddDishDto {
   })
   @IsString()
   date: string;
-
-  @ApiProperty({
-    example: MealType.BREAKFAST,
-  })
-  @IsString()
-  meal: MealType;
 
   @ApiProperty({
     example: 1,

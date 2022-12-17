@@ -29,10 +29,10 @@ export class AddGroupDishDto {
   date: string;
 
   @ApiProperty({
-    example: MealType.BREAKFAST,
+    example: '1',
   })
   @IsString()
-  meal: MealType;
+  mealId: string;
 
   @ApiProperty({
     example: 1,

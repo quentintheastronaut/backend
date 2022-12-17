@@ -11,6 +11,17 @@ import {
 
 @Injectable({})
 export class MeasurementService {
+  public async find(id: string) {
+    try {
+      return await AppDataSource.getRepository(Measurement).findOne({
+        where: { id },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
   public async getAllMeasurement(
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Measurement[]>> {

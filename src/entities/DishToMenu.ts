@@ -1,8 +1,15 @@
 import { ShoppingListType } from './../constants/shoppingListType';
-import { MealType } from 'src/constants/mealType';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Dish } from './Dish';
 import { Menu } from './Menu';
+import { Meal } from './Meal';
 
 // REFACTOR
 @Entity()
@@ -10,8 +17,8 @@ export class DishToMenu {
   @PrimaryGeneratedColumn()
   public dishToMenuId!: string;
 
-  @Column()
-  public meal!: MealType;
+  @ManyToOne(() => Meal, (meal) => meal.dishToMenu)
+  meal: Meal;
 
   @Column()
   public quantity!: number;

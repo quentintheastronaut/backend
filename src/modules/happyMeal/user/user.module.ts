@@ -9,6 +9,7 @@ import { MenuService } from '../menu/menu.service';
 import { ShoppingListService } from '../shoppingList/shoppingList.service';
 import { DishService } from '../dish/dish.service';
 import { IngredientService } from '../ingredient/ingredient.service';
+import { MeasurementService } from '../measurement/measurement.service';
 
 @Module({
   imports: [AuthModule],
@@ -20,6 +21,7 @@ import { IngredientService } from '../ingredient/ingredient.service';
     ShoppingListService,
     DishService,
     IngredientService,
+    MeasurementService,
   ],
   exports: [UserService],
 })

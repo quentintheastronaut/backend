@@ -212,7 +212,17 @@ export class UserService {
   async updateProfile(jwtUser: JwtUser, updateProfileDto: UpdateProfileDto) {
     try {
       const { sub } = jwtUser;
-      await this.updateByAccountId(sub.toString(), updateProfileDto);
+      const { firstName, lastName, sex, dob, imageUrl, ...userDto } =
+        updateProfileDto;
+      await this.updateByAccountId(sub.toString(), userDto);
+
+      await this._authService.findOneAndUpdateById(sub.toString(), {
+        firstName,
+        lastName,
+        sex,
+        dob,
+        imageUrl,
+      });
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -241,14 +251,15 @@ export class UserService {
   async getBasalMetabolicRate(jwtUser: JwtUser) {
     try {
       const { sub } = jwtUser;
+      const account = await this._authService.findOneById(sub.toString());
       const user = await this.findByAccountId(sub.toString());
 
       const age = moment().diff(
-        moment(user.dob, DateFormat.FULL_DATE),
+        moment(account.dob, DateFormat.FULL_DATE),
         'years',
       );
 
-      const currentBMR = this.bmr(user.weight, user.height, age, user.sex);
+      const currentBMR = this.bmr(user.weight, user.height, age, account.sex);
 
       const result = {
         currentBMR,
@@ -518,9 +529,13 @@ export class UserService {
 
   public async getBase(jwtUser: JwtUser) {
     const { sub } = jwtUser;
+    const account = await this._authService.findOneById(sub.toString());
     const user = await this.findByAccountId(sub.toString());
-    const age = moment().diff(moment(user.dob, DateFormat.FULL_DATE), 'years');
-    const currentBMR = this.bmr(user.weight, user.height, age, user.sex);
+    const age = moment().diff(
+      moment(account.dob, DateFormat.FULL_DATE),
+      'years',
+    );
+    const currentBMR = this.bmr(user.weight, user.height, age, account.sex);
     const baseCalories = this.dailyCalories(currentBMR, user.activityIntensity);
 
     return baseCalories;
@@ -530,11 +545,12 @@ export class UserService {
     try {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
+      const account = await this._authService.findOneById(sub.toString());
       const age = moment().diff(
-        moment(user.dob, DateFormat.FULL_DATE),
+        moment(account.dob, DateFormat.FULL_DATE),
         'years',
       );
-      const currentBMR = this.bmr(user.weight, user.height, age, user.sex);
+      const currentBMR = this.bmr(user.weight, user.height, age, account.sex);
 
       const currentCalories = await this.getCurrentCalories(jwtUser, date);
       const totalCalories = await this.getTotalCalories(jwtUser, date);

@@ -17,6 +17,7 @@ import { Admin } from './Admin';
 import { IndividualMenu } from './IndividualMenu';
 import { Allergic } from './Allergic';
 import { IndividualShoppingList } from './IndividualShoppingList';
+import { Meal } from './Meal';
 
 export { User };
 
@@ -40,6 +41,7 @@ const entities = [
   GroupShoppingList,
   Allergic,
   IndividualShoppingList,
+  Meal,
 ];
 
 export default entities;

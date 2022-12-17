@@ -1,10 +1,14 @@
+import { Measurement } from './Measurement';
 import { Ingredient } from './Ingredient';
 import { Dish } from './Dish';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -19,15 +23,8 @@ export class IngredientToDish {
   })
   public quantity!: number;
 
-  @Column({
-    default: 'GRAMME',
-  })
-  public measurementType!: string;
-
-  @Column({
-    default: 0,
-  })
-  public weight!: number;
+  @ManyToOne(() => Measurement, (measurement) => measurement.ingredientToDish)
+  measurementType: Measurement;
 
   @ManyToOne(() => Dish, (dish) => dish.ingredientsToDish, {
     onDelete: 'CASCADE',

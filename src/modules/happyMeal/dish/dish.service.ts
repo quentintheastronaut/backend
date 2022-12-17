@@ -17,11 +17,16 @@ import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
 import { Dish } from 'src/entities/Dish';
 import { Inject } from '@nestjs/common';
+import { MeasurementService } from '../measurement/measurement.service';
 
 @Injectable({})
 export class DishService {
-  @Inject(forwardRef(() => IngredientService))
-  private _ingredientService: IngredientService;
+  constructor(
+    @Inject(forwardRef(() => IngredientService))
+    private _ingredientService: IngredientService,
+    @Inject(forwardRef(() => MeasurementService))
+    private _measurementService: MeasurementService,
+  ) {}
 
   // COMMON SERVICES
   public async find(id: string) {
@@ -41,13 +46,17 @@ export class DishService {
     ingredient: Ingredient,
   ) {
     try {
+      const measurementType = await this._measurementService.find(
+        addIngredientToDishDto.measurementTypeId,
+      );
+
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(IngredientToDish)
         .values([
           {
             ...addIngredientToDishDto,
-            dish,
+            measurementType,
             ingredient,
           },
         ])
@@ -65,6 +74,7 @@ export class DishService {
         'ingredient_to_dish',
       )
         .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
+        .leftJoinAndSelect('ingredient_to_dish.measurementType', 'measurement')
         .where('ingredient_to_dish.dishId = :dishId', { dishId })
         .getMany();
       return new PageDto('OK', HttpStatus.OK, result);
@@ -117,11 +127,15 @@ export class DishService {
     addIngredientToDishDto: AddIngredientToDishDto,
   ) {
     try {
+      const measurementType = await this._measurementService.find(
+        addIngredientToDishDto.measurementTypeId,
+      );
+
       await AppDataSource.createQueryBuilder()
         .update(IngredientToDish)
         .set({
           quantity: addIngredientToDishDto.quantity,
-          measurementType: addIngredientToDishDto.measurementType,
+          measurementType,
         })
         .where('dishId = :dishId AND ingredientId = :ingredientId', {
           dishId: addIngredientToDishDto.dishId,

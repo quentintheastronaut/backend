@@ -1,10 +1,13 @@
+import { Measurement } from './Measurement';
 import { Ingredient } from './Ingredient';
 import { ShoppingList } from './ShoppingList';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -19,15 +22,11 @@ export class IngredientToShoppingList {
   })
   public quantity!: number;
 
-  @Column({
-    default: 'GRAMME',
-  })
-  public measurementType!: string;
-
-  @Column({
-    default: 0,
-  })
-  public weight!: number;
+  @ManyToOne(
+    () => Measurement,
+    (measurement) => measurement.ingredientToShoppingList,
+  )
+  measurementType: Measurement;
 
   @Column({
     default: false,

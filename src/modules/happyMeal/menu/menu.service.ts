@@ -5,12 +5,10 @@ import { AddGroupDishDto } from './dto/request/addGroupDish';
 import { Group } from 'src/entities/Group';
 import { Menu } from 'src/entities/Menu';
 import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
-import { ShoppingList } from 'src/entities/ShoppingList';
 import { IngredientToDish } from './../../../entities/IngredientToDish';
 import { TrackDto } from './dto/request/track.dto';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { DishToMenu } from './../../../entities/DishToMenu';
-import { MenuDto } from './dto/request/menu.dto';
 import { AppDataSource } from './../../../data-source';
 import { PageOptionsDto } from './../../../dtos/pageOption.dto';
 import {
@@ -18,7 +16,6 @@ import {
   InternalServerErrorException,
   HttpStatus,
   NotFoundException,
-  BadRequestException,
   Inject,
   forwardRef,
 } from '@nestjs/common';
@@ -28,7 +25,7 @@ import { AddDishDto } from './dto/request/addDish.dto';
 import { User } from 'src/entities';
 import { RemoveDishDto } from './dto/request/removeDish.dto';
 import { UpdateDishToMenuDto } from './dto/request/updateDishToMenu.dto';
-import { ShoppingListStatus, ShoppingListType } from 'src/constants';
+import { ShoppingListType } from 'src/constants';
 import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { DishService } from '../dish/dish.service';
@@ -37,6 +34,7 @@ import { Dish } from 'src/entities/Dish';
 import { DateFormat } from 'src/constants/dateFormat';
 import * as moment from 'moment';
 import { MealType } from 'src/constants/mealType';
+import { MeasurementService } from '../measurement/measurement.service';
 
 @Injectable({})
 export class MenuService {
@@ -46,6 +44,8 @@ export class MenuService {
     @Inject(forwardRef(() => GroupService)) private _groupService: GroupService,
     @Inject(forwardRef(() => ShoppingListService))
     private _shoppingListService: ShoppingListService,
+    @Inject(forwardRef(() => MeasurementService))
+    private _measurementService: MeasurementService,
   ) {}
 
   // COMMON SERVICE
@@ -154,6 +154,7 @@ export class MenuService {
         relations: {
           menu: true,
           dish: true,
+          meal: true,
         },
         where: {
           dishToMenuId: id,
@@ -227,6 +228,9 @@ export class MenuService {
         .values([
           {
             ...addDishDto,
+            meal: {
+              id: addDishDto.mealId,
+            },
             menu,
             dish,
           },
@@ -240,10 +244,15 @@ export class MenuService {
 
   async updateDishToMenu(id: string, addDishDto: AddDishDto) {
     try {
-      const { dishId, date, ...payload } = addDishDto;
+      const { dishId, date, mealId, ...payload } = addDishDto;
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
-        .set(payload)
+        .set({
+          meal: {
+            id: mealId,
+          },
+          ...payload,
+        })
         .where('dishToMenuId = :id', {
           id,
         })
@@ -338,7 +347,9 @@ export class MenuService {
             dish: {
               id: dish.id,
             },
-            meal: addGroupDishDto.meal,
+            meal: {
+              id: addGroupDishDto.mealId,
+            },
             menu: {
               id: groupMenu.menu.id,
             },
@@ -394,7 +405,7 @@ export class MenuService {
             .getMany();
 
           dishesToMenu.forEach((dishToMenu) => {
-            switch (dishToMenu.meal) {
+            switch (dishToMenu.meal.id) {
               case MealType.BREAKFAST:
                 breakfast.push(dishToMenu.dish.id);
                 break;
@@ -491,7 +502,7 @@ export class MenuService {
           date,
           dishId: breakfastDish.id,
           type: ShoppingListType.INDIVIDUAL,
-          meal: MealType.BREAKFAST,
+          mealId: MealType.BREAKFAST,
           quantity: 1,
         },
         jwtUser,
@@ -502,7 +513,7 @@ export class MenuService {
           date,
           dishId: lunchDish.id,
           type: ShoppingListType.INDIVIDUAL,
-          meal: MealType.LUNCH,
+          mealId: MealType.LUNCH,
           quantity: 1,
         },
         jwtUser,
@@ -513,7 +524,7 @@ export class MenuService {
           date,
           dishId: dinnerDish.id,
           type: ShoppingListType.INDIVIDUAL,
-          meal: MealType.DINNER,
+          mealId: MealType.DINNER,
           quantity: 1,
         },
         jwtUser,
@@ -524,21 +535,11 @@ export class MenuService {
           date,
           dishId: snackDish.id,
           type: ShoppingListType.INDIVIDUAL,
-          meal: MealType.SNACKS,
+          mealId: MealType.SNACKS,
           quantity: 1,
         },
         jwtUser,
       );
-
-      // Rule 1: Không bị dị ứng với nguyên liệu
-
-      // Rule 2: Không năm trong menu 3 ngày gần nhất
-
-      // Rule 3: Không vượt quá số calo của từng buổi (so với Base Calories)
-      //  Sáng: 15%
-      //  Trưa: 50%
-      //  Tối: 20%
-      //  Xế: 15%
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -576,7 +577,9 @@ export class MenuService {
             dish: {
               id: dish.id,
             },
-            meal: addDishDto.meal,
+            meal: {
+              id: addDishDto.mealId,
+            },
             menu: {
               id: individualMenu.menu.id,
             },
@@ -779,6 +782,7 @@ export class MenuService {
         'ingredient_to_dish',
       )
         .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
+        .leftJoinAndSelect('ingredient_to_dish.measurement', 'measurement')
         .where('dishId = :dishId', {
           dishId: addGroupDishDto.dishId,
         })
@@ -795,7 +799,7 @@ export class MenuService {
           groupId: group.id,
           ingredientId: ingredient.ingredientId,
           quantity: ingredient.quantity,
-          measurementType: ingredient.measurementType,
+          measurementTypeId: ingredient.measurementType.id,
           date: addGroupDishDto.date,
         });
       }
@@ -815,6 +819,7 @@ export class MenuService {
         'ingredient_to_dish',
       )
         .leftJoinAndSelect('ingredient_to_dish.ingredient', 'ingredient')
+        .leftJoinAndSelect('ingredient_to_dish.measurementType', 'measurement')
         .where('dishId = :dishId', {
           dishId: addDishDto.dishId,
         })
@@ -823,15 +828,16 @@ export class MenuService {
       const ingredientToList = entities.map((ingredient) => ({
         ingredientId: ingredient.ingredient.id,
         quantity: addDishDto.quantity * ingredient.quantity,
-        measurementType: ingredient.measurementType,
+        measurementTypeId: ingredient.measurementType.id,
       }));
 
       for (const ingredient of ingredientToList) {
+        console.log(ingredient);
         await this._shoppingListService.addIngredient(
           {
             ingredientId: ingredient.ingredientId,
             quantity: ingredient.quantity,
-            measurementType: ingredient.measurementType,
+            measurementTypeId: ingredient.measurementTypeId,
             date: addDishDto.date,
           },
           jwtUser,
@@ -870,6 +876,7 @@ export class MenuService {
       relations: {
         dish: true,
         ingredient: true,
+        measurementType: true,
       },
       where: {
         dish: {
@@ -958,6 +965,7 @@ export class MenuService {
       relations: {
         dish: true,
         ingredient: true,
+        measurementType: true,
       },
       where: {
         dish: {

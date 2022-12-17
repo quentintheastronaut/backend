@@ -25,5 +25,5 @@ export class AddIngredientDto {
     example: 'GRAMME',
   })
   @IsString()
-  measurementType: string;
+  measurementTypeId: string;
 }

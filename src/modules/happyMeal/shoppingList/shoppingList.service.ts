@@ -332,6 +332,10 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.ingredient',
           'ingredient',
         )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.measurementType',
+          'measurement',
+        )
         .where('shoppingListId = :listId', {
           listId: newIndividualList.shoppingList.id,
         })
@@ -374,6 +378,10 @@ export class ShoppingListService {
         .leftJoinAndSelect(
           'ingredient_to_shopping_list.ingredient',
           'ingredient',
+        )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.measurementType',
+          'measurement',
         )
         .where('shoppingListId = :listId', {
           listId: groupShoppingList.shoppingList.id,

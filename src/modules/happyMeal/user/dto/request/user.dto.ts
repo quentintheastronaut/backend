@@ -4,32 +4,6 @@ import { SexType } from 'src/constants/sexType';
 
 export class UserDto {
   @ApiProperty({
-    example: 'Quentin',
-  })
-  @IsOptional()
-  @IsString()
-  firstName?: string;
-
-  @ApiProperty({
-    example: 'Dang',
-  })
-  @IsOptional()
-  @IsString()
-  lastName?: string;
-
-  @ApiProperty({
-    example: SexType.MALE,
-  })
-  @IsOptional()
-  sex?: SexType;
-
-  @ApiProperty({
-    example: '12/06/2022',
-  })
-  @IsOptional()
-  dob?: string;
-
-  @ApiProperty({
     example: '170',
   })
   @IsOptional()
@@ -40,13 +14,6 @@ export class UserDto {
   })
   @IsOptional()
   weight?: number;
-
-  @ApiProperty({
-    example:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/OOjs_UI_icon_userAvatar-progressive.svg/1200px-OOjs_UI_icon_userAvatar-progressive.svg.png',
-  })
-  @IsOptional()
-  imageUrl?: string;
 
   @ApiProperty({
     example: '70',

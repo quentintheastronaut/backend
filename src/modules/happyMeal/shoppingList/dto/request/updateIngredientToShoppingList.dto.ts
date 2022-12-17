@@ -27,5 +27,5 @@ export class UpdateIngredientToShoppingListDto {
   })
   @IsOptional()
   @IsString()
-  measurementType?: string;
+  measurementTypeId?: string;
 }

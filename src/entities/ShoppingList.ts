@@ -9,7 +9,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IsString } from 'class-validator';
 
 @Entity()
 export class ShoppingList {

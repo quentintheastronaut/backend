@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from './User';
 import { GroupRole } from 'src/constants/groupRole';
 import { Group } from './Group';
@@ -26,4 +33,10 @@ export class UserToGroup {
     onDelete: 'CASCADE',
   })
   public group!: Group;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -16,12 +16,6 @@ import { Account } from './Account';
 import { IndividualMenu } from './IndividualMenu';
 import { Allergic } from './Allergic';
 
-enum Sex {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
-}
-
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({

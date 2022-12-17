@@ -1,3 +1,4 @@
+import { WeightRecordService } from './../weightRecord/weightRecord.service';
 import { UserService } from './../user/user.service';
 import { GroupService } from './group.service';
 import { GroupController } from './group.controller';
@@ -21,6 +22,7 @@ import { MeasurementService } from '../measurement/measurement.service';
     MenuService,
     ShoppingListService,
     IngredientService,
+    WeightRecordService,
     MeasurementService,
   ],
   exports: [GroupService],

@@ -8,29 +8,31 @@ import {
   Injectable,
   HttpStatus,
   InternalServerErrorException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { UpdateWeightDto } from './dto/request/updateWeight.dto';
 import * as moment from 'moment';
 import { DateFormat } from 'src/constants/dateFormat';
+import { UserService } from '../user/user.service';
 
 @Injectable({})
 export class WeightRecordService {
+  constructor(
+    @Inject(forwardRef(() => UserService)) private _userService: UserService,
+  ) {}
+
   public async updateWeight(
     jwtUser: JwtUser,
     updateWeightDto: UpdateWeightDto,
   ) {
     try {
-      const user = await AppDataSource.getRepository(User).findOne({
-        where: {
-          id: jwtUser.sub.toString(),
-        },
-      });
-
-      const { email } = jwtUser;
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
       await AppDataSource.createQueryBuilder()
         .update(User)
         .set(updateWeightDto)
-        .where('email = :email', { email: email })
+        .where('id = :id', { id: user.id })
         .execute();
 
       await AppDataSource.createQueryBuilder()
@@ -38,7 +40,9 @@ export class WeightRecordService {
         .into(WeightRecord)
         .values([
           {
-            user,
+            user: {
+              id: user.id,
+            },
             value: updateWeightDto.weight,
           },
         ])

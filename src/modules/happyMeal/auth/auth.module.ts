@@ -11,6 +11,7 @@ import { ShoppingListService } from '../shoppingList/shoppingList.service';
 import { DishService } from '../dish/dish.service';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { MeasurementService } from '../measurement/measurement.service';
+import { WeightRecordService } from '../weightRecord/weightRecord.service';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MeasurementService } from '../measurement/measurement.service';
     ShoppingListService,
     IngredientService,
     MeasurementService,
+    WeightRecordService,
   ],
   exports: [AuthService],
 })

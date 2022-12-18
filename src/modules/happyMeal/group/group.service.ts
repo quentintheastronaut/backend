@@ -316,31 +316,33 @@ export class GroupService {
     jwtUser: JwtUser,
     addMemberDto: AddMemberDto,
   ): Promise<PageDto<Group>> {
-    const { sub } = jwtUser;
-
-    if (!(await this.isAdmin(sub.toString(), addMemberDto.groupId))) {
-      throw new UnauthorizedException(
-        "You don't have permission to add new member.",
-      );
-    }
-
-    if (!(await this._authService.isExistedEmail(addMemberDto.email))) {
-      throw new BadRequestException('This user is not existed !');
-    }
-
-    const newMemberAccount = await this._authService.findOneByEmail(
-      addMemberDto.email,
-    );
-
-    const newMember = await this._userService.findByAccountId(
-      newMemberAccount.id,
-    );
-
-    if (await this.hasGroup(newMember.id)) {
-      throw new BadRequestException('This user is already in another group !');
-    }
-
     try {
+      const { sub } = jwtUser;
+
+      if (!(await this.isAdmin(sub.toString(), addMemberDto.groupId))) {
+        throw new UnauthorizedException(
+          "You don't have permission to add new member.",
+        );
+      }
+
+      if (!(await this._authService.isExistedEmail(addMemberDto.email))) {
+        throw new BadRequestException('This user is not existed !');
+      }
+
+      const newMemberAccount = await this._authService.findOneByEmail(
+        addMemberDto.email,
+      );
+
+      const newMember = await this._userService.findByAccountId(
+        newMemberAccount.id,
+      );
+
+      if (await this.hasGroup(newMember.id)) {
+        throw new BadRequestException(
+          'This user is already in another group !',
+        );
+      }
+
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(UserToGroup)

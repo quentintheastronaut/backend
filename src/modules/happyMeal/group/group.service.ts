@@ -372,6 +372,7 @@ export class GroupService {
         'user_to_group',
       )
         .leftJoinAndSelect('user_to_group.user', 'user')
+        .leftJoinAndSelect('user.account', 'account')
         .where('user_to_group.groupId = :id', { id })
         .getMany();
 

@@ -318,8 +318,9 @@ export class GroupService {
   ): Promise<PageDto<Group>> {
     try {
       const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
 
-      if (!(await this.isAdmin(sub.toString(), addMemberDto.groupId))) {
+      if (!(await this.isAdmin(user.id, addMemberDto.groupId))) {
         throw new UnauthorizedException(
           "You don't have permission to add new member.",
         );

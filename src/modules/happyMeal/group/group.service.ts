@@ -270,12 +270,13 @@ export class GroupService {
   ): Promise<PageDto<UserToGroup[]>> {
     const { sub } = jwtUser;
     try {
+      const user = await this._userService.findByAccountId(sub.toString());
       const result = await AppDataSource.createQueryBuilder(
         UserToGroup,
         'user_to_group',
       )
         .leftJoinAndSelect('user_to_group.group', 'group')
-        .where('userId = :userId', { userId: sub })
+        .where('userId = :userId', { userId: user.id })
         .getMany();
 
       return new PageDto('OK', HttpStatus.OK, result);

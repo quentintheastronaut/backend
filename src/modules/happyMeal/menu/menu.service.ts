@@ -919,6 +919,10 @@ export class MenuService {
           },
         });
 
+        console.log('value', value);
+        console.log('dishToMenu', dishToMenu);
+        console.log('ingredientToShoppingList', ingredientToShoppingList);
+
         if (
           ingredientToShoppingList.quantity <=
           dishToMenu.quantity * value.quantity

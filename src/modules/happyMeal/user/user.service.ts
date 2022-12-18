@@ -333,8 +333,16 @@ export class UserService {
 
   public async updateUser(id: number, updateUserDto: UpdateUserDto) {
     try {
-      const { email, firstName, lastName, sex, dob, imageUrl, ...profile } =
-        updateUserDto;
+      const {
+        email,
+        firstName,
+        lastName,
+        sex,
+        dob,
+        imageUrl,
+        password,
+        ...profile
+      } = updateUserDto;
 
       const user = await this.find(id.toString());
 

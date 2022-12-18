@@ -919,38 +919,36 @@ export class MenuService {
           },
         });
 
-        console.log('value', value);
-        console.log('dishToMenu', dishToMenu);
-        console.log('ingredientToShoppingList', ingredientToShoppingList);
-
-        if (
-          ingredientToShoppingList.quantity <=
-          dishToMenu.quantity * (value?.quantity || 1)
-        ) {
-          // Case 1:
-          await AppDataSource.createQueryBuilder()
-            .delete()
-            .from(IngredientToShoppingList)
-            .where(
-              'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
-              {
-                ...value,
-              },
-            )
-            .execute();
-        } else {
-          // Case 2:
-          await AppDataSource.createQueryBuilder()
-            .update(IngredientToShoppingList)
-            .set({
-              quantity:
-                ingredientToShoppingList.quantity -
-                dishToMenu.quantity * (value?.quantity || 1),
-            })
-            .where('ingredientToShoppingListId = :id', {
-              id: ingredientToShoppingList.ingredientToShoppingListId,
-            })
-            .execute();
+        if (ingredientToShoppingList) {
+          if (
+            ingredientToShoppingList.quantity <=
+            dishToMenu.quantity * (value?.quantity || 1)
+          ) {
+            // Case 1:
+            await AppDataSource.createQueryBuilder()
+              .delete()
+              .from(IngredientToShoppingList)
+              .where(
+                'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
+                {
+                  ...value,
+                },
+              )
+              .execute();
+          } else {
+            // Case 2:
+            await AppDataSource.createQueryBuilder()
+              .update(IngredientToShoppingList)
+              .set({
+                quantity:
+                  ingredientToShoppingList.quantity -
+                  dishToMenu.quantity * (value?.quantity || 1),
+              })
+              .where('ingredientToShoppingListId = :id', {
+                id: ingredientToShoppingList.ingredientToShoppingListId,
+              })
+              .execute();
+          }
         }
       }
     } catch (error) {
@@ -1012,34 +1010,36 @@ export class MenuService {
           },
         });
 
-        if (
-          ingredientToShoppingList.quantity <=
-          dishToMenu.quantity * (value?.quantity || 1)
-        ) {
-          // Case 1:
-          await AppDataSource.createQueryBuilder()
-            .delete()
-            .from(IngredientToShoppingList)
-            .where(
-              'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
-              {
-                ...value,
-              },
-            )
-            .execute();
-        } else {
-          // Case 2:
-          await AppDataSource.createQueryBuilder()
-            .update(IngredientToShoppingList)
-            .set({
-              quantity:
-                ingredientToShoppingList.quantity -
-                dishToMenu.quantity * (value?.quantity || 1),
-            })
-            .where('ingredientToShoppingListId = :id', {
-              id: ingredientToShoppingList.ingredientToShoppingListId,
-            })
-            .execute();
+        if (ingredientToShoppingList) {
+          if (
+            ingredientToShoppingList.quantity <=
+            dishToMenu.quantity * (value?.quantity || 1)
+          ) {
+            // Case 1:
+            await AppDataSource.createQueryBuilder()
+              .delete()
+              .from(IngredientToShoppingList)
+              .where(
+                'ingredientId = :ingredientId and shoppingListId = :shoppingListId',
+                {
+                  ...value,
+                },
+              )
+              .execute();
+          } else {
+            // Case 2:
+            await AppDataSource.createQueryBuilder()
+              .update(IngredientToShoppingList)
+              .set({
+                quantity:
+                  ingredientToShoppingList.quantity -
+                  dishToMenu.quantity * (value?.quantity || 1),
+              })
+              .where('ingredientToShoppingListId = :id', {
+                id: ingredientToShoppingList.ingredientToShoppingListId,
+              })
+              .execute();
+          }
         }
       }
     } catch (error) {

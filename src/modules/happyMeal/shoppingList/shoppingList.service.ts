@@ -670,8 +670,11 @@ export class ShoppingListService {
           groupId: assignMarketerDto.groupId,
         })
         .execute();
+
+      console.log(assignMarketerDto);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

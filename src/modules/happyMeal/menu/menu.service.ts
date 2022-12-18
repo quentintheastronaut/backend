@@ -925,7 +925,7 @@ export class MenuService {
 
         if (
           ingredientToShoppingList.quantity <=
-          dishToMenu.quantity * value.quantity
+          dishToMenu.quantity * (value?.quantity || 1),
         ) {
           // Case 1:
           await AppDataSource.createQueryBuilder()
@@ -945,7 +945,7 @@ export class MenuService {
             .set({
               quantity:
                 ingredientToShoppingList.quantity -
-                dishToMenu.quantity * value.quantity,
+                dishToMenu.quantity * (value?.quantity || 1),
             })
             .where('ingredientToShoppingListId = :id', {
               id: ingredientToShoppingList.ingredientToShoppingListId,
@@ -1014,7 +1014,7 @@ export class MenuService {
 
         if (
           ingredientToShoppingList.quantity <=
-          dishToMenu.quantity * value.quantity
+          dishToMenu.quantity * (value?.quantity || 1)
         ) {
           // Case 1:
           await AppDataSource.createQueryBuilder()
@@ -1034,7 +1034,7 @@ export class MenuService {
             .set({
               quantity:
                 ingredientToShoppingList.quantity -
-                dishToMenu.quantity * value.quantity,
+                dishToMenu.quantity * (value?.quantity || 1),
             })
             .where('ingredientToShoppingListId = :id', {
               id: ingredientToShoppingList.ingredientToShoppingListId,

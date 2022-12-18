@@ -925,7 +925,7 @@ export class MenuService {
 
         if (
           ingredientToShoppingList.quantity <=
-          dishToMenu.quantity * (value?.quantity || 1),
+          dishToMenu.quantity * (value?.quantity || 1)
         ) {
           // Case 1:
           await AppDataSource.createQueryBuilder()

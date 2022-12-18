@@ -684,6 +684,7 @@ export class ShoppingListService {
         'group_shopping_list',
       )
         .leftJoinAndSelect('group_shopping_list.marketer', 'marketer')
+        .leftJoinAndSelect('marketer.account', 'account')
         .where('date = :date AND group_shopping_list.groupId = :groupId', {
           date: assignMarketerDto.date,
           groupId: assignMarketerDto.groupId,

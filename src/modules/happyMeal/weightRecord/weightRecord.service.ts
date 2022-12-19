@@ -67,8 +67,14 @@ export class WeightRecordService {
         .where(
           'userId = :userId AND createdAt >= :startDate AND createdAt <= :endDate',
           {
-            startDate: moment(startDate, DateFormat.FULL_DATE).toISOString(),
-            endDate: moment(endDate, DateFormat.FULL_DATE).toISOString(),
+            startDate: moment(startDate, DateFormat.FULL_DATE)
+              .clone()
+              .startOf('day')
+              .toISOString(),
+            endDate: moment(endDate, DateFormat.FULL_DATE)
+              .clone()
+              .endOf('day')
+              .toISOString(),
             userId: jwtUser.sub.toString(),
           },
         )

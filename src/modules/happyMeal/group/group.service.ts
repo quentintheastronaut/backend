@@ -170,10 +170,13 @@ export class GroupService {
           id: id.toString(),
         },
       });
-
       const groupShoppingLists = await AppDataSource.getRepository(
         GroupShoppingList,
       ).find({
+        relations: {
+          group: true,
+          shoppingList: true,
+        },
         where: {
           group: {
             id: group.id,
@@ -182,6 +185,10 @@ export class GroupService {
       });
 
       const groupMenus = await AppDataSource.getRepository(GroupMenu).find({
+        relations: {
+          group: true,
+          menu: true,
+        },
         where: {
           group: {
             id: group.id,
@@ -191,6 +198,12 @@ export class GroupService {
 
       if (groupMenus) {
         groupMenus.forEach(async (groupMenu) => {
+          await AppDataSource.createQueryBuilder()
+            .delete()
+            .from(GroupMenu)
+            .where('menuId = :id', { id: groupMenu.menu.id })
+            .execute();
+
           await AppDataSource.createQueryBuilder()
             .delete()
             .from(DishToMenu)
@@ -203,8 +216,16 @@ export class GroupService {
         groupShoppingLists.forEach(async (groupShoppingList) => {
           await AppDataSource.createQueryBuilder()
             .delete()
+            .from(GroupShoppingList)
+            .where('shoppingListId = :id', {
+              id: groupShoppingList.shoppingList.id,
+            })
+            .execute();
+
+          await AppDataSource.createQueryBuilder()
+            .delete()
             .from(IngredientToShoppingList)
-            .where('shoppingId = :id', {
+            .where('shoppingListId = :id', {
               id: groupShoppingList.shoppingList.id,
             })
             .execute();

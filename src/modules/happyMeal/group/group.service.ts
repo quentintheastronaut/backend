@@ -67,7 +67,7 @@ export class GroupService {
         },
       });
 
-      if (userToGroup) return null;
+      if (!userToGroup) return null;
 
       return await AppDataSource.getRepository(Group).findOne({
         where: {

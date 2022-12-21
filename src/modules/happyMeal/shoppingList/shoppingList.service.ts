@@ -65,6 +65,10 @@ export class ShoppingListService {
   async findGroupShoppingListById(id: string) {
     try {
       return await AppDataSource.getRepository(GroupShoppingList).findOne({
+        relations: {
+          group: true,
+          shoppingList: true,
+        },
         where: {
           id,
         },

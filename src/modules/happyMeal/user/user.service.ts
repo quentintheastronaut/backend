@@ -282,13 +282,19 @@ export class UserService {
   ): Promise<PageDto<User[]>> {
     const queryBuilder = AppDataSource.createQueryBuilder();
 
+    console.log(AccountRole.USER);
+
     queryBuilder
       .select('user')
       .from(User, 'user')
       .leftJoinAndSelect('user.account', 'account')
-      .where('account.firstName like :name or account.lastName like :name', {
-        name: `%${pageOptionsDto.search}%`,
-      })
+      .where(
+        '(account.firstName like :name or account.lastName like :name) and account.role = :role',
+        {
+          name: `%${pageOptionsDto.search}%`,
+          role: AccountRole.USER,
+        },
+      )
       .orderBy('user.createdAt', pageOptionsDto.order)
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.limit);

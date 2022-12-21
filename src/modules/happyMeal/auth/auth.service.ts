@@ -156,7 +156,7 @@ export class AuthService {
 
       await delete account.password;
 
-      return this.signToken(parseInt(account.id, 10), email);
+      return this.signToken(parseInt(account.id, 10), email, account.role);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY')
         throw new ForbiddenException('Credentials taken');
@@ -200,16 +200,18 @@ export class AuthService {
 
     delete account.password;
 
-    return this.signToken(parseInt(account.id, 10), email);
+    return this.signToken(parseInt(account.id, 10), email, account.role);
   }
 
   async signToken(
     id: number,
     email: string,
+    role: string,
   ): Promise<PageDto<{ accessToken: string }>> {
     const payload = {
       sub: id,
       email,
+      role,
     };
 
     const token = await this.jwt.signAsync(payload, {

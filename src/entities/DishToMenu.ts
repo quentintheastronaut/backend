@@ -10,6 +10,7 @@ import {
 import { Dish } from './Dish';
 import { Menu } from './Menu';
 import { Meal } from './Meal';
+import { DishType } from 'src/constants/dishType';
 
 // REFACTOR
 @Entity()
@@ -40,6 +41,14 @@ export class DishToMenu {
     onDelete: 'CASCADE',
   })
   public menu!: Menu;
+
+  @Column({
+    default: DishType.COOKING,
+  })
+  public dishType!: DishType;
+
+  @Column()
+  public note: string;
 
   @CreateDateColumn()
   createdAt: Date;

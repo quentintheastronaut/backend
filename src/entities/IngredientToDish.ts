@@ -33,6 +33,9 @@ export class IngredientToDish {
   })
   public ingredient!: Ingredient;
 
+  @Column()
+  public note: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

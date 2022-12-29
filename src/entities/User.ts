@@ -15,6 +15,7 @@ import { AccountRole } from 'src/constants/accountRole';
 import { Account } from './Account';
 import { IndividualMenu } from './IndividualMenu';
 import { Allergic } from './Allergic';
+import { Favorite } from './Favorite';
 
 @Entity()
 export class User {
@@ -93,4 +94,7 @@ export class User {
   // new
   @OneToMany(() => Allergic, (allergic) => allergic.user)
   isAllergic: Allergic[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user)
+  isFavorite: Favorite[];
 }

@@ -4,11 +4,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { DishToMenu } from './DishToMenu';
+import { User } from './User';
+import { Account } from './Account';
 
 // REFACTOR
 @Entity()
@@ -77,6 +81,10 @@ export class Dish {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Account)
+  @JoinColumn()
+  createdBy: Account;
 
   @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.dish, {
     onDelete: 'CASCADE',

@@ -1,3 +1,4 @@
+import { IncompatibleDto } from './dto/request/incompatible.dto';
 import { IngredientService } from './ingredient.service';
 import {
   Body,
@@ -49,5 +50,20 @@ export class IngredientController {
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Ingredient[]>> {
     return this._ingredientService.getAllIngredients(pageOptionsDto);
+  }
+
+  @Post('/incompatible/add')
+  async addIncompatibleRelation(@Body() incompatibleDto: IncompatibleDto) {
+    return this._ingredientService.addIncompatibleRelation(incompatibleDto);
+  }
+
+  @Post('/incompatible/remove')
+  async removeIncompatibleRelation(@Body() incompatibleDto: IncompatibleDto) {
+    return this._ingredientService.removeIncompatibleRelation(incompatibleDto);
+  }
+
+  @Get('/incompatible/:id')
+  async getIncompatibleIngredient(@Param(':id') id: string) {
+    return this._ingredientService.getIncompatibleIngredient(id);
   }
 }

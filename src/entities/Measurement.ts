@@ -5,10 +5,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Account } from './Account';
 
 @Entity()
 export class Measurement {
@@ -27,6 +30,10 @@ export class Measurement {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Account)
+  @JoinColumn()
+  createdBy: Account;
 
   @OneToMany(
     () => IngredientToDish,

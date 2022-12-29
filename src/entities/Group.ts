@@ -25,12 +25,6 @@ export class Group {
   name: string;
 
   @Column({
-    nullable: false,
-    default: '',
-  })
-  password: string;
-
-  @Column({
     default: '',
   })
   imageUrl: string;

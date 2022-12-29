@@ -501,11 +501,6 @@ export class MenuService {
       const dinnerDish = await dinnerDishQuery.orderBy('RAND()').getOne();
       const snackDish = await snackDishQuery.orderBy('RAND()').getOne();
 
-      console.log(breakfastDish.id);
-      console.log(lunchDish.id);
-      console.log(dinnerDish.id);
-      console.log(snackDish.id);
-
       await Promise.all([
         await this.addDish(
           {

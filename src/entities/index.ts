@@ -1,3 +1,4 @@
+import { Incompatible } from './Incompatible';
 import { GroupShoppingList } from './GroupShoppingList';
 import { GroupMenu } from './GroupMenu';
 import { Account } from './Account';
@@ -18,10 +19,14 @@ import { IndividualMenu } from './IndividualMenu';
 import { Allergic } from './Allergic';
 import { IndividualShoppingList } from './IndividualShoppingList';
 import { Meal } from './Meal';
+import { Location } from './Location';
+import { Favorite } from './Favorite';
 
 export { User };
 
 const entities = [
+  Favorite,
+  Location,
   DishToMenu,
   UserToGroup,
   IngredientToShoppingList,
@@ -42,6 +47,7 @@ const entities = [
   Allergic,
   IndividualShoppingList,
   Meal,
+  Incompatible,
 ];
 
 export default entities;

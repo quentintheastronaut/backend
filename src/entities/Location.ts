@@ -1,28 +1,25 @@
-import { IsString } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { DishToMenu } from './DishToMenu';
 import { User } from './User';
 import { Account } from './Account';
 
 @Entity()
-export class Meal {
+export class Location {
   @PrimaryGeneratedColumn({
     name: 'id',
   })
-  @IsString()
   id: string;
 
-  @IsString()
-  @Column()
+  @Column({
+    default: '',
+  })
   name: string;
 
   @CreateDateColumn()
@@ -34,7 +31,4 @@ export class Meal {
   @OneToOne(() => Account)
   @JoinColumn()
   createdBy: Account;
-
-  @OneToMany(() => DishToMenu, (dishToMenu) => dishToMenu.meal)
-  dishToMenu: DishToMenu[];
 }

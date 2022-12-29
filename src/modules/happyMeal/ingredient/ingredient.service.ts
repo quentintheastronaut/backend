@@ -1,3 +1,5 @@
+import { IncompatibleDto } from './dto/request/incompatible.dto';
+import { Incompatible } from './../../../entities/Incompatible';
 import { PageDto } from 'src/dtos/page.dto';
 import { Ingredient } from './../../../entities/Ingredient';
 import { AppDataSource } from './../../../data-source';
@@ -20,6 +22,79 @@ export class IngredientService {
     } catch (error) {
       console.log(error);
       throw new NotFoundException('Ingredient not found');
+    }
+  }
+
+  public async insertIncompatibleIngredient(
+    firstIngredientId: string,
+    secondIngredientId: string,
+  ) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(Incompatible)
+        .values([
+          {
+            isIncompatibleTo: {
+              id: firstIngredientId,
+            },
+            isIncompatibleBy: {
+              id: secondIngredientId,
+            },
+          },
+          {
+            isIncompatibleTo: {
+              id: secondIngredientId,
+            },
+            isIncompatibleBy: {
+              id: firstIngredientId,
+            },
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('Ingredient not found');
+    }
+  }
+
+  public async deleteIncompatibleIngredient(
+    firstIngredientId: string,
+    secondIngredientId: string,
+  ) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(Incompatible)
+        .where(
+          '(isIncompatibleTo = :firstIngredientId AND isIncompatibleBy = :secondIngredientId) OR (isIncompatibleBy = :firstIngredientId AND isIncompatibleTo = :secondIngredientId )',
+          {
+            firstIngredientId,
+            secondIngredientId,
+          },
+        )
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('Ingredient not found');
+    }
+  }
+
+  public async findIncompatibleByIngredientId(ingredientId: string) {
+    try {
+      return await AppDataSource.getRepository(Incompatible).find({
+        relations: {
+          isIncompatibleBy: true,
+        },
+        where: {
+          isIncompatibleTo: {
+            id: ingredientId,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
     }
   }
 
@@ -107,5 +182,40 @@ export class IngredientService {
     const pageMetaDto = new PageMetaDto({ total: itemCount, pageOptionsDto });
 
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
+  }
+
+  public async getIncompatibleIngredient(ingredientId: string) {
+    try {
+      const incompatibleIngredients = await this.findIncompatibleByIngredientId(
+        ingredientId,
+      );
+      return new PageDto('OK', HttpStatus.OK, incompatibleIngredients);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async addIncompatibleRelation(incompatibleDto: IncompatibleDto) {
+    try {
+      this.insertIncompatibleIngredient(
+        incompatibleDto.firstIngredient,
+        incompatibleDto.secondIngredient,
+      );
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async removeIncompatibleRelation(incompatibleDto: IncompatibleDto) {
+    try {
+      this.deleteIncompatibleIngredient(
+        incompatibleDto.firstIngredient,
+        incompatibleDto.secondIngredient,
+      );
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 }

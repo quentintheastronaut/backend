@@ -1,3 +1,4 @@
+import { Incompatible } from './Incompatible';
 import { IngredientToDish } from './IngredientToDish';
 import { IngredientToShoppingList } from './IngredientToShoppingList';
 import { IsString } from 'class-validator';
@@ -5,11 +6,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Allergic } from './Allergic';
+import { Favorite } from './Favorite';
+import { User } from './User';
+import { Account } from './Account';
 
 // REFACTOR
 @Entity()
@@ -60,6 +66,10 @@ export class Ingredient {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @OneToOne(() => Account)
+  @JoinColumn()
+  createdBy: Account;
+
   @OneToMany(
     () => IngredientToShoppingList,
     (ingredientToShoppingList) => ingredientToShoppingList.ingredient,
@@ -81,4 +91,15 @@ export class Ingredient {
   // new
   @OneToMany(() => Allergic, (allergic) => allergic.ingredient)
   isAllergicBy: Allergic[];
+
+  // new
+  @OneToMany(() => Favorite, (favorite) => favorite.ingredient)
+  isFavoriteBy: Favorite[];
+
+  // new
+  @OneToMany(() => Incompatible, (favorite) => favorite.isIncompatibleTo)
+  isIncompatibleTo: Incompatible[];
+
+  @OneToMany(() => Incompatible, (favorite) => favorite.isIncompatibleBy)
+  isIncompatibleBy: Incompatible[];
 }

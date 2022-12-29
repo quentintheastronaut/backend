@@ -5,10 +5,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Location } from './Location';
 
 @Entity()
 export class ShoppingList {
@@ -38,6 +41,10 @@ export class ShoppingList {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Location)
+  @JoinColumn()
+  location: Location;
 
   @OneToMany(
     () => IngredientToShoppingList,

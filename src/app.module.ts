@@ -20,6 +20,7 @@ import { MenuModule } from './modules/happyMeal/menu/menu.module';
 import moment from 'moment';
 import { MealModule } from './modules/happyMeal/meal/meal.module';
 import { NotificationsService } from './services/notifications/notifications.service';
+import { LocationModule } from './modules/happyMeal/location/location.module';
 
 dotenv.config({
   path: `.env`,
@@ -37,6 +38,7 @@ dotenv.config({
     ClassificationModule,
     MeasurementModule,
     WeightRecordModule,
+    LocationModule,
     MealModule,
     TypeOrmModule.forRoot({
       type: 'mysql',

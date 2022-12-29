@@ -1,3 +1,4 @@
+import { AddAllergicDto } from './dto/request/addAllergic.dto';
 import { PageDto, PageOptionsDto } from 'src/dtos';
 import { User } from 'src/entities';
 import { UserDto } from './dto/request/user.dto';
@@ -8,6 +9,7 @@ import { UserService } from './user.service';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -110,5 +112,31 @@ export class UserController {
   @ApiOperation({ summary: 'Deactivate user' })
   async deactivateUser(@Param('id') id: number): Promise<PageDto<User>> {
     return this.userService.deactivateUser(id);
+  }
+
+  @Post('/allergic')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: 'Add allergic food' })
+  async createIngredient(
+    @Req() req: { user: JwtUser },
+    @Body() addAllergicDto: AddAllergicDto,
+  ): Promise<any> {
+    const { user } = req;
+    console.log(user);
+    return this.userService.addAllergic(user, addAllergicDto);
+  }
+
+  @Get('/allergic')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: 'Get allergic food' })
+  async getAllergic(@Req() req: { user: JwtUser }): Promise<any> {
+    const { user } = req;
+    return this.userService.getAllergicByUser(user);
+  }
+
+  @Delete('/allergic/:id')
+  @ApiOperation({ summary: 'Get allergic food' })
+  async removeAllergic(@Param('id') id: string): Promise<any> {
+    return this.userService.removeAllergic(id);
   }
 }

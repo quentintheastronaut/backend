@@ -16,8 +16,6 @@ export interface ISendFirebaseMessages {
 export class NotificationsService {
   constructor() {
     const firebaseCredentials: firebase.ServiceAccount = FirebaseAdmin;
-    console.log(firebaseCredentials);
-
     firebase.initializeApp({
       credential: firebase.credential.cert(firebaseCredentials),
       databaseURL: process.env.FIREBASE_DATABASE_URL,

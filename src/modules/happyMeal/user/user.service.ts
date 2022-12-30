@@ -1,3 +1,4 @@
+import { AddFavoriteDto } from './dto/request/addFavorite.dto';
 import { AddAllergicDto } from './dto/request/addAllergic.dto';
 import { UpdateUserDto } from './dto/request/updateUser.dto';
 import { AuthService } from './../auth/auth.service';
@@ -30,6 +31,7 @@ import * as moment from 'moment';
 import { DateFormat } from 'src/constants/dateFormat';
 import * as argon from 'argon2';
 import { Allergic } from 'src/entities/Allergic';
+import { Favorite } from 'src/entities/Favorite';
 
 @Injectable({})
 export class UserService {
@@ -303,11 +305,48 @@ export class UserService {
     }
   }
 
+  public async insertFavorite(userId: string, addFavoriteDto: AddFavoriteDto) {
+    try {
+      const { ingredientId, ...rest } = addFavoriteDto;
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(Favorite)
+        .values([
+          {
+            user: {
+              id: userId,
+            },
+            ingredient: {
+              id: ingredientId,
+            },
+            ...rest,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
   public async deleteAllergic(id: string) {
     try {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(Allergic)
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async deleteFavorite(id: string) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(Favorite)
         .where('id = :id', { id })
         .execute();
     } catch (error) {
@@ -330,12 +369,24 @@ export class UserService {
     }
   }
 
+  public async findFavoriteByUserId(userId: string) {
+    try {
+      return await AppDataSource.getRepository(Favorite).find({
+        relations: {
+          ingredient: true,
+        },
+        where: { user: { id: userId } },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
   public async getAllUser(
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<User[]>> {
     const queryBuilder = AppDataSource.createQueryBuilder();
-
-    console.log(AccountRole.USER);
 
     queryBuilder
       .select('user')
@@ -667,11 +718,21 @@ export class UserService {
 
   public async addAllergic(jwtUser: JwtUser, addAllergicDto: AddAllergicDto) {
     try {
-      console.log(jwtUser);
-
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
       await this.insertAllergic(user.id, addAllergicDto);
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async addFavorite(jwtUser: JwtUser, addFavoriteDto: AddFavoriteDto) {
+    try {
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
+      await this.insertFavorite(user.id, addFavoriteDto);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -689,12 +750,33 @@ export class UserService {
     }
   }
 
+  public async removeFavorite(id: string) {
+    try {
+      await this.deleteFavorite(id);
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
   public async getAllergicByUser(jwtUser: JwtUser) {
     try {
       const { sub } = jwtUser;
-      console.log(jwtUser);
       const user = await this.findByAccountId(sub.toString());
       const result = await this.findAllergicByUserId(user.id);
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async getFavoriteByUser(jwtUser: JwtUser) {
+    try {
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
+      const result = await this.findFavoriteByUserId(user.id);
       return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {
       console.log(error);

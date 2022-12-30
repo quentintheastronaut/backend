@@ -1,5 +1,5 @@
 import { NotificationsModule } from './services/notifications/notifications.module';
-import { ChatGateway } from './gateways/shoppingList.gateway';
+import { ShoppingListGateway } from './gateways/shoppingList.gateway';
 import { WeightRecordModule } from './modules/happyMeal/weightRecord/weightRecord.module';
 import { MeasurementModule } from './modules/happyMeal/measurement/measurement.module';
 import { ShoppingListModule } from './modules/happyMeal/shoppingList/shoppingList.module';
@@ -20,7 +20,6 @@ import * as dotenv from 'dotenv';
 import { MenuModule } from './modules/happyMeal/menu/menu.module';
 import moment from 'moment';
 import { MealModule } from './modules/happyMeal/meal/meal.module';
-import { NotificationsService } from './services/notifications/notifications.service';
 import { LocationModule } from './modules/happyMeal/location/location.module';
 
 dotenv.config({
@@ -59,7 +58,7 @@ dotenv.config({
       provide: 'MomentWrapper',
       useValue: moment,
     },
-    ChatGateway,
+    ShoppingListGateway,
   ],
   controllers: [AppController],
 })

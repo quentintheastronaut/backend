@@ -1,12 +1,7 @@
 import { NotificationDto } from './dto/request/notification.dto';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { mapLimit } from 'async';
 import * as firebase from 'firebase-admin';
-import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
-import { chunk } from 'lodash';
-import * as shell from 'shelljs';
 import { FirebaseAdmin } from 'src/config/firebase';
-import * as serviceAccount from '../../../push-notification.json';
 import { PageDto } from 'src/dtos';
 import { HttpStatus } from '@nestjs/common';
 

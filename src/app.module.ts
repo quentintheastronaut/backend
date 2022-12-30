@@ -1,3 +1,4 @@
+import { NotificationsModule } from './services/notifications/notifications.module';
 import { ChatGateway } from './gateways/shoppingList.gateway';
 import { WeightRecordModule } from './modules/happyMeal/weightRecord/weightRecord.module';
 import { MeasurementModule } from './modules/happyMeal/measurement/measurement.module';
@@ -40,6 +41,7 @@ dotenv.config({
     WeightRecordModule,
     LocationModule,
     MealModule,
+    NotificationsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       entities: entities,
@@ -58,7 +60,6 @@ dotenv.config({
       useValue: moment,
     },
     ChatGateway,
-    NotificationsService,
   ],
   controllers: [AppController],
 })

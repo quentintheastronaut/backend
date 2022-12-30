@@ -25,7 +25,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  app.listen(process.env.PORT, () => {
+  app.listen(process.env.PORT || 3000, () => {
     console.log(`Server is running at port ${process.env.PORT}`);
   });
 }

@@ -25,4 +25,10 @@ export class AddIngredientToDishDto {
   })
   @IsString()
   measurementTypeId: string;
+
+  @ApiProperty({
+    example: '',
+  })
+  @IsString()
+  public note: string;
 }

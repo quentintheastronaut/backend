@@ -33,4 +33,10 @@ export class AddDishDto {
   })
   @IsNumber()
   quantity: number;
+
+  @ApiProperty({
+    example: '',
+  })
+  @IsNumber()
+  note: string;
 }

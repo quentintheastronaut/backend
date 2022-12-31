@@ -26,4 +26,10 @@ export class AddIngredientDto {
   })
   @IsString()
   measurementTypeId: string;
+
+  @ApiProperty({
+    example: '',
+  })
+  @IsString()
+  public note: string;
 }

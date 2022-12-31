@@ -39,4 +39,10 @@ export class AddGroupDishDto {
   })
   @IsNumber()
   quantity: number;
+
+  @ApiProperty({
+    example: '',
+  })
+  @IsNumber()
+  note: string;
 }

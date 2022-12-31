@@ -28,4 +28,10 @@ export class UpdateIngredientToShoppingListDto {
   @IsOptional()
   @IsString()
   measurementTypeId?: string;
+
+  @ApiProperty({
+    example: '',
+  })
+  @IsString()
+  public note: string;
 }

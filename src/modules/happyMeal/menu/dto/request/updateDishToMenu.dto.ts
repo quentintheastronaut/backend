@@ -21,4 +21,10 @@ export class UpdateDishToMenuDto {
   @IsNumber()
   @IsOptional()
   quantity: number;
+
+  @ApiProperty({
+    example: '',
+  })
+  @IsNumber()
+  note: string;
 }

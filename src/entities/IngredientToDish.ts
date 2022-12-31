@@ -33,8 +33,10 @@ export class IngredientToDish {
   })
   public ingredient!: Ingredient;
 
-  // @Column()
-  // public note: string;
+  @Column({
+    default: '',
+  })
+  public note: string;
 
   @CreateDateColumn()
   createdAt: Date;

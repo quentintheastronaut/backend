@@ -25,8 +25,8 @@ export class Incompatible {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // @Column({
-  //   default: '',
-  // })
-  // note: string;
+  @Column({
+    default: '',
+  })
+  public note: string;
 }

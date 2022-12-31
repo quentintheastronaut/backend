@@ -47,8 +47,10 @@ export class DishToMenu {
   })
   public dishType!: DishType;
 
-  // @Column()
-  // public note: string;
+  @Column({
+    default: '',
+  })
+  public note: string;
 
   @CreateDateColumn()
   createdAt: Date;

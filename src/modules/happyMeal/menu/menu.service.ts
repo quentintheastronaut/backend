@@ -609,7 +609,7 @@ export class MenuService {
 
   public async removeDish(
     removeDishDto: RemoveDishDto,
-    jwtUser: JwtUser,
+    jwtUser = null,
   ): Promise<PageDto<Menu>> {
     try {
       const dishToMenu = await this.findDishToMenu(removeDishDto.dishToMenuId);
@@ -718,7 +718,6 @@ export class MenuService {
 
   public async updateMenuDetail(
     updateDishDto: UpdateDishToMenuDto,
-    jwtUser: JwtUser,
   ): Promise<PageDto<Menu>> {
     const dishToMenu = await this.findDishToMenu(updateDishDto.dishToMenuId);
     const { menu } = dishToMenu;

@@ -21,6 +21,7 @@ import { MenuModule } from './modules/happyMeal/menu/menu.module';
 import moment from 'moment';
 import { MealModule } from './modules/happyMeal/meal/meal.module';
 import { LocationModule } from './modules/happyMeal/location/location.module';
+import { MenuGateway } from './gateways/menu.gateway';
 
 dotenv.config({
   path: `.env`,
@@ -59,6 +60,7 @@ dotenv.config({
       useValue: moment,
     },
     ShoppingListGateway,
+    MenuGateway,
   ],
   controllers: [AppController],
 })

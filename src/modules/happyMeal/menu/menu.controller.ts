@@ -41,12 +41,8 @@ export class MenuController {
 
   @ApiOperation({ summary: 'Update a dish in the menu' })
   @Patch('/update-dish')
-  async updateDish(
-    @Req() req: { user: JwtUser },
-    @Body() updateDishDto: UpdateDishToMenuDto,
-  ) {
-    const { user } = req;
-    return this._menuService.updateMenuDetail(updateDishDto, user);
+  async updateDish(@Body() updateDishDto: UpdateDishToMenuDto) {
+    return this._menuService.updateMenuDetail(updateDishDto);
   }
 
   @ApiOperation({ summary: 'Delete menu' })

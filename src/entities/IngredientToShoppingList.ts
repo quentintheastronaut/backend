@@ -49,8 +49,8 @@ export class IngredientToShoppingList {
   )
   public ingredient!: Ingredient;
 
-  @Column()
-  public note: string;
+  // @Column()
+  // public note: string;
 
   @CreateDateColumn()
   createdAt: Date;

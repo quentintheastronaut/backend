@@ -1,3 +1,7 @@
+import { UpdateIngredientToShoppingListDto } from './../modules/happyMeal/shoppingList/dto/request/updateIngredientToShoppingList.dto';
+import { RemoveIngredientDto } from './../modules/happyMeal/shoppingList/dto/request/removeIngredient.dto';
+import { AddGroupIngredientDto } from './../modules/happyMeal/shoppingList/dto/request/addGroupIngredient';
+import { ShoppingListService } from './../modules/happyMeal/shoppingList/shoppingList.service';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -7,26 +11,28 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Logger, Inject, forwardRef } from '@nestjs/common';
 import { OnGatewayInit } from '@nestjs/websockets';
 
 @WebSocketGateway({ cors: true })
 export class ShoppingListGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
+  constructor(
+    @Inject(forwardRef(() => ShoppingListService))
+    private _shoppingListService: ShoppingListService,
+  ) {}
+
   @WebSocketServer()
   private server: Server;
   private logger: Logger = new Logger('ShoppingListGateway');
 
+  private date: string;
+  private groupId: string;
+
+  // Socket config
   afterInit(server: Server) {
     this.logger.log('Initialized!');
-  }
-
-  @SubscribeMessage('message')
-  handleMessage(@MessageBody() message: string): void {
-    console.log('Step 3: receive from client');
-    console.log('Step 4: send to server');
-    this.server.emit('message', message);
   }
 
   handleDisconnect(client: Socket) {
@@ -35,5 +41,61 @@ export class ShoppingListGateway
 
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
+  }
+
+  // socket.on
+  @SubscribeMessage('get-group-shopping-list')
+  async handleGetGroupShoppingList(
+    client: Socket,
+    @MessageBody() payload: any,
+  ) {
+    const { date, groupId } = payload;
+    this.date = date;
+    this.groupId = groupId;
+    const groupShoppingList =
+      await this._shoppingListService.getGroupShoppingListByDate(date, groupId);
+    this.server.emit('get-group-shopping-list', groupShoppingList);
+  }
+
+  @SubscribeMessage('add-ingredient')
+  async handleAddIngredient(
+    client: Socket,
+    @MessageBody() payload: AddGroupIngredientDto,
+  ) {
+    await this._shoppingListService.addGroupIngredient(payload);
+    const groupShoppingList =
+      await this._shoppingListService.getGroupShoppingListByDate(
+        this.date,
+        this.groupId,
+      );
+    this.server.emit('get-group-shopping-list', groupShoppingList);
+  }
+
+  @SubscribeMessage('remove-ingredient')
+  async handleRemoveIngredient(
+    client: Socket,
+    @MessageBody() payload: RemoveIngredientDto,
+  ) {
+    await this._shoppingListService.removeIngredient(payload);
+    const groupShoppingList =
+      await this._shoppingListService.getGroupShoppingListByDate(
+        this.date,
+        this.groupId,
+      );
+    this.server.emit('get-group-shopping-list', groupShoppingList);
+  }
+
+  @SubscribeMessage('update-ingredient')
+  async handleUpdateIngredient(
+    client: Socket,
+    @MessageBody() payload: UpdateIngredientToShoppingListDto,
+  ) {
+    await this._shoppingListService.updateIngredient(payload);
+    const groupShoppingList =
+      await this._shoppingListService.getGroupShoppingListByDate(
+        this.date,
+        this.groupId,
+      );
+    this.server.emit('get-group-shopping-list', groupShoppingList);
   }
 }

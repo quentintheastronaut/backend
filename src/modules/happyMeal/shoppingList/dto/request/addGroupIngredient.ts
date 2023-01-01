@@ -32,4 +32,10 @@ export class AddGroupIngredientDto {
   })
   @IsString()
   measurementTypeId: string;
+
+  @ApiProperty({
+    example: '',
+  })
+  @IsString()
+  public note: string;
 }

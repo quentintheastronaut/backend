@@ -509,6 +509,7 @@ export class MenuService {
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.BREAKFAST,
             quantity: 1,
+            note: '',
           },
           jwtUser,
         ),
@@ -519,6 +520,7 @@ export class MenuService {
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.LUNCH,
             quantity: 1,
+            note: '',
           },
           jwtUser,
         ),
@@ -529,6 +531,7 @@ export class MenuService {
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.DINNER,
             quantity: 1,
+            note: '',
           },
           jwtUser,
         ),
@@ -539,6 +542,7 @@ export class MenuService {
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.SNACKS,
             quantity: 1,
+            note: '',
           },
           jwtUser,
         ),
@@ -809,6 +813,7 @@ export class MenuService {
           quantity: ingredient.quantity,
           measurementTypeId: ingredient.measurementType.id,
           date: addGroupDishDto.date,
+          note: '',
         });
       }
     } catch (error) {
@@ -846,6 +851,7 @@ export class MenuService {
             quantity: ingredient.quantity,
             measurementTypeId: ingredient.measurementTypeId,
             date: addDishDto.date,
+            note: '',
           },
           jwtUser,
         );

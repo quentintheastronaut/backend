@@ -154,6 +154,14 @@ export class AuthService {
 
       await this._userService.bindAccount(newUser.identifiers[0].id, account);
 
+      await AppDataSource.createQueryBuilder()
+        .update(Account)
+        .set({
+          token: authDto.token,
+        })
+        .where('id = :id', { id: account.id })
+        .execute();
+
       await delete account.password;
 
       return this.signToken(parseInt(account.id, 10), email, account.role);
@@ -197,6 +205,14 @@ export class AuthService {
     if (!pwMatches) {
       throw new ForbiddenException('Credential incorrect');
     }
+
+    await AppDataSource.createQueryBuilder()
+      .update(Account)
+      .set({
+        token: authDto.token,
+      })
+      .where('id = :id', { id: account.id })
+      .execute();
 
     delete account.password;
 

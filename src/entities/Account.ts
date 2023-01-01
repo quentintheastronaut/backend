@@ -68,6 +68,12 @@ export class Account {
   })
   role: string;
 
+  @Column({
+    nullable: true,
+    default: '',
+  })
+  token: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

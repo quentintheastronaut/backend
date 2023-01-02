@@ -1,3 +1,4 @@
+import { AddDislikeDto } from './dto/request/addDislike.dto';
 import { AddFavoriteDto } from './dto/request/addFavorite.dto';
 import { AddAllergicDto } from './dto/request/addAllergic.dto';
 import { UpdateUserDto } from './dto/request/updateUser.dto';
@@ -32,6 +33,7 @@ import { DateFormat } from 'src/constants/dateFormat';
 import * as argon from 'argon2';
 import { Allergic } from 'src/entities/Allergic';
 import { Favorite } from 'src/entities/Favorite';
+import { Dislike } from 'src/entities/Dislike';
 
 @Injectable({})
 export class UserService {
@@ -329,6 +331,30 @@ export class UserService {
     }
   }
 
+  public async insertDislike(userId: string, addDislikeDto: AddDislikeDto) {
+    try {
+      const { dishId, ...rest } = addDislikeDto;
+      return await AppDataSource.createQueryBuilder()
+        .insert()
+        .into(Dislike)
+        .values([
+          {
+            user: {
+              id: userId,
+            },
+            dish: {
+              id: dishId,
+            },
+            ...rest,
+          },
+        ])
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
   public async deleteAllergic(id: string) {
     try {
       await AppDataSource.createQueryBuilder()
@@ -355,6 +381,19 @@ export class UserService {
     }
   }
 
+  public async deleteDislike(id: string) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .delete()
+        .from(Dislike)
+        .where('id = :id', { id })
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
   public async findAllergicByUserId(userId: string) {
     try {
       return await AppDataSource.getRepository(Allergic).find({
@@ -372,6 +411,20 @@ export class UserService {
   public async findFavoriteByUserId(userId: string) {
     try {
       return await AppDataSource.getRepository(Favorite).find({
+        relations: {
+          dish: true,
+        },
+        where: { user: { id: userId } },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  public async findDislikeByUserId(userId: string) {
+    try {
+      return await AppDataSource.getRepository(Dislike).find({
         relations: {
           dish: true,
         },
@@ -740,6 +793,18 @@ export class UserService {
     }
   }
 
+  public async addDislike(jwtUser: JwtUser, addDislikeDto: AddDislikeDto) {
+    try {
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
+      await this.insertDislike(user.id, addDislikeDto);
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
   public async removeAllergic(id: string) {
     try {
       await this.deleteAllergic(id);
@@ -753,6 +818,16 @@ export class UserService {
   public async removeFavorite(id: string) {
     try {
       await this.deleteFavorite(id);
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async removeDislike(id: string) {
+    try {
+      await this.deleteDislike(id);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -777,6 +852,18 @@ export class UserService {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
       const result = await this.findFavoriteByUserId(user.id);
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async getDislikeByUser(jwtUser: JwtUser) {
+    try {
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
+      const result = await this.findDislikeByUserId(user.id);
       return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {
       console.log(error);

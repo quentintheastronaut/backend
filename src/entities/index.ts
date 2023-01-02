@@ -21,6 +21,7 @@ import { IndividualShoppingList } from './IndividualShoppingList';
 import { Meal } from './Meal';
 import { Location } from './Location';
 import { Favorite } from './Favorite';
+import { Dislike } from './Dislike';
 
 export { User };
 
@@ -48,6 +49,7 @@ const entities = [
   IndividualShoppingList,
   Meal,
   Incompatible,
+  Dislike,
 ];
 
 export default entities;

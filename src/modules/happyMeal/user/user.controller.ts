@@ -164,4 +164,29 @@ export class UserController {
   async removeFavorite(@Param('id') id: string): Promise<any> {
     return this.userService.removeFavorite(id);
   }
+
+  @Post('/dislike')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: 'Add favorite food' })
+  async addDislike(
+    @Req() req: { user: JwtUser },
+    @Body() addFavoriteDto: AddFavoriteDto,
+  ): Promise<any> {
+    const { user } = req;
+    return this.userService.addDislike(user, addFavoriteDto);
+  }
+
+  @Get('/dislike')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: 'Get favorite food' })
+  async getDislikeByUser(@Req() req: { user: JwtUser }): Promise<any> {
+    const { user } = req;
+    return this.userService.getDislikeByUser(user);
+  }
+
+  @Delete('/dislike/:id')
+  @ApiOperation({ summary: 'Get favorite food' })
+  async removeDislike(@Param('id') id: string): Promise<any> {
+    return this.userService.removeDislike(id);
+  }
 }

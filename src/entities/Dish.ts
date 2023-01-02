@@ -103,5 +103,9 @@ export class Dish {
 
   // new
   @OneToMany(() => Favorite, (favorite) => favorite.dish)
-  isFavoriteBy: Favorite[];
+  isFavorite: Favorite[];
+
+  // new
+  @OneToMany(() => Favorite, (favorite) => favorite.dish)
+  isDisliked: Favorite[];
 }

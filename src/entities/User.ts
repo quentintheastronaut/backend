@@ -96,5 +96,8 @@ export class User {
   isAllergic: Allergic[];
 
   @OneToMany(() => Favorite, (favorite) => favorite.user)
-  isFavorite: Favorite[];
+  isFavoriteBy: Favorite[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user)
+  isDislikedBy: Favorite[];
 }

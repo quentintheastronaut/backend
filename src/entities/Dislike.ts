@@ -7,17 +7,17 @@ import { User } from './User';
 import { Dish } from './Dish';
 
 @Entity()
-export class Favorite {
+export class Dislike {
   @PrimaryGeneratedColumn({
     name: 'id',
   })
   @IsString()
   id: string;
 
-  @ManyToOne(() => User, (user) => user.isFavoriteBy)
+  @ManyToOne(() => User, (user) => user.isDislikedBy)
   user: User;
 
-  @ManyToOne(() => Dish, (dish) => dish.isFavorite)
+  @ManyToOne(() => Dish, (dish) => dish.isDisliked)
   dish: Dish;
 
   @CreateDateColumn()

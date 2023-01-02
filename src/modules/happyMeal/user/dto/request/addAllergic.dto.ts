@@ -1,9 +1,9 @@
-import { IsString } from 'class-validator';
+import { IsString, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 export class AddAllergicDto {
   @ApiProperty({
-    example: '811',
+    example: ['811', '812', '813'],
   })
-  @IsString()
-  ingredientId: string;
+  @IsArray()
+  ingredientIds: Array<string>;
 }

@@ -1,9 +1,9 @@
-import { IsString } from 'class-validator';
+import { IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 export class AddDislikeDto {
   @ApiProperty({
-    example: '811',
+    example: ['216', '217', '218'],
   })
-  @IsString()
-  dishId: string;
+  @IsArray()
+  dishIds: Array<string>;
 }

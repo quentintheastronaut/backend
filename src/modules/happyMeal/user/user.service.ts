@@ -285,21 +285,22 @@ export class UserService {
 
   public async insertAllergic(userId: string, addAllergicDto: AddAllergicDto) {
     try {
-      const { ingredientId, ...rest } = addAllergicDto;
+      const { ingredientIds, ...rest } = addAllergicDto;
+      const values = ingredientIds.map((ingredientId) => {
+        return {
+          user: {
+            id: userId,
+          },
+          ingredient: {
+            id: ingredientId,
+          },
+          ...rest,
+        };
+      });
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Allergic)
-        .values([
-          {
-            user: {
-              id: userId,
-            },
-            ingredient: {
-              id: ingredientId,
-            },
-            ...rest,
-          },
-        ])
+        .values(values)
         .execute();
     } catch (error) {
       console.log(error);
@@ -309,21 +310,22 @@ export class UserService {
 
   public async insertFavorite(userId: string, addFavoriteDto: AddFavoriteDto) {
     try {
-      const { dishId, ...rest } = addFavoriteDto;
+      const { dishIds, ...rest } = addFavoriteDto;
+      const values = dishIds.map((dishId) => {
+        return {
+          user: {
+            id: userId,
+          },
+          dish: {
+            id: dishId,
+          },
+          ...rest,
+        };
+      });
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Favorite)
-        .values([
-          {
-            user: {
-              id: userId,
-            },
-            dish: {
-              id: dishId,
-            },
-            ...rest,
-          },
-        ])
+        .values(values)
         .execute();
     } catch (error) {
       console.log(error);
@@ -333,21 +335,22 @@ export class UserService {
 
   public async insertDislike(userId: string, addDislikeDto: AddDislikeDto) {
     try {
-      const { dishId, ...rest } = addDislikeDto;
+      const { dishIds, ...rest } = addDislikeDto;
+      const values = dishIds.map((dishId) => {
+        return {
+          user: {
+            id: userId,
+          },
+          dish: {
+            id: dishId,
+          },
+          ...rest,
+        };
+      });
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Dislike)
-        .values([
-          {
-            user: {
-              id: userId,
-            },
-            dish: {
-              id: dishId,
-            },
-            ...rest,
-          },
-        ])
+        .values(values)
         .execute();
     } catch (error) {
       console.log(error);

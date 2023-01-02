@@ -21,6 +21,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/decorators';
 import { UpdateUserDto } from './dto/request/updateUser.dto';
+import { AddFavoriteDto } from './dto/request/addFavorite.dto';
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -144,10 +145,10 @@ export class UserController {
   @ApiOperation({ summary: 'Add favorite food' })
   async addFavorite(
     @Req() req: { user: JwtUser },
-    @Body() addAllergicDto: AddAllergicDto,
+    @Body() addFavoriteDto: AddFavoriteDto,
   ): Promise<any> {
     const { user } = req;
-    return this.userService.addFavorite(user, addAllergicDto);
+    return this.userService.addFavorite(user, addFavoriteDto);
   }
 
   @Get('/favorite')

@@ -1,3 +1,4 @@
+import { NotificationsService } from './../../../services/notifications/notifications.service';
 import { IngredientToShoppingList } from './../../../entities/IngredientToShoppingList';
 import { RemoveMemberDto } from './dto/request/removeMember.dto';
 import { AddMemberDto } from './dto/request/addMember.dto';
@@ -27,6 +28,7 @@ import { ShoppingListService } from '../shoppingList/shoppingList.service';
 import { MenuService } from '../menu/menu.service';
 import { GroupShoppingList } from 'src/entities/GroupShoppingList';
 import { GroupMenu } from 'src/entities/GroupMenu';
+import { parseGroupTopic } from 'src/utils/parseGroupTopic';
 
 @Injectable({})
 export class GroupService {
@@ -37,6 +39,8 @@ export class GroupService {
     @Inject(forwardRef(() => MenuService))
     private _menuService: MenuService,
     @Inject(forwardRef(() => AuthService)) private _authService: AuthService,
+    @Inject(forwardRef(() => NotificationsService))
+    private _notificationsService: NotificationsService,
   ) {}
 
   // COMMON SERVICE
@@ -123,6 +127,7 @@ export class GroupService {
     }
 
     const { sub } = jwtUser;
+    const account = await this._authService.findOneById(sub.toString());
     const user = await this._userService.findByAccountId(sub.toString());
 
     if (!user) {
@@ -130,11 +135,16 @@ export class GroupService {
     }
 
     try {
-      await AppDataSource.createQueryBuilder()
+      const newGroup = await AppDataSource.createQueryBuilder()
         .insert()
         .into(Group)
         .values([groupDto])
         .execute();
+
+      await this._notificationsService.subscribeTopic(
+        account.token,
+        parseGroupTopic(newGroup.raw.insertId.toString()),
+      );
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -357,6 +367,8 @@ export class GroupService {
         addMemberDto.email,
       );
 
+      const group = await this.find(addMemberDto.groupId);
+
       const newMember = await this._userService.findByAccountId(
         newMemberAccount.id,
       );
@@ -376,6 +388,18 @@ export class GroupService {
           role: GroupRole.MEMBER,
         })
         .execute();
+
+      if (newMemberAccount?.token) {
+        await this._notificationsService.subscribeTopic(
+          newMemberAccount.token,
+          parseGroupTopic(addMemberDto.groupId),
+        );
+
+        await this._notificationsService.sendJoinGroupNotification(
+          group.name,
+          newMemberAccount.token,
+        );
+      }
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -423,6 +447,10 @@ export class GroupService {
       );
     }
 
+    const member = await this._authService.findOneById(removeMemberDto.userId);
+
+    const group = await this.find(removeMemberDto.groupId);
+
     try {
       await AppDataSource.createQueryBuilder()
         .delete()
@@ -431,6 +459,18 @@ export class GroupService {
           ...removeMemberDto,
         })
         .execute();
+
+      if (member?.token) {
+        await this._notificationsService.unsubscribeTopic(
+          member.token,
+          parseGroupTopic(removeMemberDto.groupId),
+        );
+
+        await this._notificationsService.sendRemoveMemberNotification(
+          group.name,
+          member.token,
+        );
+      }
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {

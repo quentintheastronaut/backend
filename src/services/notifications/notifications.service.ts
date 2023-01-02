@@ -1,9 +1,13 @@
 import { NotificationDto } from './dto/request/notification.dto';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  HttpStatus,
+} from '@nestjs/common';
 import * as firebase from 'firebase-admin';
 import { FirebaseAdmin } from 'src/config/firebase';
 import { PageDto } from 'src/dtos';
-import { HttpStatus } from '@nestjs/common';
 
 export interface ISendFirebaseMessages {
   token: string;
@@ -13,14 +17,28 @@ export interface ISendFirebaseMessages {
 
 @Injectable()
 export class NotificationsService {
-  constructor() {
-    const firebaseCredentials: firebase.ServiceAccount = FirebaseAdmin;
-    firebase.initializeApp({
-      credential: firebase.credential.cert(firebaseCredentials),
-      databaseURL: process.env.FIREBASE_DATABASE_URL,
-    });
+  constructor(private readonly logger: Logger) {
+    if (!firebase.apps.length) {
+      const firebaseCredentials: firebase.ServiceAccount = FirebaseAdmin;
+      firebase.initializeApp({
+        credential: firebase.credential.cert(firebaseCredentials),
+        databaseURL: process.env.FIREBASE_DATABASE_URL,
+      });
+    }
   }
 
+  private readonly options = {
+    priority: 'high',
+    timeToLive: 60 * 60 * 24,
+  };
+
+  private readonly optionsSilent = {
+    priority: 'high',
+    timeToLive: 60 * 60 * 24,
+    content_available: true,
+  };
+
+  // Common Service
   public async send(notificationDto: NotificationDto) {
     try {
       const { title, body, token } = notificationDto;
@@ -31,8 +49,8 @@ export class NotificationsService {
         },
       };
 
-      Promise.all([await firebase.messaging().sendToDevice(token, payload)]);
-      console.log(`${this.send.name} executed with notification payload`);
+      await firebase.messaging().sendToDevice(token, payload);
+      console.log(`${this.send.name} executed with notification: ${title}`);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -40,74 +58,83 @@ export class NotificationsService {
     }
   }
 
-  // public async sendFirebaseMessages(
-  //   firebaseMessages: ISendFirebaseMessages[],
-  //   dryRun?: boolean,
-  // ): Promise<BatchResponse> {
-  //   const batchedFirebaseMessages = chunk(firebaseMessages, 500);
-  //   const batchResponses = await mapLimit<
-  //     ISendFirebaseMessages[],
-  //     BatchResponse
-  //   >(
-  //     batchedFirebaseMessages,
-  //     parseInt(process.env.FIREBASE_PARALLEL_LIMIT, 10), // 3 is a good place to start
-  //     async (
-  //       groupedFirebaseMessages: ISendFirebaseMessages[],
-  //     ): Promise<BatchResponse> => {
-  //       try {
-  //         const tokenMessages: firebase.messaging.TokenMessage[] =
-  //           groupedFirebaseMessages.map(({ message, title, token }) => ({
-  //             notification: { body: message, title },
-  //             token,
-  //             apns: {
-  //               payload: {
-  //                 aps: {
-  //                   'content-available': 1,
-  //                 },
-  //               },
-  //             },
-  //           }));
-  //         return await this.sendAll(tokenMessages, dryRun);
-  //       } catch (error) {
-  //         return {
-  //           responses: groupedFirebaseMessages.map(() => ({
-  //             success: false,
-  //             error,
-  //           })),
-  //           successCount: 0,
-  //           failureCount: groupedFirebaseMessages.length,
-  //         };
-  //       }
-  //     },
-  //   );
-  //   return batchResponses.reduce(
-  //     ({ responses, successCount, failureCount }, currentResponse) => {
-  //       return {
-  //         responses: responses.concat(currentResponse.responses),
-  //         successCount: successCount + currentResponse.successCount,
-  //         failureCount: failureCount + currentResponse.failureCount,
-  //       };
-  //     },
-  //     {
-  //       responses: [],
-  //       successCount: 0,
-  //       failureCount: 0,
-  //     } as unknown as BatchResponse,
-  //   );
-  // }
-  // public async sendAll(
-  //   messages: firebase.messaging.TokenMessage[],
-  //   dryRun?: boolean,
-  // ): Promise<BatchResponse> {
-  //   if (process.env.NODE_ENV === 'local') {
-  //     for (const { notification, token } of messages) {
-  //       shell.exec(
-  //         `echo '{ "aps": { "alert": ${JSON.stringify(
-  //           notification,
-  //         )}, "token": "${token}" } }' | xcrun simctl push booted com.company.appname -`,
-  //       );
-  //     }
-  //   }
-  //   return firebase.messaging().sendAll(messages, dryRun);
-  // }
+  async sendToTopic(
+    topic: 'all' | string,
+    payload: firebase.messaging.MessagingPayload,
+    silent: boolean,
+  ) {
+    if (!topic && topic.trim().length === 0) {
+      throw new Error('You provide an empty topic name!');
+    }
+
+    let result = null;
+    try {
+      result = await firebase
+        .messaging()
+        .sendToTopic(
+          topic,
+          payload,
+          silent ? this.optionsSilent : this.options,
+        );
+    } catch (error) {
+      this.logger.error(
+        error.message,
+        error.stackTrace,
+        'Firebase Cloud Messaging',
+      );
+      throw error;
+    }
+    return result;
+  }
+
+  async subscribeTopic(token: string, topic: string) {
+    try {
+      await firebase.messaging().subscribeToTopic([token], topic);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async unsubscribeTopic(token: string, topic: string) {
+    try {
+      await firebase.messaging().unsubscribeFromTopic([token], topic);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  // Specific Service
+  async sendJoinGroupNotification(groupName: string, token) {
+    try {
+      const title = 'Happy Meal';
+      const body = `You've been added ${groupName} group`;
+      const payload = {
+        title,
+        body,
+        token,
+      };
+      await this.send(payload);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async sendRemoveMemberNotification(groupName: string, token) {
+    try {
+      const title = 'Happy Meal';
+      const body = `You've been removed from ${groupName} group`;
+      const payload = {
+        title,
+        body,
+        token,
+      };
+      await this.send(payload);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
 }

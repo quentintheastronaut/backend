@@ -1,8 +1,9 @@
+import { NotificationsService } from 'src/services/notifications/notifications.service';
 import { WeightRecordService } from './../weightRecord/weightRecord.service';
 import { UserService } from './../user/user.service';
 import { GroupService } from './group.service';
 import { GroupController } from './group.controller';
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { MenuService } from '../menu/menu.service';
@@ -24,6 +25,8 @@ import { MeasurementService } from '../measurement/measurement.service';
     IngredientService,
     WeightRecordService,
     MeasurementService,
+    NotificationsService,
+    Logger,
   ],
   exports: [GroupService],
 })

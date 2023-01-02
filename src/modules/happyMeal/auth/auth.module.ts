@@ -1,7 +1,7 @@
 import { GroupService } from './../group/group.service';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { AuthService } from './auth.service';
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { AuthController } from './auth.controller';
@@ -12,6 +12,7 @@ import { DishService } from '../dish/dish.service';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { MeasurementService } from '../measurement/measurement.service';
 import { WeightRecordService } from '../weightRecord/weightRecord.service';
+import { NotificationsService } from 'src/services/notifications/notifications.service';
 
 @Module({
   imports: [
@@ -33,6 +34,8 @@ import { WeightRecordService } from '../weightRecord/weightRecord.service';
     IngredientService,
     MeasurementService,
     WeightRecordService,
+    NotificationsService,
+    Logger,
   ],
   exports: [AuthService],
 })

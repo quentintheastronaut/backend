@@ -5,5 +5,5 @@ export class AddFavoriteDto {
     example: '811',
   })
   @IsString()
-  ingredientId: string;
+  dishId: string;
 }

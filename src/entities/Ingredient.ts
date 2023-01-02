@@ -93,10 +93,6 @@ export class Ingredient {
   isAllergicBy: Allergic[];
 
   // new
-  @OneToMany(() => Favorite, (favorite) => favorite.ingredient)
-  isFavoriteBy: Favorite[];
-
-  // new
   @OneToMany(() => Incompatible, (favorite) => favorite.isIncompatibleTo)
   isIncompatibleTo: Incompatible[];
 

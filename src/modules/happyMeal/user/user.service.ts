@@ -307,7 +307,7 @@ export class UserService {
 
   public async insertFavorite(userId: string, addFavoriteDto: AddFavoriteDto) {
     try {
-      const { ingredientId, ...rest } = addFavoriteDto;
+      const { dishId, ...rest } = addFavoriteDto;
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Favorite)
@@ -316,8 +316,8 @@ export class UserService {
             user: {
               id: userId,
             },
-            ingredient: {
-              id: ingredientId,
+            dish: {
+              id: dishId,
             },
             ...rest,
           },
@@ -373,7 +373,7 @@ export class UserService {
     try {
       return await AppDataSource.getRepository(Favorite).find({
         relations: {
-          ingredient: true,
+          dish: true,
         },
         where: { user: { id: userId } },
       });

@@ -13,6 +13,7 @@ import {
 import { DishToMenu } from './DishToMenu';
 import { User } from './User';
 import { Account } from './Account';
+import { Favorite } from './Favorite';
 
 // REFACTOR
 @Entity()
@@ -99,4 +100,8 @@ export class Dish {
     },
   )
   public ingredientsToDish!: IngredientToDish[];
+
+  // new
+  @OneToMany(() => Favorite, (favorite) => favorite.dish)
+  isFavoriteBy: Favorite[];
 }

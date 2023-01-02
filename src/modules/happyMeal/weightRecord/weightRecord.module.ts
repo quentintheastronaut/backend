@@ -1,6 +1,6 @@
 import { WeightRecordService } from './weightRecord.service';
 import { WeightRecordController } from './weightRecord.controller';
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
 import { GroupService } from '../group/group.service';
@@ -10,6 +10,7 @@ import { ShoppingListService } from '../shoppingList/shoppingList.service';
 import { DishService } from '../dish/dish.service';
 import { MeasurementService } from '../measurement/measurement.service';
 import { IngredientService } from '../ingredient/ingredient.service';
+import { NotificationsService } from 'src/services/notifications/notifications.service';
 
 @Module({
   controllers: [WeightRecordController],
@@ -24,6 +25,8 @@ import { IngredientService } from '../ingredient/ingredient.service';
     MeasurementService,
     DishService,
     IngredientService,
+    NotificationsService,
+    Logger,
   ],
   exports: [WeightRecordService],
 })

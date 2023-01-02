@@ -5,6 +5,7 @@ import { ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Entity } from 'typeorm';
 import { Ingredient } from './Ingredient';
 import { User } from './User';
+import { Dish } from './Dish';
 
 @Entity()
 export class Favorite {
@@ -17,8 +18,8 @@ export class Favorite {
   @ManyToOne(() => User, (user) => user.isFavorite)
   user: User;
 
-  @ManyToOne(() => Ingredient, (ingredient) => ingredient.isFavoriteBy)
-  ingredient: Ingredient;
+  @ManyToOne(() => Dish, (dish) => dish.isFavoriteBy)
+  dish: Dish;
 
   @CreateDateColumn()
   createdAt: Date;

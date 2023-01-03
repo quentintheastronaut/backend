@@ -18,6 +18,7 @@ import {
   NotFoundException,
   Inject,
   forwardRef,
+  Logger,
 } from '@nestjs/common';
 import { PageDto } from 'src/dtos/page.dto';
 import { PageMetaDto } from 'src/dtos/pageMeta.dto';
@@ -629,6 +630,7 @@ export class MenuService {
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
+      Logger.log(error);
       throw new InternalServerErrorException(error);
     }
   }

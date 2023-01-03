@@ -14,6 +14,7 @@ async function bootstrap() {
       origin: true,
       credentials: true,
     },
+    logger: ['error', 'warn'],
   });
 
   const config = new DocumentBuilder()

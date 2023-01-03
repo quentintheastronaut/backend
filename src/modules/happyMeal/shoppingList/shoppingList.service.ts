@@ -14,7 +14,6 @@ import {
   InternalServerErrorException,
   HttpStatus,
   NotFoundException,
-  BadRequestException,
   forwardRef,
   Inject,
 } from '@nestjs/common';
@@ -42,6 +41,42 @@ export class ShoppingListService {
   ) {}
 
   // COMMON SERVICES
+  async findByUserId(userId: string) {
+    try {
+      return await AppDataSource.getRepository(IndividualShoppingList).find({
+        relations: {
+          shoppingList: true,
+        },
+        where: {
+          user: {
+            id: userId,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async findByGroupId(groupId: string) {
+    try {
+      return await AppDataSource.getRepository(GroupShoppingList).find({
+        relations: {
+          shoppingList: true,
+        },
+        where: {
+          group: {
+            id: groupId,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findGroupShoppingList(date: string, group: Group) {
     try {
       return await AppDataSource.getRepository(GroupShoppingList).findOne({
@@ -58,7 +93,7 @@ export class ShoppingListService {
       });
     } catch (error) {
       console.log(error);
-      throw new NotFoundException('User not found');
+      throw new InternalServerErrorException();
     }
   }
 
@@ -75,7 +110,7 @@ export class ShoppingListService {
       });
     } catch (error) {
       console.log(error);
-      throw new NotFoundException('User not found');
+      throw new InternalServerErrorException();
     }
   }
 
@@ -95,7 +130,7 @@ export class ShoppingListService {
       });
     } catch (error) {
       console.log(error);
-      throw new NotFoundException('User not found');
+      throw new InternalServerErrorException();
     }
   }
   async findShoppingList(id: string) {
@@ -105,7 +140,7 @@ export class ShoppingListService {
       });
     } catch (error) {
       console.log(error);
-      throw new NotFoundException('User not found');
+      throw new InternalServerErrorException();
     }
   }
   async insertGroup(date: string, shoppingList: ShoppingList, group: Group) {
@@ -123,7 +158,7 @@ export class ShoppingListService {
         .execute();
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException('');
+      throw new InternalServerErrorException();
     }
   }
   async insertIndividual(date: string, shoppingList: ShoppingList, user: User) {
@@ -141,7 +176,7 @@ export class ShoppingListService {
         .execute();
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException('');
+      throw new InternalServerErrorException();
     }
   }
   async insertShoppingList(shoppingListDto: ShoppingListDto) {
@@ -153,7 +188,7 @@ export class ShoppingListService {
         .execute();
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException('');
+      throw new InternalServerErrorException();
     }
   }
   async insertIngredientToList(
@@ -178,7 +213,7 @@ export class ShoppingListService {
         .execute();
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException('');
+      throw new InternalServerErrorException();
     }
   }
 
@@ -677,6 +712,34 @@ export class ShoppingListService {
 
       console.log(assignMarketerDto);
       return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  // Get shopping list by User
+  async getShoppingListByUser(jwtUser: JwtUser) {
+    try {
+      console.log('check');
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
+      const shoppingLists = await this.findByUserId(user.id);
+      return new PageDto('OK', HttpStatus.OK, shoppingLists);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  // Get shopping list by Group
+  async getShoppingListByGroup(jwtUser: JwtUser) {
+    try {
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
+      const group = await this._groupService.findByUser(user);
+      const shoppingLists = await this.findByGroupId(group.id);
+      return new PageDto('OK', HttpStatus.OK, shoppingLists);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

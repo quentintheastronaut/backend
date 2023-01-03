@@ -31,6 +31,20 @@ import { ApiPaginatedResponse } from 'src/decorators';
 export class ShoppingListController {
   constructor(private readonly _shoppingListService: ShoppingListService) {}
 
+  @UseGuards(JwtGuard)
+  @Get('/by-user')
+  async getShoppingListByUser(@Req() req: { user: JwtUser }) {
+    const { user } = req;
+    return this._shoppingListService.getShoppingListByUser(user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('/by-group')
+  async getShoppingListByGroup(@Req() req: { user: JwtUser }) {
+    const { user } = req;
+    return this._shoppingListService.getShoppingListByGroup(user);
+  }
+
   @Get('/detail')
   @ApiOperation({ summary: "Get group's detail shopping list by date" })
   async getShoppingListDetail(

@@ -4,7 +4,6 @@ import { CheckDto } from './dto/request/check.dto';
 import { UpdateIngredientToShoppingListDto } from './dto/request/updateIngredientToShoppingList.dto';
 import { RemoveIngredientDto } from './dto/request/removeIngredient.dto';
 import { AddIngredientDto } from './dto/request/addIngredient.dto';
-import { ShoppingListStatus } from './../../../constants/shoppingListStatus';
 import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { ShoppingListDto } from './dto/request/shoppingList.dto';
 import { AppDataSource } from './../../../data-source';
@@ -29,7 +28,6 @@ import { Group } from 'src/entities/Group';
 import { Ingredient } from 'src/entities/Ingredient';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { GroupService } from '../group/group.service';
-import { ShoppingListType } from 'src/constants';
 
 @Injectable({})
 export class ShoppingListService {
@@ -114,7 +112,7 @@ export class ShoppingListService {
     }
   }
 
-  async findIndividualShoppingList(date: string, userId: string) {
+  async findIndividualShoppingListById(id: string) {
     try {
       return await AppDataSource.getRepository(IndividualShoppingList).findOne({
         relations: {
@@ -122,10 +120,7 @@ export class ShoppingListService {
           shoppingList: true,
         },
         where: {
-          date,
-          user: {
-            id: userId,
-          },
+          id,
         },
       });
     } catch (error) {
@@ -133,6 +128,7 @@ export class ShoppingListService {
       throw new InternalServerErrorException();
     }
   }
+
   async findShoppingList(id: string) {
     try {
       return await AppDataSource.getRepository(ShoppingList).findOne({
@@ -161,14 +157,13 @@ export class ShoppingListService {
       throw new InternalServerErrorException();
     }
   }
-  async insertIndividual(date: string, shoppingList: ShoppingList, user: User) {
+  async insertIndividual(shoppingList: ShoppingList, user: User) {
     try {
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(IndividualShoppingList)
         .values([
           {
-            date,
             shoppingList,
             user,
           },
@@ -271,9 +266,15 @@ export class ShoppingListService {
       throw new NotFoundException('Not found');
     }
     try {
+      const { locationId, ...rest } = shoppingListDto;
       await AppDataSource.createQueryBuilder()
         .update(ShoppingList)
-        .set(shoppingListDto)
+        .set({
+          ...rest,
+          location: {
+            id: locationId,
+          },
+        })
         .where('id = :id', { id })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
@@ -345,29 +346,10 @@ export class ShoppingListService {
 
   // done
   public async getShoppingListByDate(
-    date: string,
-    jwtUser: JwtUser,
+    individualShoppingListId: string,
   ): Promise<PageDto<IngredientToShoppingList[]>> {
-    const { sub } = jwtUser;
-    const user = await this._userService.findByAccountId(sub.toString());
-
-    const individualList = await this.findIndividualShoppingList(date, user.id);
-
-    if (!individualList) {
-      // create shopping list if it's doesn't exist
-      const newListId = await this.insertShoppingList({
-        type: ShoppingListType.GROUP,
-        status: ShoppingListStatus.PENDING,
-      });
-
-      const newList = await this.findShoppingList(newListId.raw.insertId);
-
-      await this.insertIndividual(date, newList, user);
-    }
-
-    const newIndividualList = await this.findIndividualShoppingList(
-      date,
-      user.id,
+    const individualList = await this.findIndividualShoppingListById(
+      individualShoppingListId,
     );
 
     try {
@@ -384,7 +366,7 @@ export class ShoppingListService {
           'measurement',
         )
         .where('shoppingListId = :listId', {
-          listId: newIndividualList.shoppingList.id,
+          listId: individualList.shoppingList.id,
         })
         .addSelect('SUM(ingredient_to_shopping_list.quantity)', 'quantity')
         .groupBy('ingredient_to_shopping_list.ingredientId')
@@ -398,24 +380,11 @@ export class ShoppingListService {
   }
 
   public async getGroupShoppingListByDate(
-    date: string,
-    groupId: string,
+    groupShoppingListId: string,
   ): Promise<PageDto<IngredientToShoppingList[]>> {
-    const group = await this._groupService.find(groupId);
-    let groupShoppingList = await this.findGroupShoppingList(date, group);
-
-    if (!groupShoppingList) {
-      const newListId = await this.insertShoppingList({
-        type: ShoppingListType.GROUP,
-        status: ShoppingListStatus.PENDING,
-      });
-
-      const newList = await this.findShoppingList(newListId.raw.insertId);
-
-      await this.insertGroup(date, newList, group);
-    }
-
-    groupShoppingList = await this.findGroupShoppingList(date, group);
+    const groupShoppingList = await this.findGroupShoppingListById(
+      groupShoppingListId,
+    );
 
     try {
       const result = await AppDataSource.createQueryBuilder(
@@ -446,65 +415,45 @@ export class ShoppingListService {
     addGroupIngredientDto: AddGroupIngredientDto,
   ): Promise<PageDto<ShoppingList>> {
     try {
-      const { date, groupId } = addGroupIngredientDto;
-
-      const group = await this._groupService.find(groupId);
-
-      const list = await this.findGroupShoppingList(date, group);
-
+      const list = await this.findGroupShoppingListById(
+        addGroupIngredientDto.groupShoppingListId,
+      );
       const ingredient = await this._ingredientService.findOne(
         addGroupIngredientDto.ingredientId,
       );
+      const filteredIngredient = await AppDataSource.getRepository(
+        IngredientToShoppingList,
+      ).findOne({
+        where: {
+          ingredient: {
+            id: addGroupIngredientDto.ingredientId,
+          },
+          shoppingList: {
+            id: list.shoppingList.id,
+          },
+        },
+      });
 
-      if (!list) {
-        const newListId = await this.insertShoppingList({
-          type: ShoppingListType.GROUP,
-          status: ShoppingListStatus.PENDING,
-        });
-
-        const newList = await this.findShoppingList(newListId.raw.insertId);
-
-        await this.insertGroup(date, newList, group);
-
+      if (filteredIngredient) {
+        await this.updateIngredientToShoppingList(
+          filteredIngredient.ingredientToShoppingListId,
+          {
+            ...addGroupIngredientDto,
+            quantity:
+              filteredIngredient.quantity + addGroupIngredientDto.quantity,
+          },
+        );
+      } else {
         await this.insertIngredientToList(
-          newList,
+          list.shoppingList,
           ingredient,
           addGroupIngredientDto,
         );
-      } else {
-        const filteredIngredient = await AppDataSource.getRepository(
-          IngredientToShoppingList,
-        ).findOne({
-          where: {
-            ingredient: {
-              id: ingredient.id,
-            },
-            shoppingList: {
-              id: list.shoppingList.id,
-            },
-          },
-        });
-
-        if (filteredIngredient) {
-          await this.updateIngredientToShoppingList(
-            filteredIngredient.ingredientToShoppingListId,
-            {
-              ...addGroupIngredientDto,
-              quantity:
-                filteredIngredient.quantity + addGroupIngredientDto.quantity,
-            },
-          );
-        } else {
-          await this.insertIngredientToList(
-            list.shoppingList,
-            ingredient,
-            addGroupIngredientDto,
-          );
-        }
       }
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
@@ -515,61 +464,44 @@ export class ShoppingListService {
   ): Promise<PageDto<ShoppingList>> {
     try {
       const { sub } = jwtUser;
-      const { date } = addIngredientDto;
+
       const user = await this._userService.findByAccountId(sub.toString());
 
-      const individualShoppingList = await this.findIndividualShoppingList(
-        date,
-        user.id,
+      const individualShoppingList = await this.findIndividualShoppingListById(
+        addIngredientDto.individualShoppingListId,
       );
 
       const ingredient = await this._ingredientService.findOne(
         addIngredientDto.ingredientId,
       );
 
-      if (!individualShoppingList) {
-        const newListId = await this.insertShoppingList({
-          status: ShoppingListStatus.PENDING,
-        });
+      const filteredIngredient = await AppDataSource.getRepository(
+        IngredientToShoppingList,
+      ).findOne({
+        where: {
+          ingredient: {
+            id: ingredient.id,
+          },
+          shoppingList: {
+            id: individualShoppingList.shoppingList.id,
+          },
+        },
+      });
 
-        const newList = await this.findShoppingList(newListId.raw.insertId);
-
-        await this.insertIndividual(date, newList, user);
-
+      if (filteredIngredient) {
+        await this.updateIngredientToShoppingList(
+          filteredIngredient.ingredientToShoppingListId,
+          {
+            ...addIngredientDto,
+            quantity: filteredIngredient.quantity + addIngredientDto.quantity,
+          },
+        );
+      } else {
         await this.insertIngredientToList(
-          newList,
+          individualShoppingList.shoppingList,
           ingredient,
           addIngredientDto,
         );
-      } else {
-        const filteredIngredient = await AppDataSource.getRepository(
-          IngredientToShoppingList,
-        ).findOne({
-          where: {
-            ingredient: {
-              id: ingredient.id,
-            },
-            shoppingList: {
-              id: individualShoppingList.shoppingList.id,
-            },
-          },
-        });
-
-        if (filteredIngredient) {
-          await this.updateIngredientToShoppingList(
-            filteredIngredient.ingredientToShoppingListId,
-            {
-              ...addIngredientDto,
-              quantity: filteredIngredient.quantity + addIngredientDto.quantity,
-            },
-          );
-        } else {
-          await this.insertIngredientToList(
-            individualShoppingList.shoppingList,
-            ingredient,
-            addIngredientDto,
-          );
-        }
       }
 
       return new PageDto('OK', HttpStatus.OK);
@@ -684,9 +616,8 @@ export class ShoppingListService {
             id: user.id,
           },
         })
-        .where('date = :date AND groupId = :groupId', {
-          date: assignMarketerDto.date,
-          groupId: assignMarketerDto.groupId,
+        .where('id = :id', {
+          id: assignMarketerDto.groupShoppingListId,
         })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
@@ -704,9 +635,8 @@ export class ShoppingListService {
         .set({
           marketer: null,
         })
-        .where('date = :date AND groupId = :groupId', {
-          date: assignMarketerDto.date,
-          groupId: assignMarketerDto.groupId,
+        .where('id = :id', {
+          id: assignMarketerDto.groupShoppingListId,
         })
         .execute();
 
@@ -747,7 +677,7 @@ export class ShoppingListService {
   }
 
   // done
-  public async getShoppingListDetail(assignMarketerDto: AssignMarketerDto) {
+  public async getShoppingListDetail(groupShoppingListId: string) {
     try {
       const result = await AppDataSource.createQueryBuilder(
         GroupShoppingList,
@@ -755,9 +685,8 @@ export class ShoppingListService {
       )
         .leftJoinAndSelect('group_shopping_list.marketer', 'marketer')
         .leftJoinAndSelect('marketer.account', 'account')
-        .where('date = :date AND group_shopping_list.groupId = :groupId', {
-          date: assignMarketerDto.date,
-          groupId: assignMarketerDto.groupId,
+        .where('group_shopping_list.id = :groupShoppingListId', {
+          groupShoppingListId,
         })
         .getOne();
       return new PageDto('OK', HttpStatus.OK, result);

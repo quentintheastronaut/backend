@@ -8,10 +8,4 @@ export class RemoveIngredientDto {
   })
   @IsString()
   ingredientToShoppingListId: string;
-
-  @ApiProperty({
-    example: '30/10/2022',
-  })
-  @IsString()
-  date: string;
 }

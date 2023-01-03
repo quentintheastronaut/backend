@@ -5,7 +5,7 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class ShoppingListDto {
   @ApiProperty({
-    example: '18:00',
+    example: '30/12/2022 18:00',
   })
   @IsOptional()
   @IsString()
@@ -24,4 +24,11 @@ export class ShoppingListDto {
   @IsOptional()
   @IsString()
   status?: ShoppingListStatus;
+
+  @ApiProperty({
+    example: '1',
+  })
+  @IsOptional()
+  @IsString()
+  locationId?: string;
 }

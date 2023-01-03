@@ -1,3 +1,5 @@
+import { IngredientToShoppingList } from './../entities/IngredientToShoppingList';
+import { AppDataSource } from 'src/data-source';
 import { UpdateIngredientToShoppingListDto } from './../modules/happyMeal/shoppingList/dto/request/updateIngredientToShoppingList.dto';
 import { RemoveIngredientDto } from './../modules/happyMeal/shoppingList/dto/request/removeIngredient.dto';
 import { AddGroupIngredientDto } from './../modules/happyMeal/shoppingList/dto/request/addGroupIngredient';
@@ -49,11 +51,11 @@ export class ShoppingListGateway
     client: Socket,
     @MessageBody() payload: any,
   ) {
-    const { date, groupId } = payload;
-    this.date = date;
-    this.groupId = groupId;
+    const { shoppingListId } = payload;
     const groupShoppingList =
-      await this._shoppingListService.getGroupShoppingListByDate(date, groupId);
+      await this._shoppingListService.getGroupShoppingListByDate(
+        shoppingListId,
+      );
     this.server.emit('get-group-shopping-list', groupShoppingList);
   }
 
@@ -65,8 +67,7 @@ export class ShoppingListGateway
     await this._shoppingListService.addGroupIngredient(payload);
     const groupShoppingList =
       await this._shoppingListService.getGroupShoppingListByDate(
-        this.date,
-        this.groupId,
+        payload.groupShoppingListId,
       );
     this.server.emit('get-group-shopping-list', groupShoppingList);
   }
@@ -76,11 +77,21 @@ export class ShoppingListGateway
     client: Socket,
     @MessageBody() payload: RemoveIngredientDto,
   ) {
+    const ingredientToShoppingList = await AppDataSource.getRepository(
+      IngredientToShoppingList,
+    ).findOne({
+      relations: {
+        ingredient: true,
+        shoppingList: true,
+      },
+      where: {
+        ingredientToShoppingListId: payload.ingredientToShoppingListId,
+      },
+    });
     await this._shoppingListService.removeIngredient(payload);
     const groupShoppingList =
       await this._shoppingListService.getGroupShoppingListByDate(
-        this.date,
-        this.groupId,
+        ingredientToShoppingList.shoppingList.id,
       );
     this.server.emit('get-group-shopping-list', groupShoppingList);
   }
@@ -90,11 +101,21 @@ export class ShoppingListGateway
     client: Socket,
     @MessageBody() payload: UpdateIngredientToShoppingListDto,
   ) {
+    const ingredientToShoppingList = await AppDataSource.getRepository(
+      IngredientToShoppingList,
+    ).findOne({
+      relations: {
+        ingredient: true,
+        shoppingList: true,
+      },
+      where: {
+        ingredientToShoppingListId: payload.ingredientToShoppingListId,
+      },
+    });
     await this._shoppingListService.updateIngredient(payload);
     const groupShoppingList =
       await this._shoppingListService.getGroupShoppingListByDate(
-        this.date,
-        this.groupId,
+        ingredientToShoppingList.shoppingList.id,
       );
     this.server.emit('get-group-shopping-list', groupShoppingList);
   }

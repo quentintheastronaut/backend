@@ -20,10 +20,6 @@ export class IndividualShoppingList {
   })
   id: string;
 
-  @Column()
-  @IsString()
-  date: string;
-
   @ManyToOne(() => User, (user) => user.individualShoppingLists)
   user: User;
 

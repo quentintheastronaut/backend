@@ -16,14 +16,7 @@ export class UpdateIngredientToShoppingListDto {
   quantity?: number;
 
   @ApiProperty({
-    example: 0,
-  })
-  @IsNumber()
-  @IsOptional()
-  weight?: number;
-
-  @ApiProperty({
-    example: 'GRAMME',
+    example: '4',
   })
   @IsOptional()
   @IsString()

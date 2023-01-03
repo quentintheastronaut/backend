@@ -21,7 +21,7 @@ export class AddIngredientToDishDto {
   quantity: number;
 
   @ApiProperty({
-    example: 'GRAMME',
+    example: '4',
   })
   @IsString()
   measurementTypeId: string;

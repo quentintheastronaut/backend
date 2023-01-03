@@ -1,6 +1,6 @@
 import { ShoppingListType } from './../../../../../constants/shoppingListType';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { MealType } from 'src/constants/mealType';
 
 export class AddDishDto {
@@ -27,6 +27,13 @@ export class AddDishDto {
   })
   @IsString()
   date: string;
+
+  @ApiProperty({
+    example: '30/10/2022',
+  })
+  @IsString()
+  @IsOptional()
+  individualShoppingListId?: string;
 
   @ApiProperty({
     example: 1,

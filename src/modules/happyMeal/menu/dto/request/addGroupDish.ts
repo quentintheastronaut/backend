@@ -1,7 +1,6 @@
 import { ShoppingListType } from './../../../../../constants/shoppingListType';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
-import { MealType } from 'src/constants/mealType';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AddGroupDishDto {
   @ApiProperty({
@@ -9,6 +8,14 @@ export class AddGroupDishDto {
   })
   @IsString()
   groupId: string;
+
+  @ApiProperty({
+    example: '1',
+    default: '',
+  })
+  @IsString()
+  @IsOptional()
+  groupShoppingListId: string;
 
   @ApiProperty({
     example: '1',

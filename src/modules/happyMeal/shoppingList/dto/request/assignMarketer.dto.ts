@@ -3,14 +3,8 @@ import { IsString } from 'class-validator';
 
 export class AssignMarketerDto {
   @ApiProperty({
-    example: '06/12/2022',
+    example: '5',
   })
   @IsString()
-  date: string;
-
-  @ApiProperty({
-    example: '1',
-  })
-  @IsString()
-  groupId: string;
+  groupShoppingListId: string;
 }

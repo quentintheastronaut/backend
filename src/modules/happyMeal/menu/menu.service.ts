@@ -37,6 +37,7 @@ import { DateFormat } from 'src/constants/dateFormat';
 import * as moment from 'moment';
 import { MealType } from 'src/constants/mealType';
 import { MeasurementService } from '../measurement/measurement.service';
+import { DishType } from 'src/constants/dishType';
 
 @Injectable({})
 export class MenuService {
@@ -396,6 +397,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: recomms[0].id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.BREAKFAST,
@@ -407,6 +409,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: recomms[1].id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.LUNCH,
@@ -418,6 +421,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: recomms[2].id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.DINNER,
@@ -429,6 +433,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: recomms[3].id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.SNACKS,
@@ -575,6 +580,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: breakfastDish.id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.BREAKFAST,
@@ -586,6 +592,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: lunchDish.id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.LUNCH,
@@ -597,6 +604,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: dinnerDish.id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.DINNER,
@@ -608,6 +616,7 @@ export class MenuService {
         await this.addDish(
           {
             date,
+            dishType: DishType.COOKING,
             dishId: snackDish.id,
             type: ShoppingListType.INDIVIDUAL,
             mealId: MealType.SNACKS,

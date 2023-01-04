@@ -1,3 +1,4 @@
+import { DishType } from 'src/constants/dishType';
 import { ShoppingListType } from './../../../../../constants/shoppingListType';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
@@ -21,6 +22,12 @@ export class AddDishDto {
   })
   @IsString()
   type: ShoppingListType;
+
+  @ApiProperty({
+    example: DishType.COOKING,
+  })
+  @IsString()
+  dishType!: DishType;
 
   @ApiProperty({
     example: '30/10/2022',

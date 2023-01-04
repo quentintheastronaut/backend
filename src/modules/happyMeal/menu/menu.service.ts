@@ -380,6 +380,72 @@ export class MenuService {
     }
   }
 
+  public async recommendByRecombee(jwtUser: JwtUser, date: string) {
+    try {
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
+
+      const { data } = await this._recombeeService.recommend({
+        userId: user.id,
+        count: 4,
+      });
+
+      const { recomms } = data;
+
+      await Promise.all([
+        await this.addDish(
+          {
+            date,
+            dishId: recomms[0].id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.BREAKFAST,
+            quantity: 1,
+            note: '',
+          },
+          jwtUser,
+        ),
+        await this.addDish(
+          {
+            date,
+            dishId: recomms[1].id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.LUNCH,
+            quantity: 1,
+            note: '',
+          },
+          jwtUser,
+        ),
+        await this.addDish(
+          {
+            date,
+            dishId: recomms[2].id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.DINNER,
+            quantity: 1,
+            note: '',
+          },
+          jwtUser,
+        ),
+        await this.addDish(
+          {
+            date,
+            dishId: recomms[3].id,
+            type: ShoppingListType.INDIVIDUAL,
+            mealId: MealType.SNACKS,
+            quantity: 1,
+            note: '',
+          },
+          jwtUser,
+        ),
+      ]);
+
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
   public async recommend(jwtUser: JwtUser, date: string) {
     try {
       const { sub } = jwtUser;

@@ -71,7 +71,7 @@ export class MenuController {
   @Post('/recommend')
   async recommend(@Req() req: { user: JwtUser }, @Query('date') date: string) {
     const { user } = req;
-    return this._menuService.recommend(user, date);
+    return this._menuService.recommendByRecombee(user, date);
   }
 
   @ApiOperation({ summary: 'Remove dish into menu' })

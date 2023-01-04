@@ -403,8 +403,6 @@ export class RecombeeService {
       CryptoJS.enc.Hex,
     );
 
-    console.log(`https://${RecombeeConfig.host}${url}&hmac_sign=${sign}`);
-
     const { data } = await firstValueFrom(
       this.http
         .get(`https://${RecombeeConfig.host}${url}&hmac_sign=${sign}`)

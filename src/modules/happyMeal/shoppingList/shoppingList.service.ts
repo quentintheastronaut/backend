@@ -640,7 +640,6 @@ export class ShoppingListService {
         })
         .execute();
 
-      console.log(assignMarketerDto);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -651,7 +650,6 @@ export class ShoppingListService {
   // Get shopping list by User
   async getShoppingListByUser(jwtUser: JwtUser) {
     try {
-      console.log('check');
       const { sub } = jwtUser;
       const user = await this._userService.findByAccountId(sub.toString());
       const shoppingLists = await this.findByUserId(user.id);

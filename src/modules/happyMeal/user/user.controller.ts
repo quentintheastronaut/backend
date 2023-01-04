@@ -1,7 +1,6 @@
 import { AddAllergicDto } from './dto/request/addAllergic.dto';
 import { PageDto, PageOptionsDto } from 'src/dtos';
 import { User } from 'src/entities';
-import { UserDto } from './dto/request/user.dto';
 import { UpdateProfileDto } from './dto/request/updateProfile.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { JwtUser } from '../auth/dto/parsedToken.dto';

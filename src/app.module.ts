@@ -1,3 +1,4 @@
+import { RecombeeModule } from './services/recombee/recombee.module';
 import { NotificationsModule } from './services/notifications/notifications.module';
 import { ShoppingListGateway } from './gateways/shoppingList.gateway';
 import { WeightRecordModule } from './modules/happyMeal/weightRecord/weightRecord.module';
@@ -42,6 +43,7 @@ dotenv.config({
     LocationModule,
     MealModule,
     NotificationsModule,
+    RecombeeModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       entities: entities,

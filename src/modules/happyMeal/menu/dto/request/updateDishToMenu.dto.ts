@@ -25,6 +25,6 @@ export class UpdateDishToMenuDto {
   @ApiProperty({
     example: '',
   })
-  @IsNumber()
+  @IsString()
   note: string;
 }

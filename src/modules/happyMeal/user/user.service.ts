@@ -1,3 +1,4 @@
+import { RecombeeService } from './../../../services/recombee/recombee.service';
 import { AddDislikeDto } from './dto/request/addDislike.dto';
 import { AddFavoriteDto } from './dto/request/addFavorite.dto';
 import { AddAllergicDto } from './dto/request/addAllergic.dto';
@@ -41,6 +42,8 @@ export class UserService {
     @Inject(forwardRef(() => AuthService)) private _authService: AuthService,
     @Inject(forwardRef(() => GroupService)) private _groupService: GroupService,
     @Inject(forwardRef(() => MenuService)) private _menuService: MenuService,
+    @Inject(forwardRef(() => RecombeeService))
+    private _recombeeService: RecombeeService,
   ) {}
 
   convertKilogramsToPounds(kilograms: number): number {
@@ -121,6 +124,9 @@ export class UserService {
   async findByAccountId(accountId: string) {
     try {
       return await AppDataSource.getRepository(User).findOne({
+        relations: {
+          account: true,
+        },
         where: { account: { id: accountId } },
       });
     } catch (error) {
@@ -235,8 +241,14 @@ export class UserService {
         imageUrl,
       });
 
+      const user = await this.findByAccountId(sub.toString());
+
+      await this._recombeeService.sendSetUser(user.id, updateProfileDto);
+      await this.setUserBaseCalories(user);
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
+      console.log(error);
       throw new BadRequestException();
     }
   }
@@ -322,6 +334,15 @@ export class UserService {
           ...rest,
         };
       });
+
+      dishIds.forEach(async (dishId) => {
+        await this._recombeeService.addFavoriteAddition({
+          userId: userId,
+          itemId: dishId,
+          cascadeCreate: true,
+        });
+      });
+
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Favorite)
@@ -347,6 +368,15 @@ export class UserService {
           ...rest,
         };
       });
+
+      dishIds.forEach(async (dishId) => {
+        await this._recombeeService.deleteFavoriteAddition({
+          userId: userId,
+          itemId: dishId,
+          cascadeCreate: true,
+        });
+      });
+
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Dislike)
@@ -402,6 +432,7 @@ export class UserService {
       return await AppDataSource.getRepository(Allergic).find({
         relations: {
           ingredient: true,
+          user: true,
         },
         where: { user: { id: userId } },
       });
@@ -490,6 +521,11 @@ export class UserService {
       const user = await this.find(newUserId.raw.insertId);
       await this.bindAccount(user.id, account);
 
+      await this._recombeeService.sendAddUser(user.id);
+
+      await this._recombeeService.sendSetUser(user.id, updateUserDto);
+      await this.setUserBaseCalories(user);
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -521,10 +557,28 @@ export class UserService {
         imageUrl,
       });
       await this.update(id.toString(), profile);
+
+      await this._recombeeService.sendSetUser(user.id, updateUserDto);
+      await this.setUserBaseCalories(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
       throw new BadRequestException();
+    }
+  }
+
+  public async setUserBaseCalories(user: User) {
+    try {
+      const baseCalories = await this.getBaseByUser(user);
+      await this._recombeeService.setUserBaseCalories({
+        userId: user.id,
+        baseCalories,
+        cascadeCreate: true,
+      });
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -736,6 +790,18 @@ export class UserService {
     return baseCalories;
   }
 
+  public async getBaseByUser(user: User) {
+    const account = await this._authService.findOneById(user.account.id);
+    const age = moment().diff(
+      moment(account.dob, DateFormat.FULL_DATE),
+      'years',
+    );
+    const currentBMR = this.bmr(user.weight, user.height, age, account.sex);
+    const baseCalories = this.dailyCalories(currentBMR, user.activityIntensity);
+
+    return baseCalories;
+  }
+
   public async getOverview(jwtUser: JwtUser, date: string) {
     try {
       const { sub } = jwtUser;
@@ -777,6 +843,63 @@ export class UserService {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
       await this.insertAllergic(user.id, addAllergicDto);
+
+      await this.setUserAllergic(user);
+
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async setUserAllergic(user: User) {
+    try {
+      const results = await this.findAllergicByUserId(user.id);
+      const allergic = results.map((result) => {
+        return result.ingredient.id;
+      });
+      await this._recombeeService.setUserAllergic({
+        userId: user.id,
+        allergic: allergic,
+        cascadeCreate: true,
+      });
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async setUserFavorite(user: User) {
+    try {
+      const results = await this.findFavoriteByUserId(user.id);
+      const favorite = results.map((result) => {
+        return result.dish.id;
+      });
+      await this._recombeeService.setUserFavorite({
+        userId: user.id,
+        favorite: favorite,
+        cascadeCreate: true,
+      });
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
+
+  public async setUserBlacklist(user: User) {
+    try {
+      const results = await this.findDislikeByUserId(user.id);
+      const blacklist = results.map((result) => {
+        return result.dish.id;
+      });
+      await this._recombeeService.setUserBlacklist({
+        userId: user.id,
+        blacklist: blacklist,
+        cascadeCreate: true,
+      });
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -789,6 +912,8 @@ export class UserService {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
       await this.insertFavorite(user.id, addFavoriteDto);
+
+      await this.setUserFavorite(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -801,6 +926,7 @@ export class UserService {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
       await this.insertDislike(user.id, addDislikeDto);
+      await this.setUserBlacklist(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -808,9 +934,12 @@ export class UserService {
     }
   }
 
-  public async removeAllergic(id: string) {
+  public async removeAllergic(id: string, jwtUser: JwtUser) {
     try {
+      const { sub } = jwtUser;
       await this.deleteAllergic(id);
+      const user = await this.findByAccountId(sub.toString());
+      await this.setUserAllergic(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -818,9 +947,12 @@ export class UserService {
     }
   }
 
-  public async removeFavorite(id: string) {
+  public async removeFavorite(id: string, jwtUser: JwtUser) {
     try {
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
       await this.deleteFavorite(id);
+      await this.setUserFavorite(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -828,9 +960,12 @@ export class UserService {
     }
   }
 
-  public async removeDislike(id: string) {
+  public async removeDislike(id: string, jwtUser: JwtUser) {
     try {
+      const { sub } = jwtUser;
+      const user = await this.findByAccountId(sub.toString());
       await this.deleteDislike(id);
+      await this.setUserBlacklist(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);

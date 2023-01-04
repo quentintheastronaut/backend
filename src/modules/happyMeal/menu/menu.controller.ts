@@ -106,15 +106,19 @@ export class MenuController {
     return this._menuService.getMenuByDate(date, user);
   }
 
+  @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Track a dish in the menu' })
   @Post('/track')
-  async track(@Body() trackDto: TrackDto) {
-    return this._menuService.track(trackDto);
+  async track(@Body() trackDto: TrackDto, @Req() req: { user: JwtUser }) {
+    const { user } = req;
+    return this._menuService.track(trackDto, user);
   }
 
+  @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Untrack a dish in the menu' })
   @Post('/untrack')
-  async untrack(@Body() trackDto: TrackDto) {
-    return this._menuService.untrack(trackDto);
+  async untrack(@Body() trackDto: TrackDto, @Req() req: { user: JwtUser }) {
+    const { user } = req;
+    return this._menuService.untrack(trackDto, user);
   }
 }

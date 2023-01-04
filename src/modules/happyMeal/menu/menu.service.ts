@@ -1,3 +1,4 @@
+import { RecombeeService } from './../../../services/recombee/recombee.service';
 import { IndividualMenu } from './../../../entities/IndividualMenu';
 import { GroupMenu } from './../../../entities/GroupMenu';
 import { UserToGroup } from './../../../entities/UserToGroup';
@@ -47,6 +48,8 @@ export class MenuService {
     private _shoppingListService: ShoppingListService,
     @Inject(forwardRef(() => MeasurementService))
     private _measurementService: MeasurementService,
+    @Inject(forwardRef(() => RecombeeService))
+    private _recombeeService: RecombeeService,
   ) {}
 
   // COMMON SERVICE
@@ -606,6 +609,12 @@ export class MenuService {
 
       await this.addIngredientToIndividualList(addDishDto, jwtUser);
 
+      await this._recombeeService.addPlanAddition({
+        userId: user.id,
+        itemId: dish.id,
+        cascadeCreate: true,
+      });
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -618,6 +627,17 @@ export class MenuService {
   ): Promise<PageDto<Menu>> {
     try {
       await this.deleteDishToMenu(removeDishDto.dishToMenuId);
+
+      const dishToMenu = await this.findDishToMenu(removeDishDto.dishToMenuId);
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
+
+      await this._recombeeService.deletePlanAddition({
+        userId: user.id,
+        itemId: dishToMenu.dish.id,
+        cascadeCreate: true,
+      });
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
@@ -743,8 +763,9 @@ export class MenuService {
     }
   }
 
-  public async track(trackDto: TrackDto) {
+  public async track(trackDto: TrackDto, jwtUser: JwtUser) {
     try {
+      const { sub } = jwtUser;
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
         .set({
@@ -754,14 +775,25 @@ export class MenuService {
           dishToMenuId: trackDto.dishToMenuId,
         })
         .execute();
+
+      const dishToMenu = await this.findDishToMenu(trackDto.dishToMenuId);
+      const user = await this._userService.findByAccountId(sub.toString());
+
+      await this._recombeeService.addTrack({
+        userId: user.id,
+        itemId: dishToMenu.dish.id,
+        cascadeCreate: true,
+      });
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
     }
   }
 
-  public async untrack(trackDto: TrackDto) {
+  public async untrack(trackDto: TrackDto, jwtUser: JwtUser) {
     try {
+      const { sub } = jwtUser;
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
         .set({
@@ -771,6 +803,14 @@ export class MenuService {
           dishToMenuId: trackDto.dishToMenuId,
         })
         .execute();
+
+      const dishToMenu = await this.findDishToMenu(trackDto.dishToMenuId);
+      const user = await this._userService.findByAccountId(sub.toString());
+      await this._recombeeService.deleteTrack({
+        userId: user.id,
+        itemId: dishToMenu.dish.id,
+        cascadeCreate: true,
+      });
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();

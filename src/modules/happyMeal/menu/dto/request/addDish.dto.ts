@@ -44,6 +44,6 @@ export class AddDishDto {
   @ApiProperty({
     example: '',
   })
-  @IsNumber()
+  @IsString()
   note: string;
 }

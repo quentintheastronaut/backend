@@ -50,6 +50,6 @@ export class AddGroupDishDto {
   @ApiProperty({
     example: '',
   })
-  @IsNumber()
+  @IsString()
   note: string;
 }

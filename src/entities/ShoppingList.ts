@@ -23,6 +23,11 @@ export class ShoppingList {
   @Column({
     default: '',
   })
+  name: string;
+
+  @Column({
+    default: '',
+  })
   marketTime: string;
 
   @Column({

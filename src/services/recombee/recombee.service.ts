@@ -382,17 +382,6 @@ export class RecombeeService {
     return new PageDto('OK', HttpStatus.OK);
   }
 
-  // async insertAllergicSeries() {}
-
-  // async removeAllergicSeries() {}
-
-  // Dislike
-  // async addDislikeSeries() {}
-
-  // async insertDislikeSeries() {}
-
-  // async removeDislikeSeries() {}
-
   // RECOMMEND SERVICES
   async recommend(recommendationDto: RecommendationDto) {
     const hmacTimestamp = moment().unix();

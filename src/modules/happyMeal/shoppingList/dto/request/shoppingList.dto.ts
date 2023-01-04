@@ -12,6 +12,13 @@ export class ShoppingListDto {
   marketTime?: string;
 
   @ApiProperty({
+    example: 'Shopping List  001',
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({
     example: ShoppingListType.INDIVIDUAL,
   })
   @IsOptional()

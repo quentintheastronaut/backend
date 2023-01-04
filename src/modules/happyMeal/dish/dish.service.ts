@@ -1,3 +1,6 @@
+import { UserService } from './../user/user.service';
+import { JwtUser } from './../auth/dto/parsedToken.dto';
+import { RecombeeService } from './../../../services/recombee/recombee.service';
 import { Ingredient } from 'src/entities/Ingredient';
 import { AddIngredientDto } from './../shoppingList/dto/request/addIngredient.dto';
 import { IngredientService } from './../ingredient/ingredient.service';
@@ -26,6 +29,10 @@ export class DishService {
     private _ingredientService: IngredientService,
     @Inject(forwardRef(() => MeasurementService))
     private _measurementService: MeasurementService,
+    @Inject(forwardRef(() => RecombeeService))
+    private _recombeeService: RecombeeService,
+    @Inject(forwardRef(() => UserService))
+    private _userService: UserService,
   ) {}
 
   // COMMON SERVICES
@@ -225,15 +232,29 @@ export class DishService {
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
   }
 
-  public async getDishDetail(id: string): Promise<PageDto<Dish>> {
+  public async getDishDetail(
+    id: string,
+    jwtUser: JwtUser,
+  ): Promise<PageDto<Dish>> {
     try {
+      const { sub } = jwtUser;
       const dish = await AppDataSource.getRepository(Dish).findOne({
         where: {
           id,
         },
       });
+
+      const user = await this._userService.findByAccountId(sub.toString());
+
+      await this._recombeeService.sendViewDetail({
+        itemId: dish.id,
+        userId: user.id,
+        cascadeCreate: true,
+      });
+
       return new PageDto('OK', HttpStatus.OK, dish);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

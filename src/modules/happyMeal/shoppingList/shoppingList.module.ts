@@ -1,3 +1,4 @@
+import { RecombeeModule } from './../../../services/recombee/recombee.module';
 import { MenuService } from './../menu/menu.service';
 import { JwtService } from '@nestjs/jwt';
 import { ShoppingListService } from './shoppingList.service';
@@ -13,6 +14,7 @@ import { NotificationsService } from 'src/services/notifications/notifications.s
 
 @Module({
   controllers: [ShoppingListController],
+  imports: [RecombeeModule],
   providers: [
     ShoppingListService,
     UserService,

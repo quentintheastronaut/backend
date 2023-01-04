@@ -1,3 +1,4 @@
+import { RecombeeModule } from './../../../services/recombee/recombee.module';
 import { NotificationsService } from 'src/services/notifications/notifications.service';
 import { WeightRecordService } from './../weightRecord/weightRecord.service';
 import { UserService } from './../user/user.service';
@@ -14,6 +15,7 @@ import { MeasurementService } from '../measurement/measurement.service';
 
 @Module({
   controllers: [GroupController],
+  imports: [RecombeeModule],
   providers: [
     GroupService,
     UserService,

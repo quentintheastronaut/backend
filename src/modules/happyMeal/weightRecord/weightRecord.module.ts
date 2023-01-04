@@ -1,3 +1,4 @@
+import { RecombeeModule } from './../../../services/recombee/recombee.module';
 import { WeightRecordService } from './weightRecord.service';
 import { WeightRecordController } from './weightRecord.controller';
 import { Logger, Module } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { NotificationsService } from 'src/services/notifications/notifications.s
 
 @Module({
   controllers: [WeightRecordController],
+  imports: [RecombeeModule],
   providers: [
     WeightRecordService,
     UserService,

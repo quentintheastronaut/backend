@@ -1,3 +1,4 @@
+import { RecombeeModule } from './../../../services/recombee/recombee.module';
 import { GroupService } from './../group/group.service';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { AuthService } from './auth.service';
@@ -20,6 +21,7 @@ import { NotificationsService } from 'src/services/notifications/notifications.s
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '7d' },
     }),
+    RecombeeModule,
   ],
   controllers: [AuthController],
   providers: [

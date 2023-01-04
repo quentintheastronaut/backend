@@ -1,9 +1,8 @@
+import { RecombeeModule } from './../../../services/recombee/recombee.module';
 import { GroupService } from './../group/group.service';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { Logger, Module } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
-import { JwtService } from '@nestjs/jwt';
 import { AuthModule } from '../auth/auth.module';
 import { MenuService } from '../menu/menu.service';
 import { ShoppingListService } from '../shoppingList/shoppingList.service';
@@ -13,7 +12,7 @@ import { MeasurementService } from '../measurement/measurement.service';
 import { NotificationsService } from 'src/services/notifications/notifications.service';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, RecombeeModule],
   controllers: [UserController],
   providers: [
     UserService,

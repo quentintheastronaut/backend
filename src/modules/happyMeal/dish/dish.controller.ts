@@ -1,3 +1,4 @@
+import { JwtUser } from './../auth/dto/parsedToken.dto';
 import { DishDto } from './dto/request/dish.dto';
 import {
   Body,
@@ -8,18 +9,33 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { PageDto, PageOptionsDto } from 'src/dtos';
 import { Dish } from 'src/entities/Dish';
 import { DishService } from './dish.service';
 import { ApiPaginatedResponse } from 'src/decorators/api-paginated-response.decorator';
 import { AddIngredientToDishDto } from './dto/request/addIngredient.dto';
+import { JwtGuard } from '../auth/guard';
 
 @ApiTags('Dish')
+@ApiBearerAuth()
 @Controller('dish')
 export class DishController {
   constructor(private readonly _dishService: DishService) {}
+
+  @ApiOperation({ summary: "Get a dish's detail" })
+  @UseGuards(JwtGuard)
+  @Get(':id')
+  async getDishDetail(
+    @Req() req: { user: JwtUser },
+    @Param('id') id: string,
+  ): Promise<PageDto<Dish>> {
+    const { user } = req;
+    return this._dishService.getDishDetail(id, user);
+  }
 
   @Get('/ingredient/:id')
   @ApiPaginatedResponse(Dish)
@@ -74,12 +90,5 @@ export class DishController {
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Dish[]>> {
     return this._dishService.getAllDishes(pageOptionsDto);
-  }
-
-  @ApiOperation({ summary: "Get a dish's detail" })
-  @Get(':id')
-  @ApiPaginatedResponse(Dish)
-  async getDishDetail(@Param('id') id: string): Promise<PageDto<Dish>> {
-    return this._dishService.getDishDetail(id);
   }
 }

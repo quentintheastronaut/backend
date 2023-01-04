@@ -14,11 +14,6 @@ export class AddTrackDto {
   @IsString()
   itemId: string;
 
-  @ApiProperty({})
-  @IsString()
-  @IsOptional()
-  recommId?: string;
-
   @ApiProperty({
     example: true,
   })

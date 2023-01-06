@@ -384,6 +384,7 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.measurementType',
           'measurement',
         )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId in (:shoppingListIds)', {
           shoppingListIds,
         })
@@ -464,6 +465,7 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.measurementType',
           'measurement',
         )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId = :listId', {
           listId: newIndividualList.shoppingList.id,
         })
@@ -531,6 +533,7 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.measurementType',
           'measurement',
         )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId in (:shoppingListIds)', {
           shoppingListIds,
         })
@@ -578,6 +581,7 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.measurementType',
           'measurement',
         )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId = :listId', {
           listId: groupShoppingList.shoppingList.id,
         })

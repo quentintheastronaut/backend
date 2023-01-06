@@ -54,12 +54,14 @@ export class MenuGateway
 
   @SubscribeMessage('add-dish')
   async handleAddDish(client: Socket, @MessageBody() payload: AddGroupDishDto) {
+    this.logger.log('On event: remove-dish');
     await this._menuService.addGroupDish(payload);
-    const groupShoppingList = await this._menuService.getGroupMenuByDate(
+    const groupMenu = await this._menuService.getGroupMenuByDate(
       this.date,
       this.groupId,
     );
-    this.server.emit('get-group-menu', groupShoppingList);
+    this.server.emit('get-group-menu', groupMenu);
+    this.logger.log('Emit event: get-group-menu');
   }
 
   @SubscribeMessage('remove-dish')
@@ -67,12 +69,14 @@ export class MenuGateway
     client: Socket,
     @MessageBody() payload: RemoveDishDto,
   ) {
+    this.logger.log('On event: remove-dish');
     await this._menuService.removeDish(payload);
-    const groupShoppingList = await this._menuService.getGroupMenuByDate(
+    const groupMenu = await this._menuService.getGroupMenuByDate(
       this.date,
       this.groupId,
     );
-    this.server.emit('get-group-menu', groupShoppingList);
+    this.server.emit('get-group-menu', groupMenu);
+    this.logger.log('Emit event: get-group-menu');
   }
 
   @SubscribeMessage('update-dish')
@@ -80,11 +84,13 @@ export class MenuGateway
     client: Socket,
     @MessageBody() payload: UpdateDishToMenuDto,
   ) {
+    this.logger.log('On event: update-dish');
     await this._menuService.updateMenuDetail(payload);
-    const groupShoppingList = await this._menuService.getGroupMenuByDate(
+    const groupMenu = await this._menuService.getGroupMenuByDate(
       this.date,
       this.groupId,
     );
-    this.server.emit('get-group-menu', groupShoppingList);
+    this.server.emit('get-group-menu', groupMenu);
+    this.logger.log('Emit event: get-group-menu');
   }
 }

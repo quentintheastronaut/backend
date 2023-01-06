@@ -398,6 +398,8 @@ export class GroupService {
         })
         .execute();
 
+      console.log(newMemberAccount);
+
       if (newMemberAccount?.token) {
         await this._notificationsService.subscribeTopic(
           newMemberAccount.token,

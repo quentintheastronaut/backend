@@ -45,16 +45,19 @@ export class ShoppingListController {
     return this._shoppingListService.getShoppingListByGroup(user);
   }
 
-  // done
   @Get('/detail')
   @ApiOperation({ summary: "Get group's detail shopping list by date" })
   async getShoppingListDetail(
-    @Query('groupShoppingListId') groupShoppingListId: string,
+    @Query('date') date: string,
+    @Query('groupId') groupId: string,
   ) {
-    return this._shoppingListService.getShoppingListDetail(groupShoppingListId);
+    const assignMarketerDto: AssignMarketerDto = {
+      date,
+      groupId,
+    };
+    return this._shoppingListService.getShoppingListDetail(assignMarketerDto);
   }
 
-  // done
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: `Assign to be group\'s marketer ` })
   @Post('/assign-marketer')
@@ -66,7 +69,6 @@ export class ShoppingListController {
     return this._shoppingListService.assignMarketer(user, assignMarketerDto);
   }
 
-  // done
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: `Cancel assign to be group\'s marketer ` })
   @Post('/unassign-marketer')
@@ -74,30 +76,26 @@ export class ShoppingListController {
     return this._shoppingListService.unassignMarketer(assignMarketerDto);
   }
 
-  // done
   @Get('/group')
-  @ApiOperation({ summary: "Get group's detail shopping list by id" })
+  @ApiOperation({ summary: "Get group's detail shopping list by date" })
   async getGroupShoppingListByDate(
-    @Query('groupShoppingListId') groupShoppingListId: string,
+    @Query('date') date: string,
+    @Query('groupId') groupId: string,
   ) {
-    return this._shoppingListService.getGroupShoppingListByDate(
-      groupShoppingListId,
-    );
+    return this._shoppingListService.getGroupShoppingListByDate(date, groupId);
   }
 
-  // done
   @UseGuards(JwtGuard)
-  @Get('/:individualShoppingListId')
-  @ApiOperation({ summary: 'Get detail shopping list by id' })
+  @Get('/:date')
+  @ApiOperation({ summary: 'Get detail shopping list by date' })
   async getShoppingListByDate(
-    @Param('individualShoppingListId') individualShoppingListId: string,
+    @Param('date') date: string,
+    @Req() req: { user: JwtUser },
   ) {
-    return this._shoppingListService.getShoppingListByDate(
-      individualShoppingListId,
-    );
+    const { user } = req;
+    return this._shoppingListService.getShoppingListByDate(date, user);
   }
 
-  // done
   @ApiOperation({ summary: "Add group's ingredient into shopping list" })
   @UseGuards(JwtGuard)
   @Post('/group/add-ingredient')
@@ -107,7 +105,6 @@ export class ShoppingListController {
     return this._shoppingListService.addGroupIngredient(addGroupIngredientDto);
   }
 
-  // done
   @ApiOperation({ summary: 'Add ingredient into shopping list' })
   @UseGuards(JwtGuard)
   @Post('/add-ingredient')
@@ -119,7 +116,6 @@ export class ShoppingListController {
     return this._shoppingListService.addIngredient(addIngredientDto, user);
   }
 
-  // done
   @ApiOperation({ summary: 'Update a ingredient in the shopping list' })
   @Patch('/update-ingredient')
   async updateDish(
@@ -131,7 +127,6 @@ export class ShoppingListController {
     );
   }
 
-  // done
   @ApiOperation({ summary: 'Remove dish into menu' })
   @UseGuards(JwtGuard)
   @Post('/remove-ingredient')
@@ -139,21 +134,18 @@ export class ShoppingListController {
     return this._shoppingListService.removeIngredient(removeIngredientDto);
   }
 
-  // done
   @ApiOperation({ summary: 'Check a ingredient in the shopping list' })
   @Post('/check')
   async track(@Body() checkDto: CheckDto) {
     return this._shoppingListService.check(checkDto);
   }
 
-  // done
   @ApiOperation({ summary: 'Check a ingredient in the shopping list' })
   @Post('/uncheck')
   async uncheck(@Body() checkDto: CheckDto) {
     return this._shoppingListService.uncheck(checkDto);
   }
 
-  // done
   @Patch(':id')
   async updateShoppingList(
     @Param('id') id: number,
@@ -162,7 +154,6 @@ export class ShoppingListController {
     return this._shoppingListService.updateShoppingList(id, shoppingListDto);
   }
 
-  // done
   @Post()
   async createShoppingList(
     @Body() shoppingListDto: ShoppingListDto,
@@ -170,7 +161,6 @@ export class ShoppingListController {
     return this._shoppingListService.createShoppingList(shoppingListDto);
   }
 
-  // done
   @Delete(':id')
   async deleteShoppingList(
     @Param('id') id: number,
@@ -178,7 +168,6 @@ export class ShoppingListController {
     return this._shoppingListService.deleteShoppingList(id);
   }
 
-  // done
   @Get()
   @ApiPaginatedResponse(ShoppingList)
   async getAllShoppingLists(

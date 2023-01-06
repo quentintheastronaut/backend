@@ -36,13 +36,6 @@ export class AddDishDto {
   date: string;
 
   @ApiProperty({
-    example: '30/10/2022',
-  })
-  @IsString()
-  @IsOptional()
-  individualShoppingListId?: string;
-
-  @ApiProperty({
     example: 1,
   })
   @IsNumber()

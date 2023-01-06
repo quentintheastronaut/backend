@@ -32,7 +32,7 @@ export class GroupShoppingList {
   @JoinColumn()
   shoppingList: ShoppingList;
 
-  @OneToOne(() => User, {
+  @ManyToOne(() => User, (user) => user.market, {
     onDelete: 'CASCADE',
   })
   @JoinColumn()

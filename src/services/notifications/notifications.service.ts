@@ -89,7 +89,7 @@ export class NotificationsService {
 
   async subscribeTopic(token: string, topic: string) {
     try {
-      await firebase.messaging().subscribeToTopic([token], topic);
+      if (token) await firebase.messaging().subscribeToTopic([token], topic);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

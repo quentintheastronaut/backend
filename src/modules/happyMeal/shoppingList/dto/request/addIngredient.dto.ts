@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class AddIngredientDto {
   @ApiProperty({
@@ -9,11 +9,10 @@ export class AddIngredientDto {
   ingredientId: string;
 
   @ApiProperty({
-    example: '1',
+    example: '30/10/2022',
   })
   @IsString()
-  @IsOptional()
-  individualShoppingListId?: string;
+  date: string;
 
   @ApiProperty({
     example: 1,

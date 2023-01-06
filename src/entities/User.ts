@@ -1,3 +1,4 @@
+import { GroupShoppingList } from 'src/entities/GroupShoppingList';
 import { IndividualShoppingList } from './IndividualShoppingList';
 import { WeightRecord } from './WeightRecord';
 import {
@@ -100,4 +101,11 @@ export class User {
 
   @OneToMany(() => Favorite, (favorite) => favorite.user)
   isDislikedBy: Favorite[];
+
+  // new
+  @OneToMany(
+    () => GroupShoppingList,
+    (groupShoppingList) => groupShoppingList.marketer,
+  )
+  market: GroupShoppingList[];
 }

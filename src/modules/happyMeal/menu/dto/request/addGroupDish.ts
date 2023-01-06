@@ -12,14 +12,6 @@ export class AddGroupDishDto {
 
   @ApiProperty({
     example: '1',
-    default: '',
-  })
-  @IsString()
-  @IsOptional()
-  groupShoppingListId: string;
-
-  @ApiProperty({
-    example: '1',
   })
   @IsString()
   dishId: string;

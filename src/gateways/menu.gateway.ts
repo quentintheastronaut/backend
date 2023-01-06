@@ -54,7 +54,7 @@ export class MenuGateway
 
   @SubscribeMessage('add-dish')
   async handleAddDish(client: Socket, @MessageBody() payload: AddGroupDishDto) {
-    this.logger.log('On event: remove-dish');
+    this.logger.log('On event: add-dish');
     await this._menuService.addGroupDish(payload);
     const groupMenu = await this._menuService.getGroupMenuByDate(
       this.date,

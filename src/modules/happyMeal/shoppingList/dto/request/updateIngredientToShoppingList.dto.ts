@@ -23,6 +23,12 @@ export class UpdateIngredientToShoppingListDto {
   measurementTypeId?: string;
 
   @ApiProperty({
+    example: '4',
+  })
+  @IsString()
+  locationId: string;
+
+  @ApiProperty({
     example: '',
   })
   @IsString()

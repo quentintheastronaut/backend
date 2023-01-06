@@ -923,6 +923,7 @@ export class MenuService {
 
       for (const ingredient of ingredientToList) {
         await this._shoppingListService.addGroupIngredient({
+          locationId: null,
           groupId: group.id,
           ingredientId: ingredient.ingredientId,
           quantity: ingredient.quantity,
@@ -962,6 +963,7 @@ export class MenuService {
       for (const ingredient of ingredientToList) {
         await this._shoppingListService.addIngredient(
           {
+            locationId: null,
             ingredientId: ingredient.ingredientId,
             quantity: ingredient.quantity,
             measurementTypeId: ingredient.measurementTypeId,

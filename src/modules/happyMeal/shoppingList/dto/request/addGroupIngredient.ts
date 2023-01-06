@@ -31,6 +31,12 @@ export class AddGroupIngredientDto {
     example: '4',
   })
   @IsString()
+  locationId: string;
+
+  @ApiProperty({
+    example: '4',
+  })
+  @IsString()
   measurementTypeId: string;
 
   @ApiProperty({

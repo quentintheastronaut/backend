@@ -1,3 +1,4 @@
+import { User } from 'src/entities';
 import { Measurement } from './Measurement';
 import { Ingredient } from './Ingredient';
 import { ShoppingList } from './ShoppingList';
@@ -5,10 +6,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Location } from './Location';
 
 @Entity()
 export class IngredientToShoppingList {
@@ -53,6 +57,16 @@ export class IngredientToShoppingList {
     default: '',
   })
   public note: string;
+
+  @ManyToOne(() => User, (user) => user.market, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  marketer: User;
+
+  @OneToOne(() => Location)
+  @JoinColumn()
+  location: Location;
 
   @CreateDateColumn()
   createdAt: Date;

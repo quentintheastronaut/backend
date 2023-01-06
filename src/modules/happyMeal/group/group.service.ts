@@ -343,6 +343,10 @@ export class GroupService {
           },
         },
       });
+      console.log(user);
+      if (user) {
+        return false;
+      }
       return user && user.role == GroupRole.ADMIN;
     } catch (error) {
       console.log(error);

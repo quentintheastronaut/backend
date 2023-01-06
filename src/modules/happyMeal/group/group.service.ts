@@ -335,12 +335,17 @@ export class GroupService {
     try {
       const user = await AppDataSource.getRepository(UserToGroup).findOne({
         where: {
-          userId,
-          groupId,
+          user: {
+            id: userId,
+          },
+          group: {
+            id: groupId,
+          },
         },
       });
-      return user.role == GroupRole.ADMIN;
+      return user && user.role == GroupRole.ADMIN;
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }

@@ -452,6 +452,9 @@ export class GroupService {
   ): Promise<PageDto<UserToGroup>> {
     const { sub } = jwtUser;
 
+    console.log('sub', sub);
+    console.log('removeMemberDto', removeMemberDto);
+
     if (!(await this.isAdmin(sub.toString(), removeMemberDto.groupId))) {
       throw new UnauthorizedException(
         "You don't have permission to remove new member.",

@@ -343,11 +343,10 @@ export class GroupService {
           },
         },
       });
-      console.log(user);
-      if (user) {
+      if (!user) {
         return false;
       }
-      return user && user.role == GroupRole.ADMIN;
+      return user.role === GroupRole.ADMIN;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -361,6 +360,8 @@ export class GroupService {
     try {
       const { sub } = jwtUser;
       const user = await this._userService.findByAccountId(sub.toString());
+
+      console.log(user);
 
       if (!(await this.isAdmin(user.id, addMemberDto.groupId))) {
         throw new UnauthorizedException(
@@ -397,8 +398,6 @@ export class GroupService {
           role: GroupRole.MEMBER,
         })
         .execute();
-
-      console.log(newMemberAccount);
 
       if (newMemberAccount?.token) {
         await this._notificationsService.subscribeTopic(
@@ -451,9 +450,6 @@ export class GroupService {
     jwtUser: JwtUser,
   ): Promise<PageDto<UserToGroup>> {
     const { sub } = jwtUser;
-
-    console.log('sub', sub);
-    console.log('removeMemberDto', removeMemberDto);
 
     const user = await this._userService.findByAccountId(sub.toString());
 

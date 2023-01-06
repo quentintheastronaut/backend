@@ -64,8 +64,7 @@ export class IngredientToShoppingList {
   @JoinColumn()
   marketer: User;
 
-  @OneToOne(() => Location)
-  @JoinColumn()
+  @ManyToOne(() => Location, (location) => location.ingredientToShoppingList)
   location: Location;
 
   @CreateDateColumn()

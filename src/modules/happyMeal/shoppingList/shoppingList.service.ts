@@ -207,6 +207,9 @@ export class ShoppingListService {
             ...addIngredientDto,
             shoppingList,
             ingredient,
+            location: {
+              id: addIngredientDto.locationId,
+            },
             measurementType: {
               id: addIngredientDto.measurementTypeId,
             },
@@ -237,11 +240,14 @@ export class ShoppingListService {
     addIngredientDto: AddIngredientDto,
   ) {
     try {
-      const { measurementTypeId, quantity } = addIngredientDto;
+      const { measurementTypeId, locationId, quantity } = addIngredientDto;
       await AppDataSource.createQueryBuilder()
         .update(IngredientToShoppingList)
         .set({
           quantity,
+          location: {
+            id: locationId,
+          },
           measurementType: {
             id: measurementTypeId,
           },
@@ -415,7 +421,7 @@ export class ShoppingListService {
       user.id,
     );
 
-    return newIndividualList.id;
+    return newIndividualList.shoppingList.id;
   }
 
   // done
@@ -489,7 +495,7 @@ export class ShoppingListService {
 
     groupShoppingList = await this.findGroupShoppingList(date, group);
 
-    return groupShoppingList.id;
+    return groupShoppingList.shoppingList.id;
   }
 
   public async getGroupShoppingListByRange(

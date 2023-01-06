@@ -1,8 +1,10 @@
+import { IngredientToShoppingList } from 'src/entities/IngredientToShoppingList';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -21,6 +23,12 @@ export class Location {
     default: '',
   })
   name: string;
+
+  @OneToMany(
+    () => IngredientToShoppingList,
+    (ingredientToShoppingList) => ingredientToShoppingList.location,
+  )
+  ingredientToShoppingList: IngredientToShoppingList[];
 
   @CreateDateColumn()
   createdAt: Date;

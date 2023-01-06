@@ -457,6 +457,8 @@ export class GroupService {
 
     const user = await this._userService.findByAccountId(sub.toString());
 
+    console.log(user);
+
     if (!(await this.isAdmin(user.id, removeMemberDto.groupId))) {
       throw new UnauthorizedException(
         "You don't have permission to remove new member.",

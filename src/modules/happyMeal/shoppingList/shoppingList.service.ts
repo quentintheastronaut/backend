@@ -358,7 +358,6 @@ export class ShoppingListService {
       const it = from;
 
       while (it <= to) {
-        console.log(it.format(DateFormat.FULL_DATE));
         const shoppingListId = await this.getShoppingListId(
           it.format(DateFormat.FULL_DATE),
           jwtUser,
@@ -366,8 +365,6 @@ export class ShoppingListService {
         it.add(1, 'days');
         shoppingListIds.push(shoppingListId);
       }
-
-      console.log(shoppingListIds);
 
       const result = await AppDataSource.createQueryBuilder(
         IngredientToShoppingList,
@@ -404,7 +401,7 @@ export class ShoppingListService {
     if (!individualList) {
       // create shopping list if it's doesn't exist
       const newListId = await this.insertShoppingList({
-        type: ShoppingListType.GROUP,
+        type: ShoppingListType.INDIVIDUAL,
         status: ShoppingListStatus.PENDING,
       });
 
@@ -469,6 +466,73 @@ export class ShoppingListService {
         .getMany();
 
       return result;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getGroupShoppingListId(date: string, groupId: string) {
+    const group = await this._groupService.find(groupId);
+    let groupShoppingList = await this.findGroupShoppingList(date, group);
+
+    if (!groupShoppingList) {
+      const newListId = await this.insertShoppingList({
+        type: ShoppingListType.GROUP,
+        status: ShoppingListStatus.PENDING,
+      });
+
+      const newList = await this.findShoppingList(newListId.raw.insertId);
+
+      await this.insertGroup(date, newList, group);
+    }
+
+    groupShoppingList = await this.findGroupShoppingList(date, group);
+
+    return groupShoppingList.id;
+  }
+
+  public async getGroupShoppingListByRange(
+    fromDate: string,
+    toDate: string,
+    groupId: string,
+  ): Promise<PageDto<IngredientToShoppingList[]>> {
+    try {
+      const shoppingListIds = [];
+      const from = moment(fromDate, DateFormat.FULL_DATE);
+      const to = moment(toDate, DateFormat.FULL_DATE);
+
+      const it = from;
+
+      while (it <= to) {
+        const shoppingListId = await this.getGroupShoppingListId(
+          it.format(DateFormat.FULL_DATE),
+          groupId,
+        );
+        it.add(1, 'days');
+        shoppingListIds.push(shoppingListId);
+      }
+
+      const result = await AppDataSource.createQueryBuilder(
+        IngredientToShoppingList,
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.ingredient',
+          'ingredient',
+        )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.measurementType',
+          'measurement',
+        )
+        .where('shoppingListId in (:shoppingListIds)', {
+          shoppingListIds,
+        })
+        .addSelect('SUM(ingredient_to_shopping_list.quantity)', 'quantity')
+        .groupBy('ingredient_to_shopping_list.ingredientId')
+        .getMany();
+
+      return new PageDto('OK', HttpStatus.OK, result);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

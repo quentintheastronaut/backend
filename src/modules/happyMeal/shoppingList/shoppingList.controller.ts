@@ -79,10 +79,15 @@ export class ShoppingListController {
   @Get('/group')
   @ApiOperation({ summary: "Get group's detail shopping list by date" })
   async getGroupShoppingListByDate(
-    @Query('date') date: string,
+    @Query('fromDate') fromDate: string,
+    @Query('toDate') toDate: string,
     @Query('groupId') groupId: string,
   ) {
-    return this._shoppingListService.getGroupShoppingListByDate(date, groupId);
+    return this._shoppingListService.getGroupShoppingListByRange(
+      fromDate,
+      toDate,
+      groupId,
+    );
   }
 
   @UseGuards(JwtGuard)

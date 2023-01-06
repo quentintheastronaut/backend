@@ -30,6 +30,8 @@ import { Ingredient } from 'src/entities/Ingredient';
 import { IngredientService } from '../ingredient/ingredient.service';
 import { GroupService } from '../group/group.service';
 import { ShoppingListType } from 'src/constants';
+import * as moment from 'moment';
+import { DateFormat } from 'src/constants/dateFormat';
 
 @Injectable({})
 export class ShoppingListService {
@@ -343,11 +345,87 @@ export class ShoppingListService {
     return new PageDto('OK', HttpStatus.OK, entities, pageMetaDto);
   }
 
+  public async getShoppingListByRange(
+    fromDate: string,
+    toDate: string,
+    jwtUser: JwtUser,
+  ): Promise<PageDto<IngredientToShoppingList[]>> {
+    try {
+      const shoppingListIds = [];
+      const from = moment(fromDate, DateFormat.FULL_DATE);
+      const to = moment(toDate, DateFormat.FULL_DATE);
+
+      const it = from;
+
+      while (it <= to) {
+        console.log(it.format(DateFormat.FULL_DATE));
+        const shoppingListId = await this.getShoppingListId(
+          it.format(DateFormat.FULL_DATE),
+          jwtUser,
+        );
+        it.add(1, 'days');
+        shoppingListIds.push(shoppingListId);
+      }
+
+      console.log(shoppingListIds);
+
+      const result = await AppDataSource.createQueryBuilder(
+        IngredientToShoppingList,
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.ingredient',
+          'ingredient',
+        )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.measurementType',
+          'measurement',
+        )
+        .where('shoppingListId in (:shoppingListIds)', {
+          shoppingListIds,
+        })
+        .addSelect('SUM(ingredient_to_shopping_list.quantity)', 'quantity')
+        .groupBy('ingredient_to_shopping_list.ingredientId')
+        .getMany();
+
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getShoppingListId(date: string, jwtUser: JwtUser) {
+    const { sub } = jwtUser;
+    const user = await this._userService.findByAccountId(sub.toString());
+
+    const individualList = await this.findIndividualShoppingList(date, user.id);
+
+    if (!individualList) {
+      // create shopping list if it's doesn't exist
+      const newListId = await this.insertShoppingList({
+        type: ShoppingListType.GROUP,
+        status: ShoppingListStatus.PENDING,
+      });
+
+      const newList = await this.findShoppingList(newListId.raw.insertId);
+
+      await this.insertIndividual(date, newList, user);
+    }
+
+    const newIndividualList = await this.findIndividualShoppingList(
+      date,
+      user.id,
+    );
+
+    return newIndividualList.id;
+  }
+
   // done
   public async getShoppingListByDate(
     date: string,
     jwtUser: JwtUser,
-  ): Promise<PageDto<IngredientToShoppingList[]>> {
+  ): Promise<any> {
     const { sub } = jwtUser;
     const user = await this._userService.findByAccountId(sub.toString());
 
@@ -390,7 +468,7 @@ export class ShoppingListService {
         .groupBy('ingredient_to_shopping_list.ingredientId')
         .getMany();
 
-      return new PageDto('OK', HttpStatus.OK, result);
+      return result;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

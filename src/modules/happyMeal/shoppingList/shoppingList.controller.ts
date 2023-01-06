@@ -86,14 +86,19 @@ export class ShoppingListController {
   }
 
   @UseGuards(JwtGuard)
-  @Get('/:date')
+  @Get('/individual')
   @ApiOperation({ summary: 'Get detail shopping list by date' })
   async getShoppingListByDate(
-    @Param('date') date: string,
+    @Query('fromDate') fromDate: string,
+    @Query('toDate') toDate: string,
     @Req() req: { user: JwtUser },
   ) {
     const { user } = req;
-    return this._shoppingListService.getShoppingListByDate(date, user);
+    return this._shoppingListService.getShoppingListByRange(
+      fromDate,
+      toDate,
+      user,
+    );
   }
 
   @ApiOperation({ summary: "Add group's ingredient into shopping list" })

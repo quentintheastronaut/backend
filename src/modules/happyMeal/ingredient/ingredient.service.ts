@@ -93,10 +93,10 @@ export class IngredientService {
       await AppDataSource.createQueryBuilder()
         .update(Incompatible)
         .set({
-          note,
+          note: note,
         })
         .where(
-          '(isIncompatibleToId = :firstIngredientId AND isIncompatibleById = :secondIngredientId) OR (isIncompatibleBy = :firstIngredientId AND isIncompatibleTo = :secondIngredientId )',
+          '(isIncompatibleToId = :firstIngredientId AND isIncompatibleById = :secondIngredientId) OR (isIncompatibleById = :firstIngredientId AND isIncompatibleToId = :secondIngredientId )',
           {
             firstIngredientId,
             secondIngredientId,

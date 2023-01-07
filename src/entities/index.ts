@@ -1,3 +1,5 @@
+import { IngredientCategory } from './IngredientCategory';
+import { FoodCategory } from './FoodCategory';
 import { Incompatible } from './Incompatible';
 import { GroupShoppingList } from './GroupShoppingList';
 import { GroupMenu } from './GroupMenu';
@@ -50,6 +52,8 @@ const entities = [
   Meal,
   Incompatible,
   Dislike,
+  FoodCategory,
+  IngredientCategory,
 ];
 
 export default entities;

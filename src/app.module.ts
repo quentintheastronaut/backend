@@ -1,3 +1,5 @@
+import { IngredientCategoryModule } from './modules/happyMeal/ingredientCategory/ingredientCategory.module';
+import { FoodCategoryModule } from './modules/happyMeal/foodCategory/foodCategory.module';
 import { RecombeeModule } from './services/recombee/recombee.module';
 import { NotificationsModule } from './services/notifications/notifications.module';
 import { ShoppingListGateway } from './gateways/shoppingList.gateway';
@@ -44,6 +46,8 @@ dotenv.config({
     MealModule,
     NotificationsModule,
     RecombeeModule,
+    FoodCategoryModule,
+    IngredientCategoryModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       entities: entities,

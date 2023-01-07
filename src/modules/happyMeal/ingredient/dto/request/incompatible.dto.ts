@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class IncompatibleDto {
@@ -18,5 +18,6 @@ export class IncompatibleDto {
     example: 'Ngộ độc thực phẩm',
   })
   @IsString()
-  note: string;
+  @IsOptional()
+  note?: string;
 }

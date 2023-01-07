@@ -70,7 +70,7 @@ export class IngredientService {
         .delete()
         .from(Incompatible)
         .where(
-          '(isIncompatibleTo = :firstIngredientId AND isIncompatibleBy = :secondIngredientId) OR (isIncompatibleBy = :firstIngredientId AND isIncompatibleTo = :secondIngredientId )',
+          '(isIncompatibleToId = :firstIngredientId AND isIncompatibleById = :secondIngredientId) OR (isIncompatibleById = :firstIngredientId AND isIncompatibleToId = :secondIngredientId )',
           {
             firstIngredientId,
             secondIngredientId,

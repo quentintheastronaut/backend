@@ -847,7 +847,6 @@ export class MenuService {
 
   public async track(trackDto: TrackDto, jwtUser: JwtUser) {
     try {
-      const { sub } = jwtUser;
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
         .set({
@@ -858,14 +857,16 @@ export class MenuService {
         })
         .execute();
 
-      const dishToMenu = await this.findDishToMenu(trackDto.dishToMenuId);
-      const user = await this._userService.findByAccountId(sub.toString());
-
-      await this._recombeeService.addTrack({
-        userId: user.id,
-        itemId: dishToMenu.dish.id,
-        cascadeCreate: true,
-      });
+      if (jwtUser) {
+        const dishToMenu = await this.findDishToMenu(trackDto.dishToMenuId);
+        const { sub } = jwtUser;
+        const user = await this._userService.findByAccountId(sub.toString());
+        await this._recombeeService.addTrack({
+          userId: user.id,
+          itemId: dishToMenu.dish.id,
+          cascadeCreate: true,
+        });
+      }
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -875,7 +876,6 @@ export class MenuService {
 
   public async untrack(trackDto: TrackDto, jwtUser: JwtUser) {
     try {
-      const { sub } = jwtUser;
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
         .set({
@@ -886,13 +886,17 @@ export class MenuService {
         })
         .execute();
 
-      const dishToMenu = await this.findDishToMenu(trackDto.dishToMenuId);
-      const user = await this._userService.findByAccountId(sub.toString());
-      await this._recombeeService.deleteTrack({
-        userId: user.id,
-        itemId: dishToMenu.dish.id,
-        cascadeCreate: true,
-      });
+      if (jwtUser) {
+        const { sub } = jwtUser;
+        const dishToMenu = await this.findDishToMenu(trackDto.dishToMenuId);
+        const user = await this._userService.findByAccountId(sub.toString());
+        await this._recombeeService.deleteTrack({
+          userId: user.id,
+          itemId: dishToMenu.dish.id,
+          cascadeCreate: true,
+        });
+      }
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();

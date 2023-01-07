@@ -23,7 +23,7 @@ import { GroupRole } from 'src/constants/groupRole';
 import { DishToMenu } from 'src/entities/DishToMenu';
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
-import { forwardRef } from '@nestjs/common';
+import { forwardRef, Logger } from '@nestjs/common';
 import { ShoppingListService } from '../shoppingList/shoppingList.service';
 import { MenuService } from '../menu/menu.service';
 import { GroupShoppingList } from 'src/entities/GroupShoppingList';
@@ -42,6 +42,8 @@ export class GroupService {
     @Inject(forwardRef(() => NotificationsService))
     private _notificationsService: NotificationsService,
   ) {}
+
+  private logger: Logger = new Logger('GroupServiceLogger');
 
   // COMMON SERVICE
   public async find(id: string) {
@@ -361,8 +363,6 @@ export class GroupService {
       const { sub } = jwtUser;
       const user = await this._userService.findByAccountId(sub.toString());
 
-      console.log(user);
-
       if (!(await this.isAdmin(user.id, addMemberDto.groupId))) {
         throw new UnauthorizedException(
           "You don't have permission to add new member.",
@@ -400,6 +400,8 @@ export class GroupService {
         .execute();
 
       if (newMemberAccount?.token) {
+        this.logger.log(newMemberAccount?.token);
+
         await this._notificationsService.subscribeTopic(
           newMemberAccount.token,
           parseGroupTopic(addMemberDto.groupId),

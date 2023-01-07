@@ -21,8 +21,27 @@ export class Location {
 
   @Column({
     default: '',
+    nullable: true,
   })
   name: string;
+
+  @Column({
+    default: '',
+    nullable: true,
+  })
+  address: string;
+
+  @Column({
+    default: '',
+    nullable: true,
+  })
+  longitude: string;
+
+  @Column({
+    default: '',
+    nullable: true,
+  })
+  latitude: string;
 
   @OneToMany(
     () => IngredientToShoppingList,

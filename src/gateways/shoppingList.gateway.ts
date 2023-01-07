@@ -1,3 +1,4 @@
+import { CheckDto } from './../modules/happyMeal/shoppingList/dto/request/check.dto';
 import { UpdateIngredientToShoppingListDto } from './../modules/happyMeal/shoppingList/dto/request/updateIngredientToShoppingList.dto';
 import { RemoveIngredientDto } from './../modules/happyMeal/shoppingList/dto/request/removeIngredient.dto';
 import { AddGroupIngredientDto } from './../modules/happyMeal/shoppingList/dto/request/addGroupIngredient';
@@ -27,7 +28,8 @@ export class ShoppingListGateway
   private server: Server;
   private logger: Logger = new Logger('ShoppingListGateway');
 
-  private date: string;
+  private fromDate: string;
+  private toDate: string;
   private groupId: string;
 
   // Socket config
@@ -49,12 +51,18 @@ export class ShoppingListGateway
     client: Socket,
     @MessageBody() payload: any,
   ) {
-    const { date, groupId } = payload;
-    this.date = date;
+    const { fromDate, toDate, groupId } = payload;
+    this.fromDate = fromDate;
+    this.toDate = toDate;
     this.groupId = groupId;
     const groupShoppingList =
-      await this._shoppingListService.getGroupShoppingListByDate(date, groupId);
+      await this._shoppingListService.getGroupShoppingListByRange(
+        fromDate,
+        toDate,
+        groupId,
+      );
     this.server.emit('get-group-shopping-list', groupShoppingList);
+    this.logger.log('Emit event: get-group-shopping-list');
   }
 
   @SubscribeMessage('add-ingredient')
@@ -62,13 +70,16 @@ export class ShoppingListGateway
     client: Socket,
     @MessageBody() payload: AddGroupIngredientDto,
   ) {
+    this.logger.log('On event: add-ingredient');
     await this._shoppingListService.addGroupIngredient(payload);
     const groupShoppingList =
-      await this._shoppingListService.getGroupShoppingListByDate(
-        this.date,
+      await this._shoppingListService.getGroupShoppingListByRange(
+        this.fromDate,
+        this.toDate,
         this.groupId,
       );
     this.server.emit('get-group-shopping-list', groupShoppingList);
+    this.logger.log('Emit event: get-group-shopping-list');
   }
 
   @SubscribeMessage('remove-ingredient')
@@ -76,13 +87,16 @@ export class ShoppingListGateway
     client: Socket,
     @MessageBody() payload: RemoveIngredientDto,
   ) {
+    this.logger.log('On event: remove-ingredient');
     await this._shoppingListService.removeIngredient(payload);
     const groupShoppingList =
-      await this._shoppingListService.getGroupShoppingListByDate(
-        this.date,
+      await this._shoppingListService.getGroupShoppingListByRange(
+        this.fromDate,
+        this.toDate,
         this.groupId,
       );
     this.server.emit('get-group-shopping-list', groupShoppingList);
+    this.logger.log('Emit event: get-group-shopping-list');
   }
 
   @SubscribeMessage('update-ingredient')
@@ -90,12 +104,43 @@ export class ShoppingListGateway
     client: Socket,
     @MessageBody() payload: UpdateIngredientToShoppingListDto,
   ) {
+    this.logger.log('On event: update-ingredient');
     await this._shoppingListService.updateIngredient(payload);
     const groupShoppingList =
-      await this._shoppingListService.getGroupShoppingListByDate(
-        this.date,
+      await this._shoppingListService.getGroupShoppingListByRange(
+        this.fromDate,
+        this.toDate,
         this.groupId,
       );
     this.server.emit('get-group-shopping-list', groupShoppingList);
+    this.logger.log('Emit event: get-group-shopping-list');
+  }
+
+  @SubscribeMessage('check-ingredient')
+  async handleCheck(client: Socket, @MessageBody() payload: CheckDto) {
+    this.logger.log('On event: check-ingredient');
+    await this._shoppingListService.check(payload);
+    const groupShoppingList =
+      await this._shoppingListService.getGroupShoppingListByRange(
+        this.fromDate,
+        this.toDate,
+        this.groupId,
+      );
+    this.server.emit('get-group-shopping-list', groupShoppingList);
+    this.logger.log('Emit event: get-group-shopping-list');
+  }
+
+  @SubscribeMessage('check-ingredient')
+  async handleUncheck(client: Socket, @MessageBody() payload: CheckDto) {
+    this.logger.log('On event: uncheck-ingredient');
+    await this._shoppingListService.uncheck(payload);
+    const groupShoppingList =
+      await this._shoppingListService.getGroupShoppingListByRange(
+        this.fromDate,
+        this.toDate,
+        this.groupId,
+      );
+    this.server.emit('get-group-shopping-list', groupShoppingList);
+    this.logger.log('Emit event: get-group-shopping-list');
   }
 }

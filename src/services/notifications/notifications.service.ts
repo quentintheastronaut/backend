@@ -50,7 +50,8 @@ export class NotificationsService {
       };
 
       Promise.all([await firebase.messaging().sendToDevice(token, payload)]);
-      console.log(`${this.send.name} executed with notification payload`);
+      this.logger.log(`${this.send.name} executed with notification payload`);
+      this.logger.log(payload);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);

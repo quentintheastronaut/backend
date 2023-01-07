@@ -89,7 +89,6 @@ export class IngredientService {
     note: string,
   ) {
     try {
-      console.log(note);
       await AppDataSource.createQueryBuilder()
         .update(Incompatible)
         .set({

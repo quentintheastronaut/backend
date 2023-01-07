@@ -11,12 +11,11 @@ export class LocationService {
   // COMMON SERVICE
   public async insert(locationDto: LocationDto) {
     try {
-      await AppDataSource.createQueryBuilder()
+      return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Location)
         .values([locationDto])
         .execute();
-      return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -49,12 +48,12 @@ export class LocationService {
   }
 
   // CONTROLLER SERVICE
-  public async createLocation(
-    locationDto: LocationDto,
-  ): Promise<PageDto<Location>> {
+  public async createLocation(locationDto: LocationDto): Promise<PageDto<any>> {
     try {
-      await this.insert(locationDto);
-      return new PageDto('OK', HttpStatus.OK);
+      const result = await this.insert(locationDto);
+      return new PageDto('OK', HttpStatus.OK, {
+        insertedId: result.raw.insertId,
+      });
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

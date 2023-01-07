@@ -59,6 +59,7 @@ export class IngredientController {
 
   @Patch('/incompatible/update')
   async updateIncompatibleRelation(@Body() incompatibleDto: IncompatibleDto) {
+    console.log(incompatibleDto);
     return this._ingredientService.updateIncompatibleRelation(incompatibleDto);
   }
 

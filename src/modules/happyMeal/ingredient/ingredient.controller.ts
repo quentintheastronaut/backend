@@ -57,13 +57,18 @@ export class IngredientController {
     return this._ingredientService.addIncompatibleRelation(incompatibleDto);
   }
 
+  @Patch('/incompatible/update')
+  async updateIncompatibleRelation(@Body() incompatibleDto: IncompatibleDto) {
+    return this._ingredientService.updateIncompatibleRelation(incompatibleDto);
+  }
+
   @Post('/incompatible/remove')
   async removeIncompatibleRelation(@Body() incompatibleDto: IncompatibleDto) {
     return this._ingredientService.removeIncompatibleRelation(incompatibleDto);
   }
 
   @Get('/incompatible/:id')
-  async getIncompatibleIngredient(@Param(':id') id: string) {
+  async getIncompatibleIngredient(@Param('id') id: string) {
     return this._ingredientService.getIncompatibleIngredient(id);
   }
 }

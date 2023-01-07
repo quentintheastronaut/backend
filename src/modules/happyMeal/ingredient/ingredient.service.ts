@@ -28,6 +28,7 @@ export class IngredientService {
   public async insertIncompatibleIngredient(
     firstIngredientId: string,
     secondIngredientId: string,
+    note: string,
   ) {
     try {
       await AppDataSource.createQueryBuilder()
@@ -41,6 +42,7 @@ export class IngredientService {
             isIncompatibleBy: {
               id: secondIngredientId,
             },
+            note,
           },
           {
             isIncompatibleTo: {
@@ -49,6 +51,7 @@ export class IngredientService {
             isIncompatibleBy: {
               id: firstIngredientId,
             },
+            note,
           },
         ])
         .execute();
@@ -68,6 +71,31 @@ export class IngredientService {
         .from(Incompatible)
         .where(
           '(isIncompatibleTo = :firstIngredientId AND isIncompatibleBy = :secondIngredientId) OR (isIncompatibleBy = :firstIngredientId AND isIncompatibleTo = :secondIngredientId )',
+          {
+            firstIngredientId,
+            secondIngredientId,
+          },
+        )
+        .execute();
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('Ingredient not found');
+    }
+  }
+
+  public async updateIncompatibleIngredient(
+    firstIngredientId: string,
+    secondIngredientId: string,
+    note: string,
+  ) {
+    try {
+      await AppDataSource.createQueryBuilder()
+        .update(Incompatible)
+        .set({
+          note,
+        })
+        .where(
+          '(isIncompatibleToId = :firstIngredientId AND isIncompatibleById = :secondIngredientId) OR (isIncompatibleBy = :firstIngredientId AND isIncompatibleTo = :secondIngredientId )',
           {
             firstIngredientId,
             secondIngredientId,
@@ -200,6 +228,20 @@ export class IngredientService {
       this.insertIncompatibleIngredient(
         incompatibleDto.firstIngredient,
         incompatibleDto.secondIngredient,
+        incompatibleDto.note,
+      );
+      return new PageDto('OK', HttpStatus.OK);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async updateIncompatibleRelation(incompatibleDto: IncompatibleDto) {
+    try {
+      this.updateIncompatibleIngredient(
+        incompatibleDto.firstIngredient,
+        incompatibleDto.secondIngredient,
+        incompatibleDto.note,
       );
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {

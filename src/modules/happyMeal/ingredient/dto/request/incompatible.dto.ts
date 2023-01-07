@@ -13,4 +13,10 @@ export class IncompatibleDto {
   })
   @IsString()
   secondIngredient: string;
+
+  @ApiProperty({
+    example: 'Ngộ độc thực phẩm',
+  })
+  @IsString()
+  note: string;
 }

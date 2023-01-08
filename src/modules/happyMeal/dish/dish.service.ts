@@ -235,7 +235,7 @@ export class DishService {
       .select('dish')
       .from(Dish, 'dish')
       .leftJoinAndSelect('dish.foodCategory', 'foodCategory')
-      .where('dish.name like %:name% OR dish.foodCategory.name like %:name%', {
+      .where('dish.name like :name OR foodCategory.name like :name', {
         name: `%${pageOptionsDto.search}%`,
       })
       .orderBy('dish.createdAt', pageOptionsDto.order)
@@ -257,6 +257,9 @@ export class DishService {
     try {
       const { sub } = jwtUser;
       const dish = await AppDataSource.getRepository(Dish).findOne({
+        relations: {
+          foodCategory: true,
+        },
         where: {
           id,
         },

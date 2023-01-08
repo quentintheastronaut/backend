@@ -41,6 +41,16 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: `Get user\'s health overview` })
+  @Get('/overview/:userId')
+  async getOverviewByUser(
+    @Param('userId') userId: string,
+    @Query('date') date: string,
+  ): Promise<PageDto<any>> {
+    return this.userService.getOverviewByUser(userId, date);
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: `Get user\'s health overview` })
   @Get('/overview')
   async getOverview(
     @Req() req: { user: JwtUser },
@@ -60,11 +70,25 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
+  @Get('/profile/:userId')
+  @ApiOperation({ summary: "Get user's profile" })
+  async getProfileByUser(@Param('userId') userId: string) {
+    return this.userService.getProfileByUser(userId);
+  }
+
+  @UseGuards(JwtGuard)
   @Get('/profile')
   @ApiOperation({ summary: "Get user's profile" })
   async getProfile(@Req() req: { user: JwtUser }) {
     const { user } = req;
     return this.userService.getProfile(user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('/bmi/:userId')
+  @ApiOperation({ summary: "Get user's Body Mass Index" })
+  async getDailyCaloriesByUser(@Param('userId') userId: string) {
+    return this.userService.getBodyMassIndexByUser(userId);
   }
 
   @UseGuards(JwtGuard)

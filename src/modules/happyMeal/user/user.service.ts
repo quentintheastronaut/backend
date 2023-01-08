@@ -270,6 +270,24 @@ export class UserService {
     }
   }
 
+  async getProfileByUser(userId: string) {
+    try {
+      const user = await this.find(userId);
+      const group = await this._groupService.findByUser(user);
+
+      const profile = await AppDataSource.createQueryBuilder(User, 'user')
+        .leftJoinAndSelect('user.account', 'account')
+        .where('accountId = :accountId', { accountId: user.account.id })
+        .getOneOrFail();
+      return new PageDto('OK', HttpStatus.OK, {
+        ...profile,
+        group: group,
+      });
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
+
   async updateProfile(jwtUser: JwtUser, updateProfileDto: UpdateProfileDto) {
     try {
       const { sub } = jwtUser;
@@ -293,6 +311,23 @@ export class UserService {
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
+      throw new BadRequestException();
+    }
+  }
+
+  async getBodyMassIndexByUser(userId: string) {
+    try {
+      const user = await this.find(userId);
+
+      const currentBMI = this.bmi(user.weight, user.height);
+
+      const result = {
+        currentBMI,
+        type: this.categorizeBMI(currentBMI),
+      };
+
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
       throw new BadRequestException();
     }
   }
@@ -877,6 +912,49 @@ export class UserService {
         moment(account.dob, DateFormat.FULL_DATE),
         'years',
       );
+      const currentBMR = this.bmr(user.weight, user.height, age, account.sex);
+
+      const currentCalories = await this.getCurrentCalories(jwtUser, date);
+      const totalCalories = await this.getTotalCalories(jwtUser, date);
+      const baseCalories = this.dailyCalories(
+        currentBMR,
+        user.activityIntensity,
+      );
+      const protein = await this.getTotalProteinByDate(jwtUser, date);
+      const fat = await this.getTotalFatByDate(jwtUser, date);
+      const carb = await this.getTotalCarbByDate(jwtUser, date);
+
+      const result = {
+        baseCalories: Math.floor(baseCalories),
+        currentCalories: Math.floor(currentCalories),
+        totalCalories: Math.floor(totalCalories),
+        protein: Math.floor(protein),
+        fat: Math.floor(fat),
+        carb: Math.floor(carb),
+      };
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getOverviewByUser(userId: string, date: string) {
+    try {
+      const user = await this.findByAccountId(userId);
+      const account = await this._authService.findOneById(user.account.id);
+      const age = moment().diff(
+        moment(account.dob, DateFormat.FULL_DATE),
+        'years',
+      );
+
+      const jwtUser: JwtUser = {
+        sub: parseInt(account.id, 10),
+        email: '',
+        iat: 0,
+        exp: 0,
+      };
+
       const currentBMR = this.bmr(user.weight, user.height, age, account.sex);
 
       const currentCalories = await this.getCurrentCalories(jwtUser, date);

@@ -107,7 +107,6 @@ export class RecombeeService {
         this.http
           .post(`https://${RecombeeConfig.host}${url}&hmac_sign=${sign}`, {
             ...updateUserDto,
-            cascadeCreate: true,
           })
           .pipe(
             catchError((error) => {

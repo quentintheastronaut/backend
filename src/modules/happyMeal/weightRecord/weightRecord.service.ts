@@ -59,6 +59,9 @@ export class WeightRecordService {
     getWeightRecordsDto: GetWeightRecordsDto,
   ) {
     try {
+      const { sub } = jwtUser;
+      const user = await this._userService.findByAccountId(sub.toString());
+
       const { startDate, endDate } = getWeightRecordsDto;
       const result = await AppDataSource.createQueryBuilder(
         WeightRecord,
@@ -75,7 +78,39 @@ export class WeightRecordService {
               .clone()
               .endOf('day')
               .toISOString(),
-            userId: jwtUser.sub.toString(),
+            userId: user.id,
+          },
+        )
+        .getMany();
+
+      return new PageDto('OK', HttpStatus.OK, result);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  public async getWeightRecordsByUser(
+    userId: string,
+    getWeightRecordsDto: GetWeightRecordsDto,
+  ) {
+    try {
+      const { startDate, endDate } = getWeightRecordsDto;
+      const result = await AppDataSource.createQueryBuilder(
+        WeightRecord,
+        'weight_record',
+      )
+        .where(
+          'userId = :userId AND createdAt >= :startDate AND createdAt <= :endDate',
+          {
+            startDate: moment(startDate, DateFormat.FULL_DATE)
+              .clone()
+              .startOf('day')
+              .toISOString(),
+            endDate: moment(endDate, DateFormat.FULL_DATE)
+              .clone()
+              .endOf('day')
+              .toISOString(),
+            userId: userId,
           },
         )
         .getMany();

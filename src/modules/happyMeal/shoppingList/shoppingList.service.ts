@@ -1029,13 +1029,16 @@ export class ShoppingListService {
     }
 
     try {
-      const { measurementTypeId, ...payload } =
+      const { measurementTypeId, locationId, ...payload } =
         updateIngredientToShoppingListDto;
       await AppDataSource.createQueryBuilder()
         .update(IngredientToShoppingList)
         .set({
           measurementType: {
             id: measurementTypeId,
+          },
+          location: {
+            id: locationId,
           },
           ...payload,
         })

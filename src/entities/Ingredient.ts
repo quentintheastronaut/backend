@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -16,6 +17,7 @@ import { Allergic } from './Allergic';
 import { Favorite } from './Favorite';
 import { User } from './User';
 import { Account } from './Account';
+import { IngredientCategory } from './IngredientCategory';
 
 // REFACTOR
 @Entity()
@@ -87,6 +89,12 @@ export class Ingredient {
     },
   )
   public ingredientsToDish!: IngredientToDish[];
+
+  @ManyToOne(
+    () => IngredientCategory,
+    (ingredientCategory) => ingredientCategory.ingredients,
+  )
+  ingredientCategory: IngredientCategory;
 
   // new
   @OneToMany(() => Allergic, (allergic) => allergic.ingredient)

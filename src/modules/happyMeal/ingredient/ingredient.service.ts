@@ -17,6 +17,9 @@ export class IngredientService {
   public async findOne(id: string) {
     try {
       return await AppDataSource.getRepository(Ingredient).findOne({
+        relations: {
+          ingredientCategory: true,
+        },
         where: { id },
       });
     } catch (error) {
@@ -130,10 +133,18 @@ export class IngredientService {
     ingredientDto: IngredientDto,
   ): Promise<PageDto<Ingredient>> {
     try {
+      const { ingredientCategoryId, ...rest } = ingredientDto;
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(Ingredient)
-        .values([ingredientDto])
+        .values([
+          {
+            ...rest,
+            ingredientCategory: {
+              id: ingredientCategoryId,
+            },
+          },
+        ])
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -156,9 +167,15 @@ export class IngredientService {
     }
 
     try {
+      const { ingredientCategoryId, ...rest } = ingredientDto;
       await AppDataSource.createQueryBuilder()
         .update(Ingredient)
-        .set(ingredientDto)
+        .set({
+          ...rest,
+          ingredientCategory: {
+            id: ingredientCategoryId,
+          },
+        })
         .where('id = :id', { id })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
@@ -198,6 +215,7 @@ export class IngredientService {
     queryBuilder
       .select('ingredient')
       .from(Ingredient, 'ingredient')
+      .leftJoinAndSelect('ingredient.ingredientCategory', 'ingredientCategory')
       .where('ingredient.name like :name', {
         name: `%${pageOptionsDto.search}%`,
       })

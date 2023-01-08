@@ -49,6 +49,13 @@ export class IngredientDto {
   imageUrl: string;
 
   @ApiProperty({
+    example: '',
+  })
+  @IsOptional()
+  @IsString()
+  ingredientCategoryId: string;
+
+  @ApiProperty({
     example: 0,
     default: 0,
   })

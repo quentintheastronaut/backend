@@ -1,8 +1,10 @@
+import { Ingredient } from './Ingredient';
 import { IsString } from 'class-validator';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -17,6 +19,9 @@ export class IngredientCategory {
   @IsString()
   @Column()
   name: string;
+
+  @OneToMany(() => Ingredient, (ingredient) => ingredient.ingredientCategory)
+  ingredients: Ingredient[];
 
   @CreateDateColumn()
   createdAt: Date;

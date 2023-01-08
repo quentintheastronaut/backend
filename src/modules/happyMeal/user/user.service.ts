@@ -121,6 +121,50 @@ export class UserService {
     }
   }
 
+  async findOneDislike(userId: string, dishId: string) {
+    try {
+      return await AppDataSource.getRepository(Dislike).findOne({
+        relations: {
+          user: true,
+          dish: true,
+        },
+        where: {
+          user: {
+            id: userId,
+          },
+          dish: {
+            id: dishId,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
+  async findOneFavorite(userId: string, dishId: string) {
+    try {
+      return await AppDataSource.getRepository(Favorite).findOne({
+        relations: {
+          user: true,
+          dish: true,
+        },
+        where: {
+          user: {
+            id: userId,
+          },
+          dish: {
+            id: dishId,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException('User not found');
+    }
+  }
+
   async findByAccountId(accountId: string) {
     try {
       return await AppDataSource.getRepository(User).findOne({
@@ -323,7 +367,22 @@ export class UserService {
   public async insertFavorite(userId: string, addFavoriteDto: AddFavoriteDto) {
     try {
       const { dishIds, ...rest } = addFavoriteDto;
-      const values = dishIds.map((dishId) => {
+
+      const isFavoritesPromise = dishIds.map(async (dishId) => {
+        const value = await this.findOneFavorite(userId, dishId);
+        return {
+          key: dishId,
+          value,
+        };
+      });
+
+      const isFavorites = await Promise.all(isFavoritesPromise);
+
+      const filtered = isFavorites
+        .filter((item) => item.value === null)
+        .map((item) => item.key);
+
+      const values = filtered.map((dishId) => {
         return {
           user: {
             id: userId,
@@ -335,7 +394,7 @@ export class UserService {
         };
       });
 
-      dishIds.forEach(async (dishId) => {
+      filtered.forEach(async (dishId) => {
         await this._recombeeService.addFavoriteAddition({
           userId: userId,
           itemId: dishId,
@@ -357,7 +416,22 @@ export class UserService {
   public async insertDislike(userId: string, addDislikeDto: AddDislikeDto) {
     try {
       const { dishIds, ...rest } = addDislikeDto;
-      const values = dishIds.map((dishId) => {
+
+      const isDislikesPromise = dishIds.map(async (dishId) => {
+        const value = await this.findOneDislike(userId, dishId);
+        return {
+          key: dishId,
+          value,
+        };
+      });
+
+      const isDislikes = await Promise.all(isDislikesPromise);
+
+      const filtered = isDislikes
+        .filter((item) => item.value === null)
+        .map((item) => item.key);
+
+      const values = filtered.map((dishId) => {
         return {
           user: {
             id: userId,
@@ -903,6 +977,16 @@ export class UserService {
     try {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
+
+      const { dishIds } = addFavoriteDto;
+      dishIds.forEach(async (dishId) => {
+        const isDisliked = await this.findOneDislike(user.id, dishId);
+
+        if (isDisliked) {
+          await this.removeDislike(dishId, jwtUser);
+        }
+      });
+
       await this.insertFavorite(user.id, addFavoriteDto);
 
       await this.setUserFavorite(user);
@@ -917,6 +1001,16 @@ export class UserService {
     try {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
+
+      const { dishIds } = addDislikeDto;
+      dishIds.forEach(async (dishId) => {
+        const isFavorite = await this.findOneFavorite(user.id, dishId);
+
+        if (isFavorite) {
+          await this.removeFavorite(dishId, jwtUser);
+        }
+      });
+
       await this.insertDislike(user.id, addDislikeDto);
       await this.setUserBlacklist(user);
       return new PageDto('OK', HttpStatus.OK);

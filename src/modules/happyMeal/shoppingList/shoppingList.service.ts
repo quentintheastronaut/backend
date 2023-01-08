@@ -355,7 +355,7 @@ export class ShoppingListService {
     fromDate: string,
     toDate: string,
     jwtUser: JwtUser,
-  ): Promise<PageDto<IngredientToShoppingList[]>> {
+  ): Promise<PageDto<any>> {
     try {
       const shoppingListIds = [];
       const from = moment(fromDate, DateFormat.FULL_DATE);
@@ -383,8 +383,12 @@ export class ShoppingListService {
         .groupBy('ingredient_to_shopping_list.locationId')
         .getMany();
 
-      const locationId = locations.map((location) => {
-        return location.location.id;
+      const filteredLocations = locations.filter(
+        (location) => location.location,
+      );
+
+      const locationId = filteredLocations.map((location) => {
+        return location.location && location.location.id;
       });
 
       const ingredientCategory = await AppDataSource.createQueryBuilder(
@@ -411,9 +415,19 @@ export class ShoppingListService {
         .groupBy('ingredient.ingredientCategory')
         .getMany();
 
-      const ingredientCategoryId = ingredientCategory.map((location) => {
-        return location.ingredient.ingredientCategory.id;
-      });
+      const filteredIngredientCategory = ingredientCategory.filter(
+        (ingredientToShoppingList) =>
+          ingredientToShoppingList.ingredient.ingredientCategory,
+      );
+
+      const ingredientCategoryId = filteredIngredientCategory.map(
+        (ingredientToShoppingList) => {
+          return (
+            ingredientToShoppingList.ingredient.ingredientCategory &&
+            ingredientToShoppingList.ingredient.ingredientCategory.id
+          );
+        },
+      );
 
       const result = await AppDataSource.createQueryBuilder(
         IngredientToShoppingList,
@@ -441,27 +455,72 @@ export class ShoppingListService {
 
       const finalResult = [];
 
+      const locatedIngredients = result.filter((item) => {
+        return item.location !== null;
+      });
       for (let i = 0; i < locationId.length; i++) {
         const ingredientCategories = [];
+        const uncategorizedIngredients = locatedIngredients.filter((item) => {
+          return (
+            item.location?.id === locationId[i] &&
+            item.ingredient.ingredientCategory === null
+          );
+        });
         for (let j = 0; j < ingredientCategoryId.length; j++) {
-          const ingredients = result.filter((item) => {
+          const ingredients = locatedIngredients.filter((item) => {
             return (
-              item.location.id === locationId[i] &&
-              item.ingredient.ingredientCategory.id === ingredientCategoryId[j]
+              item.location?.id === locationId[i] &&
+              item.ingredient.ingredientCategory?.id === ingredientCategoryId[j]
             );
           });
           const item = {
-            ...ingredientCategory[j].ingredient.ingredientCategory,
+            ...filteredIngredientCategory[j].ingredient.ingredientCategory,
             ingredients: ingredients,
           };
           ingredientCategories.push(item);
         }
+        ingredientCategories.push({
+          name: 'The Others',
+          ingredients: uncategorizedIngredients,
+        });
+
         const locationItem = {
-          ...locations[i].location,
+          ...filteredLocations[i].location,
           ingredientCategories: ingredientCategories,
         };
         finalResult.push(locationItem);
       }
+
+      // the others
+      const unlocatedIngredients = result.filter((item) => {
+        return item.location === null;
+      });
+      const ingredientCategories = [];
+      const uncategorizedIngredients = unlocatedIngredients.filter((item) => {
+        return item.ingredient.ingredientCategory === null;
+      });
+      for (let j = 0; j < ingredientCategoryId.length; j++) {
+        const ingredients = unlocatedIngredients.filter((item) => {
+          return (
+            item.ingredient.ingredientCategory?.id === ingredientCategoryId[j]
+          );
+        });
+        const item = {
+          ...filteredIngredientCategory[j].ingredient.ingredientCategory,
+          ingredients: ingredients,
+        };
+        ingredientCategories.push(item);
+      }
+
+      ingredientCategories.push({
+        name: 'The Others',
+        ingredients: uncategorizedIngredients,
+      });
+
+      finalResult.push({
+        name: 'The Others',
+        ingredientCategories: ingredientCategories,
+      });
 
       return new PageDto('OK', HttpStatus.OK, finalResult);
     } catch (error) {
@@ -579,7 +638,7 @@ export class ShoppingListService {
     fromDate: string,
     toDate: string,
     groupId: string,
-  ): Promise<PageDto<IngredientToShoppingList[]>> {
+  ): Promise<PageDto<any>> {
     try {
       const shoppingListIds = [];
       const from = moment(fromDate, DateFormat.FULL_DATE);
@@ -607,8 +666,12 @@ export class ShoppingListService {
         .groupBy('ingredient_to_shopping_list.locationId')
         .getMany();
 
-      const locationId = locations.map((location) => {
-        return location.location.id;
+      const filteredLocations = locations.filter(
+        (location) => location.location,
+      );
+
+      const locationId = filteredLocations.map((location) => {
+        return location.location && location.location.id;
       });
 
       const ingredientCategory = await AppDataSource.createQueryBuilder(
@@ -635,9 +698,19 @@ export class ShoppingListService {
         .groupBy('ingredient.ingredientCategory')
         .getMany();
 
-      const ingredientCategoryId = ingredientCategory.map((location) => {
-        return location.ingredient.ingredientCategory.id;
-      });
+      const filteredIngredientCategory = ingredientCategory.filter(
+        (ingredientToShoppingList) =>
+          ingredientToShoppingList.ingredient.ingredientCategory,
+      );
+
+      const ingredientCategoryId = filteredIngredientCategory.map(
+        (ingredientToShoppingList) => {
+          return (
+            ingredientToShoppingList.ingredient.ingredientCategory &&
+            ingredientToShoppingList.ingredient.ingredientCategory.id
+          );
+        },
+      );
 
       const result = await AppDataSource.createQueryBuilder(
         IngredientToShoppingList,
@@ -665,27 +738,72 @@ export class ShoppingListService {
 
       const finalResult = [];
 
+      const locatedIngredients = result.filter((item) => {
+        return item.location !== null;
+      });
       for (let i = 0; i < locationId.length; i++) {
         const ingredientCategories = [];
+        const uncategorizedIngredients = locatedIngredients.filter((item) => {
+          return (
+            item.location?.id === locationId[i] &&
+            item.ingredient.ingredientCategory === null
+          );
+        });
         for (let j = 0; j < ingredientCategoryId.length; j++) {
-          const ingredients = result.filter((item) => {
+          const ingredients = locatedIngredients.filter((item) => {
             return (
-              item.location.id === locationId[i] &&
-              item.ingredient.ingredientCategory.id === ingredientCategoryId[j]
+              item.location?.id === locationId[i] &&
+              item.ingredient.ingredientCategory?.id === ingredientCategoryId[j]
             );
           });
           const item = {
-            ...ingredientCategory[j].ingredient.ingredientCategory,
+            ...filteredIngredientCategory[j].ingredient.ingredientCategory,
             ingredients: ingredients,
           };
           ingredientCategories.push(item);
         }
+        ingredientCategories.push({
+          name: 'The Others',
+          ingredients: uncategorizedIngredients,
+        });
+
         const locationItem = {
-          ...locations[i].location,
+          ...filteredLocations[i].location,
           ingredientCategories: ingredientCategories,
         };
         finalResult.push(locationItem);
       }
+
+      // the others
+      const unlocatedIngredients = result.filter((item) => {
+        return item.location === null;
+      });
+      const ingredientCategories = [];
+      const uncategorizedIngredients = unlocatedIngredients.filter((item) => {
+        return item.ingredient.ingredientCategory === null;
+      });
+      for (let j = 0; j < ingredientCategoryId.length; j++) {
+        const ingredients = unlocatedIngredients.filter((item) => {
+          return (
+            item.ingredient.ingredientCategory?.id === ingredientCategoryId[j]
+          );
+        });
+        const item = {
+          ...filteredIngredientCategory[j].ingredient.ingredientCategory,
+          ingredients: ingredients,
+        };
+        ingredientCategories.push(item);
+      }
+
+      ingredientCategories.push({
+        name: 'The Others',
+        ingredients: uncategorizedIngredients,
+      });
+
+      finalResult.push({
+        name: 'The Others',
+        ingredientCategories: ingredientCategories,
+      });
 
       return new PageDto('OK', HttpStatus.OK, finalResult);
     } catch (error) {

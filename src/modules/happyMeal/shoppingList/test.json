@@ -1,0 +1,456 @@
+{
+  "data": [
+    {
+      "id": 2,
+      "name": "Bách hoá xanh Tân Hương",
+      "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+      "longitude": "10.789752960732981",
+      "latitude": " 106.61800314968305",
+      "createdAt": "2023-01-07T03:11:19.510Z",
+      "updatedAt": "2023-01-07T03:11:19.510Z",
+      "ingredientCategories": [
+        {
+          "id": 2,
+          "name": "Gia vị",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 9,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:43:26.166Z",
+              "ingredient": {
+                "id": 811,
+                "name": "Chuối",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.651Z",
+                "updatedAt": "2023-01-08T04:03:50.000Z",
+                "ingredientCategory": {
+                  "id": 2,
+                  "name": "Gia vị",
+                  "createdAt": "2023-01-08T04:01:41.519Z",
+                  "updatedAt": "2023-01-08T04:01:41.519Z"
+                }
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": {
+                "id": 2,
+                "name": "Bách hoá xanh Tân Hương",
+                "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+                "longitude": "10.789752960732981",
+                "latitude": " 106.61800314968305",
+                "createdAt": "2023-01-07T03:11:19.510Z",
+                "updatedAt": "2023-01-07T03:11:19.510Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Thịt đông lạnh",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": []
+        },
+        {
+          "id": 4,
+          "name": "Đồ khô",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": []
+        },
+        {
+          "name": "The Others",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 15,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:48:18.059Z",
+              "ingredient": {
+                "id": 817,
+                "name": "Olive oil",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.660Z",
+                "updatedAt": "2023-01-08T08:19:32.539Z",
+                "ingredientCategory": null
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": {
+                "id": 2,
+                "name": "Bách hoá xanh Tân Hương",
+                "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+                "longitude": "10.789752960732981",
+                "latitude": " 106.61800314968305",
+                "createdAt": "2023-01-07T03:11:19.510Z",
+                "updatedAt": "2023-01-07T03:11:19.510Z"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Bách hoá xanh Tân Hương 2",
+      "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+      "longitude": "10.789752960732981",
+      "latitude": "106.61800314968305",
+      "createdAt": "2023-01-07T11:06:31.094Z",
+      "updatedAt": "2023-01-07T11:06:31.094Z",
+      "ingredientCategories": [
+        {
+          "id": 2,
+          "name": "Gia vị",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 10,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:43:26.166Z",
+              "ingredient": {
+                "id": 812,
+                "name": "Butter 82.5%",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.654Z",
+                "updatedAt": "2023-01-08T05:27:10.190Z",
+                "ingredientCategory": {
+                  "id": 2,
+                  "name": "Gia vị",
+                  "createdAt": "2023-01-08T04:01:41.519Z",
+                  "updatedAt": "2023-01-08T04:01:41.519Z"
+                }
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": {
+                "id": 3,
+                "name": "Bách hoá xanh Tân Hương 2",
+                "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+                "longitude": "10.789752960732981",
+                "latitude": "106.61800314968305",
+                "createdAt": "2023-01-07T11:06:31.094Z",
+                "updatedAt": "2023-01-07T11:06:31.094Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Thịt đông lạnh",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 13,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:48:18.060Z",
+              "ingredient": {
+                "id": 815,
+                "name": "Chicken breast",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.657Z",
+                "updatedAt": "2023-01-08T05:27:10.189Z",
+                "ingredientCategory": {
+                  "id": 3,
+                  "name": "Thịt đông lạnh",
+                  "createdAt": "2023-01-08T04:01:41.519Z",
+                  "updatedAt": "2023-01-08T04:01:41.519Z"
+                }
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": {
+                "id": 3,
+                "name": "Bách hoá xanh Tân Hương 2",
+                "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+                "longitude": "10.789752960732981",
+                "latitude": "106.61800314968305",
+                "createdAt": "2023-01-07T11:06:31.094Z",
+                "updatedAt": "2023-01-07T11:06:31.094Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Đồ khô",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": []
+        },
+        {
+          "name": "The Others",
+          "ingredients": []
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Bách hoá xanh Tân Hương 3",
+      "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+      "longitude": "10.789752960732981",
+      "latitude": "106.61800314968305",
+      "createdAt": "2023-01-07T11:07:06.118Z",
+      "updatedAt": "2023-01-08T09:14:26.435Z",
+      "ingredientCategories": [
+        {
+          "id": 2,
+          "name": "Gia vị",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": []
+        },
+        {
+          "id": 3,
+          "name": "Thịt đông lạnh",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 14,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:48:24.538Z",
+              "ingredient": {
+                "id": 816,
+                "name": "Broccoli",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.658Z",
+                "updatedAt": "2023-01-08T05:27:10.189Z",
+                "ingredientCategory": {
+                  "id": 3,
+                  "name": "Thịt đông lạnh",
+                  "createdAt": "2023-01-08T04:01:41.519Z",
+                  "updatedAt": "2023-01-08T04:01:41.519Z"
+                }
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": {
+                "id": 4,
+                "name": "Bách hoá xanh Tân Hương 3",
+                "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+                "longitude": "10.789752960732981",
+                "latitude": "106.61800314968305",
+                "createdAt": "2023-01-07T11:07:06.118Z",
+                "updatedAt": "2023-01-08T09:14:26.435Z"
+              }
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Đồ khô",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": []
+        },
+        {
+          "name": "The Others",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 11,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:48:24.539Z",
+              "ingredient": {
+                "id": 813,
+                "name": "Garlic",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.655Z",
+                "updatedAt": "2023-01-08T08:19:32.539Z",
+                "ingredientCategory": null
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": {
+                "id": 4,
+                "name": "Bách hoá xanh Tân Hương 3",
+                "address": "348 Tân Hương, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh 700000",
+                "longitude": "10.789752960732981",
+                "latitude": "106.61800314968305",
+                "createdAt": "2023-01-07T11:07:06.118Z",
+                "updatedAt": "2023-01-08T09:14:26.435Z"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "The Others",
+      "ingredientCategories": [
+        {
+          "id": 2,
+          "name": "Gia vị",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": []
+        },
+        {
+          "id": 3,
+          "name": "Thịt đông lạnh",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 12,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:48:44.026Z",
+              "ingredient": {
+                "id": 814,
+                "name": "Cream cheese Philadelphia light",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.656Z",
+                "updatedAt": "2023-01-08T05:27:10.189Z",
+                "ingredientCategory": {
+                  "id": 3,
+                  "name": "Thịt đông lạnh",
+                  "createdAt": "2023-01-08T04:01:41.519Z",
+                  "updatedAt": "2023-01-08T04:01:41.519Z"
+                }
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": null
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Đồ khô",
+          "createdAt": "2023-01-08T04:01:41.519Z",
+          "updatedAt": "2023-01-08T04:01:41.519Z",
+          "ingredients": [
+            {
+              "ingredientToShoppingListId": 17,
+              "quantity": 1,
+              "checked": false,
+              "note": "",
+              "createdAt": "2023-01-08T08:03:45.795Z",
+              "updatedAt": "2023-01-08T08:57:54.652Z",
+              "ingredient": {
+                "id": 818,
+                "name": "Canned tuna (in its own juice)",
+                "carbohydrates": 0,
+                "fat": 0,
+                "protein": 0,
+                "calories": 0,
+                "imageUrl": "",
+                "suggestedPrice": 0,
+                "createdAt": "2022-11-25T06:32:01.666Z",
+                "updatedAt": "2023-01-08T05:27:10.188Z",
+                "ingredientCategory": {
+                  "id": 4,
+                  "name": "Đồ khô",
+                  "createdAt": "2023-01-08T04:01:41.519Z",
+                  "updatedAt": "2023-01-08T04:01:41.519Z"
+                }
+              },
+              "measurementType": {
+                "id": 4,
+                "name": "CUP",
+                "createdAt": "2023-01-05T22:54:29.082Z",
+                "updatedAt": "2023-01-05T22:54:29.082Z"
+              },
+              "location": null
+            }
+          ]
+        },
+        {
+          "name": "The Others",
+          "ingredients": []
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "statusCode": 200,
+    "status": "OK"
+  }
+}

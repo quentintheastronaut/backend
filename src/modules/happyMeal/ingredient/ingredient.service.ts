@@ -216,9 +216,12 @@ export class IngredientService {
       .select('ingredient')
       .from(Ingredient, 'ingredient')
       .leftJoinAndSelect('ingredient.ingredientCategory', 'ingredientCategory')
-      .where('ingredient.name like :name', {
-        name: `%${pageOptionsDto.search}%`,
-      })
+      .where(
+        'ingredient.name like :name OR ingredientCategory.name like :name',
+        {
+          name: `%${pageOptionsDto.search}%`,
+        },
+      )
       .orderBy('ingredient.createdAt', pageOptionsDto.order)
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.limit);

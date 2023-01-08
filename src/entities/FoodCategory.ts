@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Dish } from './Dish';
 @Entity()
 export class FoodCategory {
   @PrimaryGeneratedColumn({
@@ -17,6 +19,9 @@ export class FoodCategory {
   @IsString()
   @Column()
   name: string;
+
+  @OneToMany(() => Dish, (dish) => dish.foodCategory)
+  dishes: Dish[];
 
   @CreateDateColumn()
   createdAt: Date;

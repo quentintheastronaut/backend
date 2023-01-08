@@ -39,6 +39,9 @@ export class DishService {
   public async find(id: string) {
     try {
       return await AppDataSource.getRepository(Dish).findOne({
+        relations: {
+          foodCategory: true,
+        },
         where: { id },
       });
     } catch (error) {
@@ -107,9 +110,15 @@ export class DishService {
       throw new NotFoundException('Not found');
     }
     try {
+      const { foodCategoryId, ...rest } = dishDto;
       await AppDataSource.createQueryBuilder()
         .update(Dish)
-        .set(dishDto)
+        .set({
+          ...rest,
+          foodCategory: {
+            id: foodCategoryId,
+          },
+        })
         .where('id = :id', { id })
         .execute();
       return new PageDto('OK', HttpStatus.OK);
@@ -176,10 +185,18 @@ export class DishService {
 
   public async createDish(dishDto: DishDto): Promise<PageDto<Dish>> {
     try {
+      const { foodCategoryId, ...rest } = dishDto;
       await AppDataSource.createQueryBuilder()
         .insert()
         .into(Dish)
-        .values([dishDto])
+        .values([
+          {
+            ...rest,
+            foodCategory: {
+              id: foodCategoryId,
+            },
+          },
+        ])
         .execute();
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -217,7 +234,8 @@ export class DishService {
     queryBuilder
       .select('dish')
       .from(Dish, 'dish')
-      .where('dish.name like :name', {
+      .leftJoinAndSelect('dish.foodCategory', 'foodCategory')
+      .where('dish.name like %:name% OR dish.foodCategory.name like %:name%', {
         name: `%${pageOptionsDto.search}%`,
       })
       .orderBy('dish.createdAt', pageOptionsDto.order)

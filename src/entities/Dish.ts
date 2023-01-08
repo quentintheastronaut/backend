@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -14,6 +15,7 @@ import { DishToMenu } from './DishToMenu';
 import { User } from './User';
 import { Account } from './Account';
 import { Favorite } from './Favorite';
+import { FoodCategory } from './FoodCategory';
 
 // REFACTOR
 @Entity()
@@ -108,4 +110,7 @@ export class Dish {
   // new
   @OneToMany(() => Favorite, (favorite) => favorite.dish)
   isDisliked: Favorite[];
+
+  @ManyToOne(() => FoodCategory, (foodCategory) => foodCategory.dishes)
+  foodCategory: FoodCategory;
 }

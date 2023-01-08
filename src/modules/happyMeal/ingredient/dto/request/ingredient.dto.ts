@@ -55,11 +55,4 @@ export class IngredientDto {
   @IsOptional()
   @IsNumber()
   suggestedPrice: number;
-
-  @ApiProperty({
-    example: '',
-  })
-  @IsOptional()
-  @IsString()
-  recipe: string;
 }

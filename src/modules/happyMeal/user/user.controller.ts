@@ -193,12 +193,12 @@ export class UserController {
     return this.userService.getDislikeByUser(user);
   }
 
-  @Delete('/dislike/:id')
+  @Delete('/dislike/:dishlikeId')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Get favorite food' })
   async removeDislike(
     @Req() req: { user: JwtUser },
-    @Param('id') id: string,
+    @Param('dishlikeId') id: string,
   ): Promise<any> {
     const { user } = req;
     return this.userService.removeDislike(id, user);

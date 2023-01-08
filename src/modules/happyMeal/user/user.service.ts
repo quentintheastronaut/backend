@@ -369,14 +369,6 @@ export class UserService {
         };
       });
 
-      dishIds.forEach(async (dishId) => {
-        await this._recombeeService.deleteFavoriteAddition({
-          userId: userId,
-          itemId: dishId,
-          cascadeCreate: true,
-        });
-      });
-
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(Dislike)
@@ -951,6 +943,13 @@ export class UserService {
     try {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
+
+      await this._recombeeService.deleteFavoriteAddition({
+        userId: user.id,
+        itemId: id,
+        cascadeCreate: true,
+      });
+
       await this.deleteFavorite(id);
       await this.setUserFavorite(user);
       return new PageDto('OK', HttpStatus.OK);

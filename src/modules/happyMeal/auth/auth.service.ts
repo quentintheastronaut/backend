@@ -20,6 +20,7 @@ import {
 } from '@nestjs/common';
 import * as argon from 'argon2';
 import { UserService } from '../user/user.service';
+import { RecombeeService } from 'src/services/recombee/recombee.service';
 
 dotenv.config({
   path: `.env`,
@@ -29,6 +30,8 @@ export class AuthService {
   constructor(
     @Inject(forwardRef(() => UserService)) private _userService: UserService,
     @Inject(forwardRef(() => JwtService)) private jwt: JwtService,
+    @Inject(forwardRef(() => RecombeeService))
+    private _recombeeService: RecombeeService,
   ) {}
 
   // COMMON SERVICES
@@ -162,7 +165,9 @@ export class AuthService {
         .where('id = :id', { id: account.id })
         .execute();
 
-      await delete account.password;
+      await this._recombeeService.sendAddUser(newUser.identifiers[0].id);
+
+      delete account.password;
 
       return this.signToken(parseInt(account.id, 10), email, account.role);
     } catch (error) {

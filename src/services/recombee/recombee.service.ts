@@ -59,7 +59,6 @@ export class RecombeeService {
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);
-      this.logger.log(error);
       throw new InternalServerErrorException();
     }
   }
@@ -138,10 +137,10 @@ export class RecombeeService {
 
       await firstValueFrom(
         this.http
-          .post(
-            `https://${RecombeeConfig.host}${url}&hmac_sign=${sign}`,
-            addTrackDto,
-          )
+          .post(`https://${RecombeeConfig.host}${url}&hmac_sign=${sign}`, {
+            ...addTrackDto,
+            cascadeCreate: true,
+          })
           .pipe(
             catchError((error) => {
               throw new ForbiddenException(error?.response?.data?.message);

@@ -130,7 +130,7 @@ export class ShoppingListGateway
     this.logger.log('Emit event: get-group-shopping-list');
   }
 
-  @SubscribeMessage('check-ingredient')
+  @SubscribeMessage('uncheck-ingredient')
   async handleUncheck(client: Socket, @MessageBody() payload: CheckDto) {
     this.logger.log('On event: uncheck-ingredient');
     await this._shoppingListService.uncheck(payload);

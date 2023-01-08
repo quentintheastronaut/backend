@@ -134,10 +134,10 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
-  @Delete('/allergic/:id')
+  @Delete('/allergic/:allergicId')
   @ApiOperation({ summary: 'Get allergic food' })
   async removeAllergic(
-    @Param('id') id: string,
+    @Param('allergicId') id: string,
     @Req() req: { user: JwtUser },
   ): Promise<any> {
     const { user } = req;
@@ -163,12 +163,12 @@ export class UserController {
     return this.userService.getFavoriteByUser(user);
   }
 
-  @Delete('/favorite/:id')
+  @Delete('/favorite/:favoriteId')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: 'Get favorite food' })
   async removeFavorite(
     @Req() req: { user: JwtUser },
-    @Param('id') id: string,
+    @Param('favoriteId') id: string,
   ): Promise<any> {
     const { user } = req;
     return this.userService.removeFavorite(id, user);
@@ -176,7 +176,7 @@ export class UserController {
 
   @Post('/dislike')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: 'Add favorite food' })
+  @ApiOperation({ summary: 'Add dislike food' })
   async addDislike(
     @Req() req: { user: JwtUser },
     @Body() addFavoriteDto: AddFavoriteDto,
@@ -187,18 +187,18 @@ export class UserController {
 
   @Get('/dislike')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: 'Get favorite food' })
+  @ApiOperation({ summary: 'Get dislike food' })
   async getDislikeByUser(@Req() req: { user: JwtUser }): Promise<any> {
     const { user } = req;
     return this.userService.getDislikeByUser(user);
   }
 
-  @Delete('/dislike/:dishlikeId')
+  @Delete('/dislike/:dishId')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: 'Get favorite food' })
+  @ApiOperation({ summary: 'Get dislike food' })
   async removeDislike(
     @Req() req: { user: JwtUser },
-    @Param('dishlikeId') id: string,
+    @Param('dishId') id: string,
   ): Promise<any> {
     const { user } = req;
     return this.userService.removeDislike(id, user);

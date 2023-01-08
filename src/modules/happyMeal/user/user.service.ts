@@ -393,12 +393,12 @@ export class UserService {
     }
   }
 
-  public async deleteFavorite(id: string) {
+  public async deleteFavorite(userId: string, dishId: string) {
     try {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(Favorite)
-        .where('id = :id', { id })
+        .where('userId = :userId and dishId = :dishId', { userId, dishId })
         .execute();
     } catch (error) {
       console.log(error);
@@ -406,12 +406,12 @@ export class UserService {
     }
   }
 
-  public async deleteDislike(id: string) {
+  public async deleteDislike(userId: string, dishId: string) {
     try {
       await AppDataSource.createQueryBuilder()
         .delete()
         .from(Dislike)
-        .where('id = :id', { id })
+        .where('userId = :userId and dishId = :dishId', { userId, dishId })
         .execute();
     } catch (error) {
       console.log(error);
@@ -950,7 +950,7 @@ export class UserService {
         cascadeCreate: true,
       });
 
-      await this.deleteFavorite(id);
+      await this.deleteFavorite(user.id, id);
       await this.setUserFavorite(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -963,7 +963,7 @@ export class UserService {
     try {
       const { sub } = jwtUser;
       const user = await this.findByAccountId(sub.toString());
-      await this.deleteDislike(id);
+      await this.deleteDislike(user.id, id);
       await this.setUserBlacklist(user);
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {

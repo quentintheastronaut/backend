@@ -227,17 +227,18 @@ export class MenuService {
 
   async insertDishToMenu(dish: Dish, menu: Menu, addDishDto: AddDishDto) {
     try {
+      const { dishId, mealId, ...rest } = addDishDto;
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(DishToMenu)
         .values([
           {
-            ...addDishDto,
+            ...rest,
             meal: {
               id: addDishDto.mealId,
             },
-            menu,
             dish,
+            menu,
           },
         ])
         .execute();
@@ -824,12 +825,12 @@ export class MenuService {
     if (menu.type === ShoppingListType.GROUP) {
     } else {
     }
-
+    const { mealId, ...rest } = updateDishDto;
     try {
       await AppDataSource.createQueryBuilder()
         .update(DishToMenu)
         .set({
-          quantity: updateDishDto.quantity,
+          ...rest,
           meal: {
             id: updateDishDto.mealId,
           },

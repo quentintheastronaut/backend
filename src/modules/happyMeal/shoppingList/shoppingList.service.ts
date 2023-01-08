@@ -372,6 +372,49 @@ export class ShoppingListService {
         shoppingListIds.push(shoppingListId);
       }
 
+      const locations = await AppDataSource.createQueryBuilder(
+        IngredientToShoppingList,
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
+        .where('shoppingListId in (:shoppingListIds)', {
+          shoppingListIds,
+        })
+        .groupBy('ingredient_to_shopping_list.locationId')
+        .getMany();
+
+      const locationId = locations.map((location) => {
+        return location.location.id;
+      });
+
+      const ingredientCategory = await AppDataSource.createQueryBuilder(
+        IngredientToShoppingList,
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.ingredient',
+          'ingredient',
+        )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.measurementType',
+          'measurement',
+        )
+        .leftJoinAndSelect(
+          'ingredient.ingredientCategory',
+          'ingredientCategory',
+        )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
+        .where('shoppingListId in (:shoppingListIds)', {
+          shoppingListIds,
+        })
+        .addSelect('SUM(ingredient_to_shopping_list.quantity)', 'quantity')
+        .groupBy('ingredient.ingredientCategory')
+        .getMany();
+
+      const ingredientCategoryId = ingredientCategory.map((location) => {
+        return location.ingredient.ingredientCategory.id;
+      });
+
       const result = await AppDataSource.createQueryBuilder(
         IngredientToShoppingList,
         'ingredient_to_shopping_list',
@@ -384,6 +427,10 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.measurementType',
           'measurement',
         )
+        .leftJoinAndSelect(
+          'ingredient.ingredientCategory',
+          'ingredientCategory',
+        )
         .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId in (:shoppingListIds)', {
           shoppingListIds,
@@ -392,7 +439,31 @@ export class ShoppingListService {
         .groupBy('ingredient_to_shopping_list.ingredientId')
         .getMany();
 
-      return new PageDto('OK', HttpStatus.OK, result);
+      const finalResult = [];
+
+      for (let i = 0; i < locationId.length; i++) {
+        const ingredientCategories = [];
+        for (let j = 0; j < ingredientCategoryId.length; j++) {
+          const ingredients = result.filter((item) => {
+            return (
+              item.location.id === locationId[i] &&
+              item.ingredient.ingredientCategory.id === ingredientCategoryId[j]
+            );
+          });
+          const item = {
+            ...ingredientCategory[j].ingredient.ingredientCategory,
+            ingredients: ingredients,
+          };
+          ingredientCategories.push(item);
+        }
+        const locationItem = {
+          ...locations[i].location,
+          ingredientCategories: ingredientCategories,
+        };
+        finalResult.push(locationItem);
+      }
+
+      return new PageDto('OK', HttpStatus.OK, finalResult);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -465,6 +536,10 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.measurementType',
           'measurement',
         )
+        .leftJoinAndSelect(
+          'ingredient.ingredientCategory',
+          'ingredientCategory',
+        )
         .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId = :listId', {
           listId: newIndividualList.shoppingList.id,
@@ -521,6 +596,49 @@ export class ShoppingListService {
         shoppingListIds.push(shoppingListId);
       }
 
+      const locations = await AppDataSource.createQueryBuilder(
+        IngredientToShoppingList,
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
+        .where('shoppingListId in (:shoppingListIds)', {
+          shoppingListIds,
+        })
+        .groupBy('ingredient_to_shopping_list.locationId')
+        .getMany();
+
+      const locationId = locations.map((location) => {
+        return location.location.id;
+      });
+
+      const ingredientCategory = await AppDataSource.createQueryBuilder(
+        IngredientToShoppingList,
+        'ingredient_to_shopping_list',
+      )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.ingredient',
+          'ingredient',
+        )
+        .leftJoinAndSelect(
+          'ingredient_to_shopping_list.measurementType',
+          'measurement',
+        )
+        .leftJoinAndSelect(
+          'ingredient.ingredientCategory',
+          'ingredientCategory',
+        )
+        .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
+        .where('shoppingListId in (:shoppingListIds)', {
+          shoppingListIds,
+        })
+        .addSelect('SUM(ingredient_to_shopping_list.quantity)', 'quantity')
+        .groupBy('ingredient.ingredientCategory')
+        .getMany();
+
+      const ingredientCategoryId = ingredientCategory.map((location) => {
+        return location.ingredient.ingredientCategory.id;
+      });
+
       const result = await AppDataSource.createQueryBuilder(
         IngredientToShoppingList,
         'ingredient_to_shopping_list',
@@ -533,6 +651,10 @@ export class ShoppingListService {
           'ingredient_to_shopping_list.measurementType',
           'measurement',
         )
+        .leftJoinAndSelect(
+          'ingredient.ingredientCategory',
+          'ingredientCategory',
+        )
         .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId in (:shoppingListIds)', {
           shoppingListIds,
@@ -541,7 +663,31 @@ export class ShoppingListService {
         .groupBy('ingredient_to_shopping_list.ingredientId')
         .getMany();
 
-      return new PageDto('OK', HttpStatus.OK, result);
+      const finalResult = [];
+
+      for (let i = 0; i < locationId.length; i++) {
+        const ingredientCategories = [];
+        for (let j = 0; j < ingredientCategoryId.length; j++) {
+          const ingredients = result.filter((item) => {
+            return (
+              item.location.id === locationId[i] &&
+              item.ingredient.ingredientCategory.id === ingredientCategoryId[j]
+            );
+          });
+          const item = {
+            ...ingredientCategory[j].ingredient.ingredientCategory,
+            ingredients: ingredients,
+          };
+          ingredientCategories.push(item);
+        }
+        const locationItem = {
+          ...locations[i].location,
+          ingredientCategories: ingredientCategories,
+        };
+        finalResult.push(locationItem);
+      }
+
+      return new PageDto('OK', HttpStatus.OK, finalResult);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -580,6 +726,10 @@ export class ShoppingListService {
         .leftJoinAndSelect(
           'ingredient_to_shopping_list.measurementType',
           'measurement',
+        )
+        .leftJoinAndSelect(
+          'ingredient.ingredientCategory',
+          'ingredientCategory',
         )
         .leftJoinAndSelect('ingredient_to_shopping_list.location', 'location')
         .where('shoppingListId = :listId', {

@@ -199,6 +199,26 @@ export class ShoppingListService {
     addIngredientDto: AddIngredientDto,
   ) {
     try {
+      if (addIngredientDto.locationId) {
+        return await AppDataSource.createQueryBuilder()
+          .insert()
+          .into(IngredientToShoppingList)
+          .values([
+            {
+              ...addIngredientDto,
+              shoppingList,
+              ingredient,
+              location: {
+                id: addIngredientDto.locationId,
+              },
+              measurementType: {
+                id: addIngredientDto.measurementTypeId,
+              },
+            },
+          ])
+          .execute();
+      }
+
       return await AppDataSource.createQueryBuilder()
         .insert()
         .into(IngredientToShoppingList)
@@ -207,9 +227,6 @@ export class ShoppingListService {
             ...addIngredientDto,
             shoppingList,
             ingredient,
-            location: {
-              id: addIngredientDto.locationId,
-            },
             measurementType: {
               id: addIngredientDto.measurementTypeId,
             },
@@ -241,21 +258,36 @@ export class ShoppingListService {
   ) {
     try {
       const { measurementTypeId, locationId, quantity } = addIngredientDto;
-      await AppDataSource.createQueryBuilder()
-        .update(IngredientToShoppingList)
-        .set({
-          quantity,
-          location: {
-            id: locationId,
-          },
-          measurementType: {
-            id: measurementTypeId,
-          },
-        })
-        .where('ingredientToShoppingListId = :id', {
-          id,
-        })
-        .execute();
+      if (locationId) {
+        await AppDataSource.createQueryBuilder()
+          .update(IngredientToShoppingList)
+          .set({
+            quantity,
+            location: {
+              id: locationId,
+            },
+            measurementType: {
+              id: measurementTypeId,
+            },
+          })
+          .where('ingredientToShoppingListId = :id', {
+            id,
+          })
+          .execute();
+      } else {
+        await AppDataSource.createQueryBuilder()
+          .update(IngredientToShoppingList)
+          .set({
+            quantity,
+            measurementType: {
+              id: measurementTypeId,
+            },
+          })
+          .where('ingredientToShoppingListId = :id', {
+            id,
+          })
+          .execute();
+      }
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('');
@@ -1031,22 +1063,40 @@ export class ShoppingListService {
     try {
       const { measurementTypeId, locationId, ...payload } =
         updateIngredientToShoppingListDto;
-      await AppDataSource.createQueryBuilder()
-        .update(IngredientToShoppingList)
-        .set({
-          measurementType: {
-            id: measurementTypeId,
-          },
-          location: {
-            id: locationId,
-          },
-          ...payload,
-        })
-        .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
-          ingredientToShoppingListId:
-            updateIngredientToShoppingListDto.ingredientToShoppingListId,
-        })
-        .execute();
+
+      if (locationId) {
+        await AppDataSource.createQueryBuilder()
+          .update(IngredientToShoppingList)
+          .set({
+            measurementType: {
+              id: measurementTypeId,
+            },
+            location: {
+              id: locationId,
+            },
+            ...payload,
+          })
+          .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
+            ingredientToShoppingListId:
+              updateIngredientToShoppingListDto.ingredientToShoppingListId,
+          })
+          .execute();
+      } else {
+        await AppDataSource.createQueryBuilder()
+          .update(IngredientToShoppingList)
+          .set({
+            measurementType: {
+              id: measurementTypeId,
+            },
+            ...payload,
+          })
+          .where('ingredientToShoppingListId = :ingredientToShoppingListId', {
+            ingredientToShoppingListId:
+              updateIngredientToShoppingListDto.ingredientToShoppingListId,
+          })
+          .execute();
+      }
+
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
       console.log(error);

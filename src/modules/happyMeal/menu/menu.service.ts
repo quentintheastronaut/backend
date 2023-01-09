@@ -387,12 +387,16 @@ export class MenuService {
       const { sub } = jwtUser;
       const user = await this._userService.findByAccountId(sub.toString());
 
+      console.log(user);
+
       const { data } = await this._recombeeService.recommend({
         userId: user.id,
         count: 4,
       });
 
       const { recomms } = data;
+
+      console.log(recomms);
 
       await Promise.all([
         await this.addDish(

@@ -466,7 +466,7 @@ export class RecombeeService {
     try {
       const hmacTimestamp = moment().unix();
       const { userId, count } = recommendationDto;
-      const url = `/${RecombeeConfig.myDb}/recomms/users/${userId}/items/?count=${count}&hmac_timestamp=${hmacTimestamp}`;
+      const url = `/${RecombeeConfig.myDb}/recomms/users/${userId}/items/?count=${count}&scenario=meal-recommendation&hmac_timestamp=${hmacTimestamp}`;
 
       const sign = HmacSHA1(url, RecombeeConfig.privateToken).toString(
         CryptoJS.enc.Hex,

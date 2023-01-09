@@ -373,7 +373,9 @@ export class MenuService {
         }
       }
 
-      await this.addIngredientToGroupList(addGroupDishDto, group);
+      if (addGroupDishDto.dishType === DishType.COOKING) {
+        await this.addIngredientToGroupList(addGroupDishDto, group);
+      }
 
       return new PageDto('OK', HttpStatus.OK);
     } catch (error) {
@@ -689,7 +691,9 @@ export class MenuService {
         }
       }
 
-      await this.addIngredientToIndividualList(addDishDto, jwtUser);
+      if (addDishDto.dishType === DishType.COOKING) {
+        await this.addIngredientToIndividualList(addDishDto, jwtUser);
+      }
 
       await this._recombeeService.addPlanAddition({
         userId: user.id,

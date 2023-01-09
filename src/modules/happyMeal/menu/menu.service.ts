@@ -389,14 +389,16 @@ export class MenuService {
 
       console.log(user);
 
-      const { data } = await this._recombeeService.recommend({
+      const result = await this._recombeeService.recommend({
         userId: user.id,
         count: 4,
       });
 
+      const { data } = result;
       const { recomms } = data;
 
       console.log(recomms);
+      console.log(data);
 
       await Promise.all([
         await this.addDish(
